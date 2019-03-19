@@ -101,5 +101,6 @@ $RECYCLE.BIN/
 history.txt
 
 # jupyter notebook
+notebook/
 .ipynb_checkpoints/
 Untitled.ipynb
