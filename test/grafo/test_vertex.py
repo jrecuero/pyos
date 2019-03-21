@@ -1,0 +1,295 @@
+# import pytest
+from typing import Any
+from grafo.vertex import Vertex, new_static_edge, Edge, Link, Path
+
+
+def test_new_vertex():
+    label = "vertex/0"
+    vertex = Vertex(label)
+    assert vertex.label == label, "Error: new vertex : label got {} exp {}".format(
+        vertex.label, label
+    )
+
+
+def test_add():
+    vertex = Vertex("vertex/0")
+    p_vertex = Vertex("parent/0")
+    vertex.add_parent(p_vertex)
+    got = len(vertex.parents)
+    assert got == 1, "Error: add parent: len got {} exp {}".format(got, 1)
+    got = vertex.parents[-1]
+    assert got == p_vertex, "Error: add parent: got {} exp {}".format(got, p_vertex)
+    c_vertex = Vertex("child/0")
+    vertex.add_child(c_vertex)
+    got = len(vertex.children)
+    assert got == 1, "Error: add child: len got {} exp {}".format(got, 1)
+    got = vertex.children[-1]
+    assert got == c_vertex, "Error: add child: got {} exp {}".format(got, c_vertex)
+
+
+def test_add_edge():
+    parent_v = Vertex("root/1")
+    child_v = Vertex("child/1")
+    edge = new_static_edge(parent_v, child_v)
+    parent_v.add_edge(edge)
+    child_v.add_edge(edge)
+    got = len(parent_v.edges)
+    assert got == 1, "Error: add_edge : parent len got {} exp {}".format(got, 1)
+    got = len(child_v.edges)
+    assert got == 1, "Error: add_edge : child len got {} exp {}".format(got, 1)
+    got = len(parent_v.parents)
+    assert got == 0, "Error: add edge: len parent got {} exp {}".format(got, 0)
+    got = parent_v.children[-1]
+    assert got == child_v, "Error: add edge: child got {} exp {}".format(got, child_v)
+    got = child_v.parents[-1]
+    assert got == parent_v, "Error: add edge: child got {} exp {}".format(got, parent_v)
+    got = len(child_v.children)
+    assert got == 0, "Error: add edge: len child got {} exp {}".format(got, 0)
+
+
+def test_edge_peer():
+    v1: Vertex = Vertex("vertex/0")
+    v2: Vertex = Vertex("vertex/1")
+    edge: Edge = Edge(v1, v2, None)
+    got = edge.peer(v2)
+    assert got == v1, "Error: peer got {} exp {}".format(got, v1)
+    got = edge.peer(v1)
+    assert got == v2, "Error: peer got {} exp {}".format(got, v2)
+
+
+def test_new_edge():
+    parent: Vertex = Vertex("parent/0")
+    child: Vertex = Vertex("child/0")
+    edge: Edge = Edge(parent, child, None)
+    assert edge.parent == parent, "Error: new edge: parent got {} exp {}".format(
+        edge.parent, parent
+    )
+    assert edge.child == child, "Error: new edge: child got {} exp {}".format(
+        edge.child, child
+    )
+    assert edge.clearance_cb is None, "Error: new edge: cb is not None {}".format(
+        edge.clearance_cb
+    )
+    assert edge.link == Link.BI, "Error: new edge: link got {} exp {}".format(
+        edge.link, Link.BI
+    )
+
+
+def test_allow():
+    parent: Vertex = Vertex("parent/0")
+    child: Vertex = Vertex("child/0")
+    edge: Edge = Edge(parent, child, None)
+    assert edge.is_allow_down(), "Error: is allow down failed"
+    assert edge.is_allow_up(), "Error: is allow up failed"
+    assert edge.is_allow_bi(), "Error: is allow bi failed"
+    assert not edge.is_cut(), "Error: is cut failed"
+    assert edge.is_allow(parent, child), "Error: is allow parent-to-child failed"
+    assert edge.is_allow(child, parent), "Error: is allow child-to-parent failed"
+
+    edge: Edge = Edge(parent, child, None, link=Link.BI)
+    assert edge.is_allow_down(), "Error: is allow down failed"
+    assert edge.is_allow_up(), "Error: is allow up failed"
+    assert edge.is_allow_bi(), "Error: is allow bi failed"
+    assert not edge.is_cut(), "Error: is cut failed"
+    assert edge.is_allow(parent, child), "Error: is allow parent-to-child failed"
+    assert edge.is_allow(child, parent), "Error: is allow child-to-parent failed"
+
+    edge: Edge = Edge(parent, child, None, link=Link.DOWN)
+    assert edge.is_allow_down(), "Error: is allow down failed"
+    assert not edge.is_allow_up(), "Error: is allow up failed"
+    assert not edge.is_allow_bi(), "Error: is allow bi failed"
+    assert not edge.is_cut(), "Error: is cut failed"
+    assert edge.is_allow(parent, child), "Error: is allow parent-to-child failed"
+    assert not edge.is_allow(child, parent), "Error: is allow child-to-parent failed"
+
+    edge: Edge = Edge(parent, child, None, link=Link.UP)
+    assert not edge.is_allow_down(), "Error: is allow down failed"
+    assert edge.is_allow_up(), "Error: is allow up failed"
+    assert not edge.is_allow_bi(), "Error: is allow bi failed"
+    assert not edge.is_cut(), "Error: is cut failed"
+    assert not edge.is_allow(parent, child), "Error: is allow parent-to-child failed"
+    assert edge.is_allow(child, parent), "Error: is allow child-to-parent failed"
+
+    edge: Edge = Edge(parent, child, None, link=Link.NONE)
+    assert not edge.is_allow_down(), "Error: is allow down failed"
+    assert not edge.is_allow_up(), "Error: is allow up failed"
+    assert not edge.is_allow_bi(), "Error: is allow bi failed"
+    assert edge.is_cut(), "Error: is cut failed"
+    assert not edge.is_allow(parent, child), "Error: is allow parent-to-child failed"
+    assert not edge.is_allow(child, parent), "Error: is allow child-to-parent failed"
+
+
+def test_check():
+    parent: Vertex = Vertex("parent/0")
+    child: Vertex = Vertex("child/0")
+    edge: Edge = Edge(parent, child, lambda p, c, l: ("OK", True))
+    got = edge.check()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_bi()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_down()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_up()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_with_vertex(parent, child)
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_with_vertex(child, parent)
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+
+    edge: Edge = Edge(parent, child, lambda p, c, l: ("OK", True), link=Link.BI)
+    got = edge.check()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_bi()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_down()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_up()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_with_vertex(parent, child)
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_with_vertex(child, parent)
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+
+    edge: Edge = Edge(parent, child, lambda p, c, l: ("OK", True), link=Link.DOWN)
+    got = edge.check()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_bi()
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_down()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_up()
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_with_vertex(parent, child)
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_with_vertex(child, parent)
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+
+    edge: Edge = Edge(parent, child, lambda p, c, l: ("OK", True), link=Link.UP)
+    got = edge.check()
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_bi()
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_down()
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_up()
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+    got = edge.check_with_vertex(parent, child)
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_with_vertex(child, parent)
+    assert got == ("OK", True), "Error: check got {} exp {}".format(got, ("OK", True))
+
+    edge: Edge = Edge(parent, child, lambda p, c, l: ("OK", True), link=Link.NONE)
+    got = edge.check()
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_bi()
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_down()
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_up()
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_with_vertex(parent, child)
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+    got = edge.check_with_vertex(child, parent)
+    assert got == (None, False), "Error: check got {} exp {}".format(got, (None, False))
+
+
+def test_new_path():
+    label = "path/0"
+    path = Path(label)
+    assert path.label == label, "Error: path: label got {} exp {}".format(
+        path.label, label
+    )
+    assert path.edges == [], "Error: path: edges got {} exp {}".format(path.edges, [])
+    assert path.sequential, "Error: path: sequential is False"
+
+    label = "path/1"
+    path = Path(label, [Edge(None, None, None)])
+    assert path.label == label, "Error: path: label got {} exp {}".format(
+        path.label, label
+    )
+    got = len(path.edges)
+    assert got == 1, "Error: path: len got {} exp {}".format(got, 1)
+    assert path.sequential, "Error: path: sequential is False"
+
+    label = "path/2"
+    path = Path(label, sequential=False)
+    assert path.label == label, "Error: path: label got {} exp {}".format(
+        path.label, label
+    )
+    assert path.edges == [], "Error: path: edges got {} exp {}".format(path.edges, [])
+    assert not path.sequential, "Error: path: sequential is True"
+
+    label = "path/3"
+    path = Path(label, [Edge(None, None, None)], sequential=False)
+    assert path.label == label, "Error: path: label got {} exp {}".format(
+        path.label, label
+    )
+    got = len(path.edges)
+    assert got == 1, "Error: path: len got {} exp {}".format(got, 1)
+    assert not path.sequential, "Error: path: sequential is True"
+
+    v1: Vertex = Vertex("v/1")
+    v2: Vertex = Vertex("v/2")
+    v3: Vertex = Vertex("v/3")
+    path = Path("path/4", [Edge(v1, v2, None), Edge(v2, v3, None)])
+    got = len(path.edges)
+    assert got == 2, "Error: path: len got {} exp {}".format(got, 2)
+    assert path.sequential, "Error: path: sequential is False"
+
+    try:
+        path = Path("path/4", [Edge(v1, v2, None), Edge(v3, v2, None)])
+    except Exception:
+        pass
+    else:
+        assert False, "Error: path: wrong edge sequence"
+
+    path = Path("path/4", [Edge(v1, v2, None), Edge(v3, v2, None)], sequential=False)
+    got = len(path.edges)
+    assert got == 2, "Error: path: len got {} exp {}".format(got, 2)
+    assert not path.sequential, "Error: path: sequential is True"
+
+
+def test_path_add():
+    path = Path("path/0")
+    assert path.edges == [], "Error: add path: edges not empty {}".format(path.edges)
+    v1: Vertex = Vertex("v/1")
+    v2: Vertex = Vertex("v/2")
+    v3: Vertex = Vertex("v/3")
+    assert path.add(Edge(v1, v2, None)), "Error: add path: failed"
+    got = len(path.edges)
+    assert got == 1, "Error: add path: len got {} exp {}".format(got, 1)
+    assert path.add(Edge(v2, v3, None)), "Error: add path: failed"
+    got = len(path.edges)
+    assert got == 2, "Error: add path: len got {} exp {}".format(got, 2)
+    assert not path.add(Edge(v2, v3, None)), "Error: add path: failed"
+
+    path = Path("path/1", sequential=False)
+    assert path.add(Edge(v1, v2, None)), "Error: add path: failed"
+    assert path.add(Edge(v1, v2, None)), "Error: add path: failed"
+
+
+if __name__ == "__main__":
+    parent: Vertex = Vertex("vertex/0")
+    child: Vertex = Vertex("vertex/1")
+    gchild: Vertex = Vertex("vertex/2")
+    print("create vertices: {}, {}, {}".format(parent, child, gchild))
+
+    def _weight(p: Vertex, c: Vertex, link: Link) -> [Any, bool]:
+        if link == Link.DOWN:
+            return "link down", True
+        elif link == Link.UP:
+            return "link up", True
+        elif link == Link.BI:
+            return "link bi", True
+        else:
+            return "not link", True
+
+    edge: Edge = Edge(parent, child, _weight)
+    print("create edge: {}".format(edge))
+    print("check down result: {}".format(edge.check_down()))
+    print("check up result: {}".format(edge.check_up()))
+    print("{}".format(edge.to_mermaid()))
+    path: Path = Path("path/0", [edge])
+    edge: Edge = Edge(child, gchild, None)
+    path.add(edge)
+    print("create path: {}".format(path))
