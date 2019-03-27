@@ -1,3 +1,4 @@
+from typing import List
 import logging
 import json
 import datetime
@@ -24,6 +25,9 @@ class _Formatter(logging.Formatter):
     """_Formatter class implements the functionality to format all logger
     output in JSON format.
     """
+
+    def __init__(self, **kwargs):
+        super(_Formatter, self).__init__(**kwargs)
 
     def format(self, record):
         """format proceeds to format logging output as JSON format.
@@ -87,41 +91,36 @@ def get_loggar(name, handler=None):
     return loggars[name]
 
 
-def load_loggar(filename):
-    obj = []
-    with open(filename, "r") as fd:
-        line = fd.readline()
-        while line:
-            obj.append(json.loads(line))
+class LoggarProc:
+    def __init__(self, filename: str = "loggar.log"):
+        self.log_data: List[str] = []
+        with open(filename, "r") as fd:
             line = fd.readline()
-    return obj
+            while line:
+                self.log_data.append(json.loads(line))
+                line = fd.readline()
+
+    def tag(self, tagname: str):
+        result: List[str] = []
+        for data in self.log_data:
+            tagdata = data.get(tagname, None)
+            if tagdata:
+                result.append(tagdata)
+        return "\n".join(result)
 
 
 if __name__ == "__main__":
+    import argparse
 
-    def main():
-        m.info({"fname": "jose carlos", "lname": "recuero arias"})
-        m.Informato("this is informato").call()
-
-    def insider():
-        m.Insider("this is the insider").call()
-
-    # from logging.handlers import RotatingFileHandler
-    from logging import FileHandler
-
-    # fhandler = RotatingFileHandler("loggar.log", maxBytes=(1048576 * 5), backupCount=4)
-    fhandler = FileHandler("loggar.log", mode="w")
-    # m = get_loggar("private-loggar")
-    m = get_loggar("private-loggar", handler=fhandler)
-    insider()
-    m.info("logging message")
-    m.debug("debug message")
-    m.Info("this is an info message").call()
-    m.Warmer("alarm").Info("red fire").call()
-    m.Message({"data": "This is the data", "id": 100}).call()
-    m.FirstName("Jose Carlos").LastName("Recuero Arias").Age(52).call()
-    main()
-    try:
-        operation = 1 / 0
-    except Exception as ex:
-        m.Error(str(ex)).call()
+    parser = argparse.ArgumentParser(description="Logger tool")
+    parser.add_argument("--noserver", action="store_true", help="Launch Server")
+    parser.add_argument(
+        "-f",
+        "--filename",
+        nargs="?",
+        default="loggar.log",
+        help="Loggar filename (default: loggar.log)",
+    )
+    parser.add_argument("tag", help="Tag name")
+    args = parser.parse_args()
+    print(LoggarProc(args.filename).tag(args.tag))
