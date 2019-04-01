@@ -17,14 +17,14 @@ def test_add():
     vertex.add_parent(p_vertex)
     got = len(vertex.parents)
     assert got == 1, "Error: add parent: len got {} exp {}".format(got, 1)
-    got = vertex.parents[-1]
-    assert got == p_vertex, "Error: add parent: got {} exp {}".format(got, p_vertex)
+    got, exp = vertex.parents[-1], p_vertex
+    assert got == exp, "Error: add parent: got {} exp {}".format(got, exp)
     c_vertex = Vertex("child/0")
     vertex.add_child(c_vertex)
-    got = len(vertex.children)
-    assert got == 1, "Error: add child: len got {} exp {}".format(got, 1)
-    got = vertex.children[-1]
-    assert got == c_vertex, "Error: add child: got {} exp {}".format(got, c_vertex)
+    got, exp = len(vertex.children), 1
+    assert got == exp, "Error: add child: len got {} exp {}".format(got, exp)
+    got, exp = vertex.children[-1], c_vertex
+    assert got == exp, "Error: add child: got {} exp {}".format(got, exp)
 
 
 def test_add_edge():
@@ -33,28 +33,28 @@ def test_add_edge():
     edge = new_static_edge(parent_v, child_v)
     parent_v.add_edge(edge)
     child_v.add_edge(edge)
-    got = len(parent_v.edges)
-    assert got == 1, "Error: add_edge : parent len got {} exp {}".format(got, 1)
-    got = len(child_v.edges)
-    assert got == 1, "Error: add_edge : child len got {} exp {}".format(got, 1)
-    got = len(parent_v.parents)
-    assert got == 0, "Error: add edge: len parent got {} exp {}".format(got, 0)
-    got = parent_v.children[-1]
-    assert got == child_v, "Error: add edge: child got {} exp {}".format(got, child_v)
-    got = child_v.parents[-1]
-    assert got == parent_v, "Error: add edge: child got {} exp {}".format(got, parent_v)
-    got = len(child_v.children)
-    assert got == 0, "Error: add edge: len child got {} exp {}".format(got, 0)
+    got, exp = len(parent_v.edges), 1
+    assert got == exp, "Error: add_edge : parent len got {} exp {}".format(got, exp)
+    got, exp = len(child_v.edges), 1
+    assert got == exp, "Error: add_edge : child len got {} exp {}".format(got, exp)
+    got, exp = len(parent_v.parents), 0
+    assert got == exp, "Error: add edge: len parent got {} exp {}".format(got, exp)
+    got, exp = parent_v.children[-1], child_v
+    assert got == exp, "Error: add edge: child got {} exp {}".format(got, exp)
+    got, exp = child_v.parents[-1], parent_v
+    assert got == exp, "Error: add edge: child got {} exp {}".format(got, exp)
+    got, exp = len(child_v.children), 0
+    assert got == exp, "Error: add edge: len child got {} exp {}".format(got, exp)
 
 
 def test_edge_peer():
     v1: Vertex = Vertex("vertex/0")
     v2: Vertex = Vertex("vertex/1")
     edge: Edge = Edge(v1, v2, None)
-    got = edge.peer(v2)
-    assert got == v1, "Error: peer got {} exp {}".format(got, v1)
-    got = edge.peer(v1)
-    assert got == v2, "Error: peer got {} exp {}".format(got, v2)
+    got, exp = edge.peer(v2), v1
+    assert got == exp, "Error: peer got {} exp {}".format(got, exp)
+    got, exp = edge.peer(v1), v2
+    assert got == exp, "Error: peer got {} exp {}".format(got, exp)
 
 
 def test_new_edge():

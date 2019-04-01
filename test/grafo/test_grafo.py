@@ -12,8 +12,8 @@ def test_new_grafo():
     assert root is not None, "Error: grafo: root not None {}".format(root)
     assert root == anchor, "Error: grafo: root {} anchor {}".format(root, anchor)
     assert g.path is None, "Error: grafo: path is not None {}".format(g.path)
-    got = len(g.vertices)
-    assert got == 1, "Error: grafo: len vertices got {} exp {}".format(got, 1)
+    got, exp = len(g.vertices), 1
+    assert got == exp, "Error: grafo: len vertices got {} exp {}".format(got, exp)
 
 
 def test_add_edge():
@@ -22,12 +22,12 @@ def test_add_edge():
     parent = Vertex("parent/1")
     root_edge = new_static_edge(None, parent)
     g.add_edge(None, root_edge)
-    got = root_edge.parent
-    assert got == root, "Error: add edge: parent got {} exp {}".format(got, root)
-    got = len(parent.parents)
-    assert got == 1, "Error: add edge: len parents got {} exp {}".format(got, 1)
-    got = parent.parents[0]
-    assert got == root, "Error: add edge: parent parent got {} exp {}".format(got, root)
+    got, exp = root_edge.parent, root
+    assert got == exp, "Error: add edge: parent got {} exp {}".format(got, exp)
+    got, exp = len(parent.parents), 1
+    assert got == exp, "Error: add edge: len parents got {} exp {}".format(got, exp)
+    got, exp = parent.parents[0], root
+    assert got == exp, "Error: add edge: parent parent got {} exp {}".format(got, exp)
 
 
 def test_grafo_path():
@@ -59,8 +59,8 @@ def test_grafo_path():
     g.add_edge(v4, e_v4_v7)
     g.add_edge(v6, e_v6_v7)
     paths = g.paths_from_v_to_v(v1, v7)
-    got = len(paths)
-    assert got == 3, "Error: paths: len got {} exp {}".format(got, 3)
+    got, exp = len(paths), 3
+    assert got == exp, "Error: paths: len got {} exp {}".format(got, exp)
     exp = [
         [e_v1_v2, e_v2_v3, e_v3_v6, e_v6_v7],
         [e_v1_v2, e_v2_v4, e_v4_v7],
@@ -69,6 +69,14 @@ def test_grafo_path():
     for p in paths:
         if p.edges not in exp:
             assert False, "Error:paths: path {} not found".format(p)
+
+    paths = g.paths_from_v_to_v(v5, v7)
+    got, exp = len(paths), 0
+    assert got == exp, "Error: paths: len got {} exp {}".format(got, exp)
+
+    paths = g.paths_from_v_to_v(v2, v1)
+    got, exp = len(paths), 0
+    assert got == exp, "Error: paths: len got {} exp {}".format(got, exp)
 
 
 if __name__ == "__main__":
