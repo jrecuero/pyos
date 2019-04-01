@@ -1,5 +1,5 @@
 from typing import List, Any, Optional
-from grafo.ider import next_ider
+from ._ider import Iderable
 
 
 class Link:
@@ -9,10 +9,11 @@ class Link:
     BI: int = 3
 
 
-class Vertex:
+class Vertex(Iderable):
+    __slots__ = ["parents", "children", "edges", "content", "hooked", "pos"]
+
     def __init__(self, label: str):
-        self.ider: int = next_ider()
-        self.label: str = label
+        super(Vertex, self).__init__(label)
         self.parents: List["Vertex"] = []
         self.children: List["Vertex"] = []
         self.edges: List["Edge"] = []
@@ -20,7 +21,6 @@ class Vertex:
         self.content: Any = None
         self.hooked: bool = False
         self.pos: Any = None
-        self.content: Any = None
 
     def __str__(self) -> str:
         return self.label
@@ -42,9 +42,11 @@ class Vertex:
         return True
 
 
-class VtoV:
+class VtoV(Iderable):
+    __slots__ = ["parent", "child", "vertices"]
+
     def __init__(self, parent: Vertex, child: Vertex):
-        self.ider: int = next_ider()
+        super(VtoV, self).__init__()
         self.parent: Vertex = parent
         self.child: Vertex = child
         self.vertices: List[Vertex] = [parent, child]
@@ -54,6 +56,8 @@ class VtoV:
 
 
 class Edge(VtoV):
+    __slots__ = ["clearance_cb", "link", "content"]
+
     def __init__(
         self, parent: Vertex, child: Vertex, clearance_cb: Any, link: Link = Link.BI
     ):
@@ -148,12 +152,13 @@ class Edge(VtoV):
         return ""
 
 
-class Path:
+class Path(Iderable):
+    __slots__ = ["edges", "sequential"]
+
     def __init__(
         self, label: str, edges: Optional[List[Edge]] = None, sequential: bool = True
     ):
-        self.ider: int = next_ider()
-        self.label: str = label
+        super(Path, self).__init__(label)
         self.edges: List[Edge] = edges if edges else []
         self.sequential: bool = sequential
         if self.sequential and len(self.edges) > 1:

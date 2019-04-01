@@ -1,5 +1,4 @@
-from grafo.grafo import Grafo
-from grafo.vertex import Vertex, new_static_edge, Link
+from grafo import Vertex, new_static_edge, Link, Grafo
 from tools.loggar import get_loggar
 
 

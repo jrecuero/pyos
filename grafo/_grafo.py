@@ -1,17 +1,18 @@
 from typing import Dict, List, Any
 from logging import FileHandler
 from tools.loggar import get_loggar
-from grafo.ider import next_ider
-from grafo.vertex import Vertex, Edge, Path, new_static_edge, Link
+from ._ider import Iderable
+from ._vertex import Vertex, Edge, Path, new_static_edge, Link
 
 
 log = get_loggar("grafo", handler=FileHandler("loggar.log", mode="w"))
 
 
-class Grafo:
+class Grafo(Iderable):
+    __slots__ = ["root", "_anchor", "path", "vertices", "edges"]
+
     def __init__(self, label: str):
-        self.ider: int = next_ider
-        self.label: str = label
+        super(Grafo, self).__init__(label)
         self.root: Vertex = Vertex("root/0")
         self.root.hooked = True
         self._anchor: Vertex = self.root

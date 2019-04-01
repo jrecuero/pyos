@@ -1,6 +1,7 @@
 # import pytest
 from typing import Any
-from grafo.vertex import Vertex, new_static_edge, Edge, Link, Path
+
+from grafo import Vertex, new_static_edge, Edge, Link, Path
 
 
 def test_new_vertex():
