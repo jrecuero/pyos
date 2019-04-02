@@ -26,14 +26,23 @@ class Vertex(Iderable):
         return self.label
 
     def add_parent(self, parent: "Vertex") -> None:
+        """add_parent adds a parent vertex. This has to be added when the
+        vertex belongs to an edge as child.
+        """
         if self != parent:
             self.parents.append(parent)
 
     def add_child(self, child: "Vertex") -> None:
+        """add_child adds a child vertex. This has to be added when the
+        vertex belongs to an edge as parent.
+        """
         if self != child:
             self.children.append(child)
 
     def add_edge(self, edge: "Edge") -> bool:
+        """add_edge adds an edge to the vertex. This has to be added when the
+        vertex belongs to an edge as parent or child.
+        """
         if self not in [edge.parent, edge.child]:
             return False
         self.edges.append(edge)
@@ -67,6 +76,8 @@ class Edge(VtoV):
         self.content: Any = None
 
     def peer(self, vertex: Vertex) -> Vertex:
+        """peer looks for the other vertex in the edge
+        """
         if vertex == self.parent:
             return self.child
         elif vertex == self.child:
@@ -74,6 +85,8 @@ class Edge(VtoV):
         return None
 
     def is_allow(self, src: Vertex, dst: Vertex) -> bool:
+        """is_allow verifies if there is a valid link between given vertices.
+        """
         if self.link == Link.NONE:
             return False
         elif self.link == Link.BI:
@@ -112,6 +125,8 @@ class Edge(VtoV):
         return None, False
 
     def check(self, link: Link = Link.DOWN, **kwargs) -> [Any, bool]:
+        """check verifies the edge has a valid link and clearance.
+        """
         if link == Link.DOWN:
             return self.check_down(**kwargs)
         elif link == Link.UP:
@@ -123,6 +138,9 @@ class Edge(VtoV):
     def check_with_vertex(
         self, src: Vertex = None, dst: Vertex = None, **kwargs
     ) -> [Any, bool]:
+        """check_wit_vertex verifies if edge has given vertices and valid
+        link and clearance.
+        """
         if src == self.parent and dst == self.child:
             return self.check_down(**kwargs)
         elif src == self.child and dst == self.parent:

@@ -35,6 +35,9 @@ class Grafo(Iderable):
             raise Exception("Vertex {} not in grafo".format(vertex))
 
     def add_edge(self, parent: Vertex, edge: Edge):
+        """add_edge adds a new edge to the grafo and hook it up to the given
+        vertex.
+        """
         if parent is None:
             parent = self.root
             edge.parent = parent
@@ -47,6 +50,9 @@ class Grafo(Iderable):
         self.edges[edge.ider] = edge
 
     def add_vertex(self, parent: Vertex, child: Vertex):
+        """add_vertex creates an edge between give vertices and add it to the
+        grafo.
+        """
         if parent is None:
             parent = self.root
         edge: Edge = new_static_edge(parent, child)
@@ -70,6 +76,9 @@ class Grafo(Iderable):
     #     return None
 
     def exit_edge_to(self, src: Vertex, dst: Vertex) -> Edge:
+        """exit_edge_to checks if there is a valid link for give vertices
+        as source/parent and destination/child
+        """
         if src is None:
             src = self._anchor
         for edge in src.edges:
@@ -80,6 +89,10 @@ class Grafo(Iderable):
         return None
 
     def check_edge_from_to(self, src: Vertex, dst: Vertex, **kwargs) -> [Any, bool]:
+        """check_edge_from_to verifies if there is an edge between given
+        vertices and there is valid link and clearance for that edge for
+        those vertices.
+        """
         if src is None:
             src = self._anchor
         edge = self.exit_edge_to(src, dst)
@@ -88,6 +101,8 @@ class Grafo(Iderable):
         return None, False
 
     def links_from(self, src: Vertex, vertex_or_edge: bool, **kwargs) -> List[Any]:
+        """links_from returns all edges/vertices from the given vertex.
+        """
         children: List[Any] = []
         if src is None:
             src = self._anchor
@@ -111,6 +126,8 @@ class Grafo(Iderable):
     def paths_from_v_to_v(
         self, src: Vertex, dst: Vertex, path: List[Edge] = None, **kwargs
     ) -> List[Path]:
+        """paths_from_v_to_v returns all valid paths between given vertices.
+        """
         paths: List[Path] = []
         if path is None:
             path = []
@@ -134,6 +151,17 @@ class Grafo(Iderable):
                 if child_paths:
                     paths.extend(child_paths)
         return paths
+
+    def vertices_in_path(self, src: Vertex, path: List[Edge]) -> List[Vertex]:
+        """vertices_in_path returns all ordered vertices in a given path from
+        a source vertex.
+        """
+        vertices: List[Vertex] = [src]
+        next_vertex = src
+        for edge in path:
+            next_vertex = edge.peer(next_vertex)
+            vertices.append(next_vertex)
+        return vertices
 
     def to_mermaid(self) -> str:
         result: str = "graph LR\n"
