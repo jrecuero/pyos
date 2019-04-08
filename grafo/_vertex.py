@@ -1,4 +1,4 @@
-from typing import List, Any, Optional
+from typing import List, Optional
 from ._ider import Iderable
 
 
@@ -10,17 +10,14 @@ class Link:
 
 
 class Vertex(Iderable):
-    __slots__ = ["parents", "children", "edges", "content", "hooked", "pos"]
+    __slots__ = ["parents", "children", "edges", "hooked"]
 
     def __init__(self, label: str):
         super(Vertex, self).__init__(label)
         self.parents: List["Vertex"] = []
         self.children: List["Vertex"] = []
         self.edges: List["Edge"] = []
-        # self.traversed: List["VtoV"] = []
-        self.content: Any = None
         self.hooked: bool = False
-        self.pos: Any = None
 
     def __str__(self) -> str:
         return self.label
@@ -54,8 +51,8 @@ class Vertex(Iderable):
 class VtoV(Iderable):
     __slots__ = ["parent", "child", "vertices"]
 
-    def __init__(self, parent: Vertex, child: Vertex):
-        super(VtoV, self).__init__()
+    def __init__(self, label: str, parent: Vertex, child: Vertex):
+        super(VtoV, self).__init__(label)
         self.parent: Vertex = parent
         self.child: Vertex = child
         self.vertices: List[Vertex] = [parent, child]
@@ -65,15 +62,13 @@ class VtoV(Iderable):
 
 
 class Edge(VtoV):
-    __slots__ = ["clearance_cb", "link", "content"]
+    __slots__ = ["link", "src", "dst"]
 
-    def __init__(
-        self, parent: Vertex, child: Vertex, clearance_cb: Any, link: Link = Link.BI
-    ):
-        super(Edge, self).__init__(parent, child)
-        self.clearance_cb: Any = clearance_cb
+    def __init__(self, label: str, parent: Vertex, child: Vertex, link: Link = Link.BI):
+        super(Edge, self).__init__(label, parent, child)
         self.link: Link = link
-        self.content: Any = None
+        self.src = self.parent if self.link != Link.UP else self.child
+        self.dst = self.child if self.link != Link.UP else self.parent
 
     def peer(self, vertex: Vertex) -> Vertex:
         """peer looks for the other vertex in the edge
@@ -91,11 +86,12 @@ class Edge(VtoV):
             return False
         elif self.link == Link.BI:
             return src in self.vertices or dst in self.vertices
-        elif self.link == Link.DOWN:
-            return src == self.parent and dst == self.child
-        elif self.link == Link.UP:
-            return src == self.child and dst == self.parent
-        return False
+        return src == self.src and dst == self.dst
+
+    def is_allow_with_link(self, link=Link.DOWN) -> bool:
+        if self.link == Link.BI:
+            return True
+        return self.link == link
 
     def is_allow_down(self) -> bool:
         return self.link in [Link.BI, Link.DOWN]
@@ -109,47 +105,6 @@ class Edge(VtoV):
     def is_cut(self) -> bool:
         return self.link == Link.NONE
 
-    def check_down(self, **kwargs) -> [Any, bool]:
-        if self.is_allow_down():
-            return self.clearance_cb(self.parent, self.child, Link.DOWN, **kwargs)
-        return None, False
-
-    def check_up(self, **kwargs) -> [Any, bool]:
-        if self.is_allow_up():
-            return self.clearance_cb(self.parent, self.child, Link.UP, **kwargs)
-        return None, False
-
-    def check_bi(self, **kwargs) -> [Any, bool]:
-        if self.is_allow_bi():
-            return self.clearance_cb(self.parent, self.child, Link.BI, **kwargs)
-        return None, False
-
-    def check(self, link: Link = Link.DOWN, **kwargs) -> [Any, bool]:
-        """check verifies the edge has a valid link and clearance.
-        """
-        if link == Link.DOWN:
-            return self.check_down(**kwargs)
-        elif link == Link.UP:
-            return self.check_up(**kwargs)
-        elif link == Link.BI:
-            return self.check_bi(**kwargs)
-        return None, False
-
-    def check_with_vertex(
-        self, src: Vertex = None, dst: Vertex = None, **kwargs
-    ) -> [Any, bool]:
-        """check_wit_vertex verifies if edge has given vertices and valid
-        link and clearance.
-        """
-        if src == self.parent and dst == self.child:
-            return self.check_down(**kwargs)
-        elif src == self.child and dst == self.parent:
-            return self.check_up(**kwargs)
-        elif src is None and dst is None:
-            return self.check_bi(**kwargs)
-        else:
-            return [None, False]
-
     def __str__(self) -> str:
         if self.link == Link.BI:
             return "{} <-> {}".format(self.parent, self.child)
@@ -162,11 +117,11 @@ class Edge(VtoV):
 
     def to_mermaid(self) -> str:
         if self.link == Link.DOWN:
-            return "{} --> {}".format(self.parent, self.child)
+            return "{} --> {}".format(self.src, self.dst)
         elif self.link == Link.UP:
-            return "{} --> {}".format(self.child, self.parent)
+            return "{} --> {}".format(self.src, self.dst)
         elif self.link == Link.BI:
-            return "{} --- {}".format(self.parent, self.child)
+            return "{} --- {}".format(self.src, self.dst)
         return ""
 
 
@@ -207,7 +162,3 @@ class Path(Iderable):
         for edge in self.edges:
             result += "{} --> {}\n".format(edge.parent, edge.child)
         return result
-
-
-def new_static_edge(parent: Vertex, child: Vertex, link: Link = Link.BI) -> Edge:
-    return Edge(parent, child, lambda p, c, l: (None, True), link)

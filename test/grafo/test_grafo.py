@@ -1,5 +1,4 @@
-from grafo import Vertex, new_static_edge, Link, Grafo
-from tools.loggar import get_loggar
+from grafo import log, Vertex, Link, Grafo, Edge
 
 
 def test_new_grafo():
@@ -19,7 +18,7 @@ def test_add_edge():
     g = Grafo("root/0")
     root = g.root
     parent = Vertex("parent/1")
-    root_edge = new_static_edge(None, parent)
+    root_edge = Edge("edge", None, parent)
     g.add_edge(None, root_edge)
     got, exp = root_edge.parent, root
     assert got == exp, "Error: add edge: parent got {} exp {}".format(got, exp)
@@ -38,16 +37,16 @@ def test_grafo_path():
     v6: Vertex = Vertex("v/6")
     v7: Vertex = Vertex("v/7")
     g: Grafo = Grafo("root/0")
-    g.add_edge(None, new_static_edge(None, v1, Link.DOWN))
-    e_v1_v2 = new_static_edge(v1, v2, Link.DOWN)
-    e_v1_v3 = new_static_edge(v1, v3, Link.DOWN)
-    e_v2_v3 = new_static_edge(v2, v3, Link.DOWN)
-    e_v2_v4 = new_static_edge(v2, v4, Link.DOWN)
-    e_v2_v5 = new_static_edge(v2, v5, Link.DOWN)
-    e_v3_v5 = new_static_edge(v3, v5, Link.DOWN)
-    e_v3_v6 = new_static_edge(v3, v6, Link.DOWN)
-    e_v4_v7 = new_static_edge(v4, v7, Link.DOWN)
-    e_v6_v7 = new_static_edge(v6, v7, Link.DOWN)
+    g.add_edge(None, Edge("edge", None, v1, Link.DOWN))
+    e_v1_v2 = Edge("edge", v1, v2, Link.DOWN)
+    e_v1_v3 = Edge("edge", v1, v3, Link.DOWN)
+    e_v2_v3 = Edge("edge", v2, v3, Link.DOWN)
+    e_v2_v4 = Edge("edge", v2, v4, Link.DOWN)
+    e_v2_v5 = Edge("edge", v2, v5, Link.DOWN)
+    e_v3_v5 = Edge("edge", v3, v5, Link.DOWN)
+    e_v3_v6 = Edge("edge", v3, v6, Link.DOWN)
+    e_v4_v7 = Edge("edge", v4, v7, Link.DOWN)
+    e_v6_v7 = Edge("edge", v6, v7, Link.DOWN)
     g.add_edge(v1, e_v1_v2)
     g.add_edge(v1, e_v1_v3)
     g.add_edge(v2, e_v2_v3)
@@ -79,7 +78,6 @@ def test_grafo_path():
 
 
 if __name__ == "__main__":
-    log = get_loggar("grafo")
     v1: Vertex = Vertex("v/1")
     v2: Vertex = Vertex("v/2")
     v3: Vertex = Vertex("v/3")
@@ -88,16 +86,16 @@ if __name__ == "__main__":
     v6: Vertex = Vertex("v/6")
     v7: Vertex = Vertex("v/7")
     g: Grafo = Grafo("root/0")
-    g.add_edge(None, new_static_edge(None, v1, Link.DOWN))
-    g.add_edge(v1, new_static_edge(v1, v2, Link.DOWN))
-    g.add_edge(v1, new_static_edge(v1, v3, Link.DOWN))
-    g.add_edge(v2, new_static_edge(v2, v3, Link.DOWN))
-    g.add_edge(v2, new_static_edge(v2, v4, Link.DOWN))
-    g.add_edge(v2, new_static_edge(v2, v5, Link.DOWN))
-    g.add_edge(v3, new_static_edge(v3, v5, Link.DOWN))
-    g.add_edge(v3, new_static_edge(v3, v6, Link.DOWN))
-    g.add_edge(v4, new_static_edge(v4, v7, Link.DOWN))
-    g.add_edge(v6, new_static_edge(v6, v7, Link.DOWN))
+    g.add_edge(None, Edge("edge", None, v1, Link.DOWN))
+    g.add_edge(v1, Edge("edge", v1, v2, Link.DOWN))
+    g.add_edge(v1, Edge("edge", v1, v3, Link.DOWN))
+    g.add_edge(v2, Edge("edge", v2, v3, Link.DOWN))
+    g.add_edge(v2, Edge("edge", v2, v4, Link.DOWN))
+    g.add_edge(v2, Edge("edge", v2, v5, Link.DOWN))
+    g.add_edge(v3, Edge("edge", v3, v5, Link.DOWN))
+    g.add_edge(v3, Edge("edge", v3, v6, Link.DOWN))
+    g.add_edge(v4, Edge("edge", v4, v7, Link.DOWN))
+    g.add_edge(v6, Edge("edge", v6, v7, Link.DOWN))
     log.Test(g.to_mermaid()).call()
     paths = g.paths_from_v_to_v(v1, v7)
     # paths = g.paths_from_v_to_v(v5, v7)

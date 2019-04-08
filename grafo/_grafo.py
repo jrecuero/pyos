@@ -1,11 +1,7 @@
 from typing import Dict, List, Any
-from logging import FileHandler
-from tools.loggar import get_loggar
+from ._loggar import log
 from ._ider import Iderable
-from ._vertex import Vertex, Edge, Path, new_static_edge, Link
-
-
-log = get_loggar("grafo", handler=FileHandler("loggar.log", mode="w"))
+from ._vertex import Vertex, Edge, Path, Link
 
 
 class Grafo(Iderable):
@@ -39,7 +35,7 @@ class Grafo(Iderable):
         vertex.
         """
         if parent is None:
-            parent = self.root
+            parent = self.anchor
             edge.parent = parent
         if not parent.hooked:
             raise Exception("Parent {} not found in grafo".format(parent))
@@ -48,15 +44,31 @@ class Grafo(Iderable):
         edge.child.hooked = True
         self.vertices[edge.child.ider] = edge.child
         self.edges[edge.ider] = edge
+        self.anchor = edge.child
 
-    def add_vertex(self, parent: Vertex, child: Vertex):
+    def add_vertex(self, parent: Vertex, child: Vertex, link: Link = Link.DOWN):
         """add_vertex creates an edge between give vertices and add it to the
         grafo.
         """
         if parent is None:
-            parent = self.root
-        edge: Edge = new_static_edge(parent, child)
+            parent = self.anchor
+        edge: Edge = Edge("static", parent, child, link)
         self.add_edge(parent, edge)
+        self.anchor = child
+
+    def hook_edge(self, edge: Edge):
+        """hook_edge appends the given edge to the grafo anchor.
+        """
+        if edge.parent is None:
+            return self.add_edge(None, edge)
+        return self.add_edge(edge.parent, edge)
+
+    def hook_vertex(self, dst: Vertex, link: Link = Link.DOWN):
+        """hook_vertex appends the given vertex to the grafo anchor, in the
+        process it creates a static edge between the anchor and the given
+        vertex.
+        """
+        return self.add_vertex(self.anchor, dst, link)
 
     # def add_vtov(self, edge: Edge):
     #     if edge.parent is None:
@@ -80,7 +92,7 @@ class Grafo(Iderable):
         as source/parent and destination/child
         """
         if src is None:
-            src = self._anchor
+            src = self.anchor
         for edge in src.edges:
             if edge.child == dst and edge.link in [Link.DOWN, Link.BI]:
                 return edge
@@ -88,40 +100,28 @@ class Grafo(Iderable):
                 return edge
         return None
 
-    def check_edge_from_to(self, src: Vertex, dst: Vertex, **kwargs) -> [Any, bool]:
-        """check_edge_from_to verifies if there is an edge between given
-        vertices and there is valid link and clearance for that edge for
-        those vertices.
-        """
-        if src is None:
-            src = self._anchor
-        edge = self.exit_edge_to(src, dst)
-        if edge:
-            return edge.check_with_vertex(src, dst, **kwargs)
-        return None, False
-
-    def links_from(self, src: Vertex, vertex_or_edge: bool, **kwargs) -> List[Any]:
+    def links_from(self, src: Vertex, vertex_or_edge: bool) -> List[Any]:
         """links_from returns all edges/vertices from the given vertex.
         """
         children: List[Any] = []
         if src is None:
-            src = self._anchor
+            src = self.anchor
         log.Info("[EDGES] {} : {}".format(src, [str(e) for e in src.edges])).call()
         for edge in src.edges:
             dst = edge.peer(src)
-            _, ok = self.check_edge_from_to(src, dst, **kwargs)
-            if ok:
+            # _, ok = self.check_edge_from_to(src, dst, **kwargs)
+            if self.exit_edge_to(src, dst):
                 if vertex_or_edge:
                     children.append(dst)
                 else:
                     children.append(edge)
         return children
 
-    def vertices_from(self, src: Vertex, **kwargs) -> List[Vertex]:
-        return self.links_from(src, True, **kwargs)
+    def vertices_from(self, src: Vertex) -> List[Vertex]:
+        return self.links_from(src, True)
 
-    def edges_from(self, src: Vertex, **kwargs) -> List[Edge]:
-        return self.links_from(src, False, **kwargs)
+    def edges_from(self, src: Vertex) -> List[Edge]:
+        return self.links_from(src, False)
 
     def paths_from_v_to_v(
         self, src: Vertex, dst: Vertex, path: List[Edge] = None, **kwargs
