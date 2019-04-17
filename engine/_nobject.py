@@ -255,7 +255,9 @@ class Input(NObject):
         screen.addstr(self.y, self.x, self.text_data, self.dx)
         screen.nodelay(False)
         curses.echo()
+        curses.curs_set(True)
         self.input_str = screen.getstr(self.y, self.x + self.dx).decode("utf-8")
+        curses.curs_set(False)
         screen.nodelay(True)
         curses.noecho()
         return [EventInput(str(self.input_str))]

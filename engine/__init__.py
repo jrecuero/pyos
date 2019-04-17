@@ -21,7 +21,7 @@ from ._nobject import (
     Box,
     BoxText,
     FlashText,
-    TimerUpdater,
+    TimeUpdater,
     Caller,
     Input,
 )
@@ -51,7 +51,7 @@ __all__ = [
     "Box",
     "BoxText",
     "FlashText",
-    "TimerUpdater",
+    "TimeUpdater",
     "Caller",
     "Input",
     "update_scene",
