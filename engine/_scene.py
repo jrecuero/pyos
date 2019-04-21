@@ -1,4 +1,6 @@
 from typing import List, Any
+
+# from ._loggar import log
 from ._event import Event, Timer, EventTimer
 from ._nobject import NObject
 
@@ -50,6 +52,7 @@ class Scene:
         self.enable: bool = True
         self.visible: bool = True
         self.timers: List[Timer] = []
+        self.capture_inputs: List[NObject] = []
 
     def activate(self):
         """activate sets the scene to be enabled and visible.
@@ -72,8 +75,11 @@ class Scene:
         """update_objects updates all nobjects in a scene.
         """
         new_events: List[Event] = []
-        for obj in self.nobjects:
-            new_events.extend(obj.update(*events))
+        if len(getattr(self, "capture_inputs", [])):
+            new_events.extend(self.capture_inputs[-1].update(*events))
+        else:
+            for obj in self.nobjects:
+                new_events.extend(obj.update(*events))
         return new_events
 
     def render_objects(self, screen: Any) -> List[Event]:
@@ -102,12 +108,16 @@ class Scene:
         """add_object adds a new nobject to the scene.
         """
         self.nobjects.append(obj)
+        if getattr(obj, "capture_input", None):
+            self.capture_inputs.append(obj)
         return True
 
     def del_object(self, obj: NObject) -> bool:
         """del_object deletes an nobject from the scene.
         """
         self.nobjects.remove(obj)
+        if getattr(obj, "capture_input", None):
+            self.capture_inputs.remove(obj)
         return True
 
     def new_timer(self, timeout: int, enable: bool = True) -> Timer:

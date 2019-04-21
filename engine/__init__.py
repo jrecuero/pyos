@@ -1,3 +1,4 @@
+from ._loggar import log
 from ._event import (
     EVT,
     Timer,
@@ -24,6 +25,7 @@ from ._nobject import (
     TimeUpdater,
     Caller,
     Input,
+    Selector,
 )
 from ._scene import update as update_scene
 from ._scene import render as render_scene
@@ -31,6 +33,7 @@ from ._scene import Scene
 from ._handler import Handler
 
 __all__ = [
+    "log",
     "EVT",
     "Timer",
     "Event",
@@ -54,6 +57,7 @@ __all__ = [
     "TimeUpdater",
     "Caller",
     "Input",
+    "Selector",
     "update_scene",
     "render_scene",
     "Scene",

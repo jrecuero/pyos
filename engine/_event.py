@@ -12,16 +12,17 @@ class EVT:
         KEY: int = 100
         TIMER: int = 200
         INPUT: int = 300
+        SELECT: int = 400
 
     class SCN:
         """SCN class contains enums to identify engine scenes.
         """
 
-        ISCENE: int = 400
-        NEXT_SCENE: int = 401
-        PREV_SCENE: int = 402
-        FIRST_SCENE: int = 403
-        LAST_SCENE: int = 404
+        ISCENE: int = 1000
+        NEXT_SCENE: int = 1001
+        PREV_SCENE: int = 1002
+        FIRST_SCENE: int = 1003
+        LAST_SCENE: int = 1004
 
 
 class Timer:
@@ -73,6 +74,18 @@ class Event:
             return self.params.get("input_str", None)
         return None
 
+    def get_selected_index(self) -> int:
+        """get_selected_index returns the index for the token selected.
+        """
+        if self.evt == EVT.ENG.SELECT:
+            return self.params.get("index", None)
+
+    def get_selected_data(self) -> str:
+        """get_selected_data returns the data for the token selected.
+        """
+        if self.evt == EVT.ENG.SELECT:
+            return self.params.get("data", None)
+
     def get_iscene(self) -> Optional[int]:
         """get_iscene returns the iscene attribute for an event.
         """
@@ -109,6 +122,14 @@ class EventInput(Event):
 
     def __init__(self, data: str):
         super(EventInput, self).__init__(EVT.ENG.INPUT, input_str=data)
+
+
+class EventSelected(Event):
+    """EventSelected class identifies when a Selection is done.
+    """
+
+    def __init__(self, index: int, data: str):
+        super(EventSelected, self).__init__(EVT.ENG.SELECT, index=index, data=data)
 
 
 class EventIScene(Event):

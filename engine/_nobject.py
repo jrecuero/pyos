@@ -1,6 +1,8 @@
 from typing import Optional, Any, List
 import curses
-from ._event import Event, EventInput, Timer, EVT
+from ._event import Event, EventInput, EventSelected, Timer, EVT
+
+# from ._loggar import log
 
 
 def update(f):
@@ -247,6 +249,7 @@ class Input(NObject):
         super(Input, self).__init__(y, x, 1, len(text_data))
         self.text_data: str = text_data
         self.input_str: Optional[str] = None
+        self.capture_input = True
 
     @render
     def render(self, screen) -> List[Event]:
@@ -261,3 +264,61 @@ class Input(NObject):
         screen.nodelay(True)
         curses.noecho()
         return [EventInput(str(self.input_str))]
+
+
+class Selector(NObject):
+    """Selector class identifies a list of tokens that are highlighted and
+    can be selected using cursor movement.
+    """
+
+    def __init__(
+        self,
+        y: int,
+        x: int,
+        tokens: List[str],
+        selected: int = 0,
+        dy: int = -1,
+        dx: int = -1,
+    ):
+        dy = 1 if dy == -1 else dy
+        dx = sum([len(t) for t in tokens]) if dx == -1 else dx
+        super(Selector, self).__init__(y, x, dy, dx)
+        self.tokens: List[str] = tokens
+        # self.capture_input = True
+        self.selected: int = selected
+
+    @update
+    def update(self, *events: Event) -> List[Event]:
+        """update updates a selector nobject.
+        """
+        return []
+
+    @render
+    def render(self, screen) -> List[Event]:
+        """render renders an string nobject.
+        """
+        screen.nodelay(False)
+        while True:
+            xpos = self.x
+            for index, token in enumerate(self.tokens):
+                screen.addstr(
+                    self.y,
+                    xpos,
+                    token,
+                    curses.A_REVERSE if self.selected == index else len(token),
+                )
+                xpos += len(token) + 1
+            key = screen.getch()
+            curses.flushinp()
+            if curses.KEY_LEFT == key:
+                selected = self.selected - 1
+            elif curses.KEY_RIGHT == key:
+                selected = self.selected + 1
+            elif "\n" == chr(key):
+                screen.nodelay(True)
+                return [EventSelected(self.selected, self.tokens[self.selected])]
+            else:
+                continue
+            if 0 <= selected < len(self.tokens):
+                self.selected = selected
+        return []

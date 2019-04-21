@@ -13,12 +13,14 @@ from engine import (
     TimeUpdater,
     EventNextScene,
     update_scene,
+    Selector,
 )
 
 
 class SceneMain(Scene):
     def __init__(self):
         super(SceneMain, self).__init__()
+        self.select_obj = None
         self.input_obj = None
         self.timer = None
         self.t_counter = 0
@@ -38,7 +40,9 @@ class SceneMain(Scene):
         st = " Engine Example "
         self.add_object(Box(0, 0, 2, len(st) + 2))
         self.add_object(String(1, 1, st))
-        self.input_obj = Input(3, 0, "Name: ")
+        self.select_obj = Selector(3, 0, ["Yes", "No", "Cancel"], selected=2)
+        self.add_object(self.select_obj)
+        self.input_obj = Input(5, 0, "Name: ")
         self.add_object(self.input_obj)
         self.kh = KeyHandler(
             {
@@ -59,16 +63,21 @@ class SceneMain(Scene):
                 if event.get_timer() == self.timer:
                     self.t_counter += 1
                     self.add_object(
-                        String(9, 0, "Timeout expired: {}".format(self.t_counter))
+                        String(11, 0, "Timeout expired: {}".format(self.t_counter))
                     )
                     if self.t_counter == 10:
                         event_to_return.append(EventNextScene())
             elif event.evt == EVT.ENG.INPUT:
                 msg = event.get_input()
-                self.add_object(BoxText(3, 0, " Your name is {} ".format(msg)))
+                self.add_object(BoxText(5, 0, " Your name is {} ".format(msg)))
                 self.del_object(self.input_obj)
                 self.input_obj = None
                 self.timer = self.new_timer(100)
+            elif event.evt == EVT.ENG.SELECT:
+                msg = event.get_selected_data()
+                self.add_object(BoxText(8, 0, " Data {} ".format(msg)))
+                self.del_object(self.select_obj)
+                self.select_obj = None
             else:
                 event_to_return.append(event)
         return event_to_return
