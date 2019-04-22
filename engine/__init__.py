@@ -26,6 +26,7 @@ from ._nobject import (
     Caller,
     Input,
     Selector,
+    ScrollSelector,
 )
 from ._scene import update as update_scene
 from ._scene import render as render_scene
@@ -58,6 +59,7 @@ __all__ = [
     "Caller",
     "Input",
     "Selector",
+    "ScrollSelector",
     "update_scene",
     "render_scene",
     "Scene",

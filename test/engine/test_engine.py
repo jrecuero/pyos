@@ -13,7 +13,8 @@ from engine import (
     TimeUpdater,
     EventNextScene,
     update_scene,
-    Selector,
+    # Selector,
+    ScrollSelector,
 )
 
 
@@ -40,7 +41,10 @@ class SceneMain(Scene):
         st = " Engine Example "
         self.add_object(Box(0, 0, 2, len(st) + 2))
         self.add_object(String(1, 1, st))
-        self.select_obj = Selector(3, 0, ["Yes", "No", "Cancel"], selected=2)
+        # self.select_obj = Selector(
+        #     3, 0, ["Yes", "No", "Cancel"], selected=2, horizontal=False
+        # )
+        self.select_obj = ScrollSelector(3, 0, ["Yes", "No", "Cancel"], selected=2)
         self.add_object(self.select_obj)
         self.input_obj = Input(5, 0, "Name: ")
         self.add_object(self.input_obj)

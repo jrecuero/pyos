@@ -279,6 +279,7 @@ class Selector(NObject):
         selected: int = 0,
         dy: int = -1,
         dx: int = -1,
+        horizontal: bool = True,
     ):
         dy = 1 if dy == -1 else dy
         dx = sum([len(t) for t in tokens]) if dx == -1 else dx
@@ -286,6 +287,7 @@ class Selector(NObject):
         self.tokens: List[str] = tokens
         # self.capture_input = True
         self.selected: int = selected
+        self.horizontal: bool = horizontal
 
     @update
     def update(self, *events: Event) -> List[Event]:
@@ -299,24 +301,97 @@ class Selector(NObject):
         """
         screen.nodelay(False)
         while True:
-            xpos = self.x
+            ypos, xpos = self.y, self.x
             for index, token in enumerate(self.tokens):
                 screen.addstr(
-                    self.y,
+                    ypos,
                     xpos,
                     token,
                     curses.A_REVERSE if self.selected == index else len(token),
                 )
-                xpos += len(token) + 1
+                if self.horizontal:
+                    xpos += len(token) + 1
+                else:
+                    ypos += 1
             key = screen.getch()
             curses.flushinp()
-            if curses.KEY_LEFT == key:
+            if curses.KEY_LEFT == key and self.horizontal:
                 selected = self.selected - 1
-            elif curses.KEY_RIGHT == key:
+            elif curses.KEY_RIGHT == key and self.horizontal:
+                selected = self.selected + 1
+            if curses.KEY_UP == key and not self.horizontal:
+                selected = self.selected - 1
+            elif curses.KEY_DOWN == key and not self.horizontal:
                 selected = self.selected + 1
             elif "\n" == chr(key):
                 screen.nodelay(True)
                 return [EventSelected(self.selected, self.tokens[self.selected])]
+            else:
+                continue
+            if 0 <= selected < len(self.tokens):
+                self.selected = selected
+        return []
+
+
+class ScrollSelector(Selector):
+    """ScrollSelector class identifies a list of tokens that are expanded
+    to be selected.
+    """
+
+    def __init__(
+        self,
+        y: int,
+        x: int,
+        tokens: List[str],
+        selected: int = 0,
+        dy: int = -1,
+        dx: int = -1,
+    ):
+        super(ScrollSelector, self).__init__(
+            y, x, tokens, selected=selected, dy=dy, dx=dx, horizontal=False
+        )
+        self.expanded: bool = False
+
+    @render
+    def render(self, screen) -> List[Event]:
+        """render renders an string nobject.
+        """
+        screen.nodelay(False)
+        while True:
+            if self.expanded:
+                ypos, xpos = self.y, self.x
+                screen.addstr(ypos, xpos, " " * len(self.tokens[self.selected]))
+                for index, token in enumerate(self.tokens):
+                    screen.addstr(
+                        ypos,
+                        xpos,
+                        token,
+                        curses.A_REVERSE if self.selected == index else len(token),
+                    )
+                    ypos += 1
+            else:
+                screen.addstr(
+                    self.y, self.x, self.tokens[self.selected], curses.A_REVERSE
+                )
+            key = screen.getch()
+            curses.flushinp()
+            if self.expanded and curses.KEY_UP == key:
+                selected = self.selected - 1
+            elif self.expanded and curses.KEY_DOWN == key:
+                selected = self.selected + 1
+            elif self.expanded and "\n" == chr(key):
+                screen.nodelay(True)
+                ypos, xpos = self.y, self.x
+                for index, token in enumerate(self.tokens):
+                    screen.addstr(ypos, xpos, " " * len(token))
+                    ypos += 1
+                screen.addstr(
+                    self.y, self.x, self.tokens[self.selected], curses.A_REVERSE
+                )
+                return [EventSelected(self.selected, self.tokens[self.selected])]
+            elif not self.expanded and "\n" == chr(key):
+                selected = self.selected
+                self.expanded = True
             else:
                 continue
             if 0 <= selected < len(self.tokens):
