@@ -17,20 +17,21 @@ class Handler:
         self.tick: float = tick
         self.timers: List[Timer] = []
         self.render_events: List[Event] = []
+        self.pinput_events: List[Event] = []
+        self.keys: List[int] = []
 
     def run(self):
         """run runs all scenes.
         """
         curses.wrapper(self.__main)
 
-    def __loop(self) -> int:
-        """__loop is an internal method that loops for any user input key
+    def __get_input(self) -> int:
+        """__get_input is an internal method that loops for any user input key
         being entered.
         """
-        time.sleep(self.tick)
-        self.key = self.screen.getch()
+        key: int = self.screen.getch()
         curses.flushinp()
-        return self.key
+        return key
 
     def __main(self, screen: Any):
         """__main is an internal method that implements the handler main
@@ -41,10 +42,14 @@ class Handler:
         curses.start_color()
         curses.curs_set(False)
         while True:
+            time.sleep(self.tick)
+            key = self.__get_input()
+            if key != -1:
+                self.keys.append(key)
             self.screen.erase()
+            self.pinput()
             self.update()
             self.render()
-            self.__loop()
 
     def new_timer(self, timeout: int, enable: bool = True) -> Timer:
         """new_timer creates and adds a timer event to the handler.
@@ -142,18 +147,29 @@ class Handler:
         """
         pass
 
+    def update_unblockable(self):
+        events = []
+        for t in self.timers:
+            if t.inc():
+                events.append(EventTimer(t))
+        return events
+
+    def pinput(self):
+        """pinput checks any user input for the main scene.
+        """
+        if self.iscene != -1:
+            self.pinput_events = self.scenes[self.iscene].pinput(self.screen, self.keys)
+
     def update(self):
         """update updates scenes, events and nobject in the handler.
         """
         if self.iscene != -1:
             events = []
+            events.extend(self.pinput_events)
             events.extend(self.render_events)
-            if self.key != -1:
-                events.append(EventKey(self.key))
-                self.key = -1
-            for t in self.timers:
-                if t.inc():
-                    events.append(EventTimer(t))
+            if len(self.keys):
+                events.append(EventKey(self.keys.pop()))
+            events.extend(self.update_unblockable())
             update_events = self.scenes[self.iscene].update(*events)
             for upd_event in update_events:
                 if upd_event.evt == EVT.SCN.ISCENE:

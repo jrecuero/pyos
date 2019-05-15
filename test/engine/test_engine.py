@@ -25,6 +25,8 @@ class SceneMain(Scene):
         self.input_obj = None
         self.timer = None
         self.t_counter = 0
+        self.main_timer = None
+        self.mt_counter = 0
 
     def setup(self):
         def handle_t():
@@ -41,6 +43,7 @@ class SceneMain(Scene):
         st = " Engine Example "
         self.add_object(Box(0, 0, 2, len(st) + 2))
         self.add_object(String(1, 1, st))
+        self.main_timer = self.new_timer(100)
         # self.select_obj = Selector(
         #     3, 0, ["Yes", "No", "Cancel"], selected=2, horizontal=False
         # )
@@ -64,7 +67,10 @@ class SceneMain(Scene):
             if event.evt == EVT.ENG.KEY:
                 event_to_return.extend(self.kh.update(event))
             elif event.evt == EVT.ENG.TIMER:
-                if event.get_timer() == self.timer:
+                if event.get_timer() == self.main_timer:
+                    self.mt_counter += 1
+                    self.add_object(String(10, 0, "Timer : {}".format(self.mt_counter)))
+                elif event.get_timer() == self.timer:
                     self.t_counter += 1
                     self.add_object(
                         String(11, 0, "Timeout expired: {}".format(self.t_counter))

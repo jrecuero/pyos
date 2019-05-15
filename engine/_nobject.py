@@ -5,6 +5,21 @@ from ._event import Event, EventInput, EventSelected, Timer, EVT
 # from ._loggar import log
 
 
+def pinput(f):
+    """pinput method decorates any nobject process input method,
+    calling the process input method only if the nobject is enabled.
+    """
+
+    def _pinput(self: "NObject", screen: Any, keys: List[int]) -> List[Event]:
+        if self.enable:
+            result = f(self, screen, keys)
+            if result is not None:
+                return result
+        return []
+
+    return _pinput
+
+
 def update(f):
     """update method decorates any nobject update method, calling the update
     method only if the nobject is enabled.
@@ -60,6 +75,12 @@ class NObject:
         self.enable = False
         self.visible = False
 
+    @pinput
+    def pinput(self, screen, keys) -> List[Event]:
+        """pinput abstact method allows to process input for  nobject.
+        """
+        return []
+
     @update
     def update(self, *events: Event) -> List[Event]:
         """update abstract method allows to update the nobject.
@@ -71,6 +92,12 @@ class NObject:
         """render abstact method allows to render the nobject.
         """
         return []
+
+    def set_cursor(self) -> Optional[List[int]]:
+        """set_cursor returns the position the cursor has to be set
+        for the given object.
+        """
+        return None
 
 
 class String(NObject):
@@ -245,25 +272,38 @@ class Input(NObject):
     """Input class identifies an input string nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str):
+    def __init__(self, y: int, x: int, text_data: str, text_output: List[str]):
         super(Input, self).__init__(y, x, 1, len(text_data))
         self.text_data: str = text_data
-        self.input_str: Optional[str] = None
+        self.input_str: str = ""
+        self.text_output: List[str] = text_output
         self.capture_input = True
+
+    @pinput
+    def pinput(self, screen, keys) -> List[Event]:
+        if self.capture_input and len(keys):
+            key = keys.pop()
+            if key == 10:
+                self.capture_input = False
+                self.text_output.append(self.input_str)
+                return [EventInput(self.input_str)]
+            elif key == 127:
+                self.input_str = self.input_str[:-1]
+            else:
+                self.input_str += chr(key)
+        return []
 
     @render
     def render(self, screen) -> List[Event]:
         """render renders an input string nobject.
         """
-        screen.addstr(self.y, self.x, self.text_data, self.dx)
-        screen.nodelay(False)
-        curses.echo()
-        curses.curs_set(True)
-        self.input_str = screen.getstr(self.y, self.x + self.dx).decode("utf-8")
-        curses.curs_set(False)
-        screen.nodelay(True)
-        curses.noecho()
-        return [EventInput(str(self.input_str))]
+        screen.addstr(self.y, self.x, self.text_data + self.input_str, self.dx)
+        return []
+
+    def set_cursor(self) -> Optional[List[int]]:
+        if self.capture_input:
+            return [self.y, self.x + len(self.text_data + self.input_str)]
+        return None
 
 
 class Selector(NObject):
@@ -285,9 +325,28 @@ class Selector(NObject):
         dx = sum([len(t) for t in tokens]) if dx == -1 else dx
         super(Selector, self).__init__(y, x, dy, dx)
         self.tokens: List[str] = tokens
-        # self.capture_input = True
+        self.capture_input = True
         self.selected: int = selected
         self.horizontal: bool = horizontal
+
+    @pinput
+    def pinput(self, screen, keys) -> List[Event]:
+        if self.capture_input and len(keys):
+            key = keys.pop()
+            if curses.KEY_LEFT == key and self.horizontal:
+                selected = self.selected - 1
+            elif curses.KEY_RIGHT == key and self.horizontal:
+                selected = self.selected + 1
+            if curses.KEY_UP == key and not self.horizontal:
+                selected = self.selected - 1
+            elif curses.KEY_DOWN == key and not self.horizontal:
+                selected = self.selected + 1
+            elif "\n" == chr(key):
+                self.capture_input = False
+                return [EventSelected(self.selected, self.tokens[self.selected])]
+            if 0 <= selected < len(self.tokens):
+                self.selected = selected
+        return []
 
     @update
     def update(self, *events: Event) -> List[Event]:
@@ -299,37 +358,18 @@ class Selector(NObject):
     def render(self, screen) -> List[Event]:
         """render renders an string nobject.
         """
-        screen.nodelay(False)
-        while True:
-            ypos, xpos = self.y, self.x
-            for index, token in enumerate(self.tokens):
-                screen.addstr(
-                    ypos,
-                    xpos,
-                    token,
-                    curses.A_REVERSE if self.selected == index else len(token),
-                )
-                if self.horizontal:
-                    xpos += len(token) + 1
-                else:
-                    ypos += 1
-            key = screen.getch()
-            curses.flushinp()
-            if curses.KEY_LEFT == key and self.horizontal:
-                selected = self.selected - 1
-            elif curses.KEY_RIGHT == key and self.horizontal:
-                selected = self.selected + 1
-            if curses.KEY_UP == key and not self.horizontal:
-                selected = self.selected - 1
-            elif curses.KEY_DOWN == key and not self.horizontal:
-                selected = self.selected + 1
-            elif "\n" == chr(key):
-                screen.nodelay(True)
-                return [EventSelected(self.selected, self.tokens[self.selected])]
+        ypos, xpos = self.y, self.x
+        for index, token in enumerate(self.tokens):
+            screen.addstr(
+                ypos,
+                xpos,
+                token,
+                curses.A_REVERSE if self.selected == index else len(token),
+            )
+            if self.horizontal:
+                xpos += len(token) + 1
             else:
-                continue
-            if 0 <= selected < len(self.tokens):
-                self.selected = selected
+                ypos += 1
         return []
 
 
@@ -352,48 +392,41 @@ class ScrollSelector(Selector):
         )
         self.expanded: bool = False
 
-    @render
-    def render(self, screen) -> List[Event]:
-        """render renders an string nobject.
-        """
-        screen.nodelay(False)
-        while True:
-            if self.expanded:
-                ypos, xpos = self.y, self.x
-                screen.addstr(ypos, xpos, " " * len(self.tokens[self.selected]))
-                for index, token in enumerate(self.tokens):
-                    screen.addstr(
-                        ypos,
-                        xpos,
-                        token,
-                        curses.A_REVERSE if self.selected == index else len(token),
-                    )
-                    ypos += 1
-            else:
-                screen.addstr(
-                    self.y, self.x, self.tokens[self.selected], curses.A_REVERSE
-                )
-            key = screen.getch()
-            curses.flushinp()
+    @pinput
+    def pinput(self, screen, keys) -> List[Event]:
+        selected = self.selected
+        if self.capture_input and len(keys):
+            key = keys.pop()
             if self.expanded and curses.KEY_UP == key:
                 selected = self.selected - 1
             elif self.expanded and curses.KEY_DOWN == key:
                 selected = self.selected + 1
             elif self.expanded and "\n" == chr(key):
-                screen.nodelay(True)
-                ypos, xpos = self.y, self.x
-                for index, token in enumerate(self.tokens):
-                    screen.addstr(ypos, xpos, " " * len(token))
-                    ypos += 1
-                screen.addstr(
-                    self.y, self.x, self.tokens[self.selected], curses.A_REVERSE
-                )
+                self.expanded = False
+                self.capture_input = False
                 return [EventSelected(self.selected, self.tokens[self.selected])]
             elif not self.expanded and "\n" == chr(key):
                 selected = self.selected
                 self.expanded = True
-            else:
-                continue
             if 0 <= selected < len(self.tokens):
                 self.selected = selected
+        return []
+
+    @render
+    def render(self, screen) -> List[Event]:
+        """render renders an string nobject.
+        """
+        if self.expanded:
+            ypos, xpos = self.y, self.x
+            screen.addstr(ypos, xpos, " " * len(self.tokens[self.selected]))
+            for index, token in enumerate(self.tokens):
+                screen.addstr(
+                    ypos,
+                    xpos,
+                    token,
+                    curses.A_REVERSE if self.selected == index else len(token),
+                )
+                ypos += 1
+        else:
+            screen.addstr(self.y, self.x, self.tokens[self.selected], curses.A_REVERSE)
         return []

@@ -1,8 +1,26 @@
 from typing import List, Any
+import curses
 
 # from ._loggar import log
 from ._event import Event, Timer, EventTimer
 from ._nobject import NObject
+
+
+def pinput(f):
+    """pinput method decorates any scene process input  method, calling any event
+    to process input.
+    """
+
+    def _pinput(self: "Scene", screen: Any, keys: List[int]) -> List[Event]:
+        if self.visible:
+            new_events = self.pinput_objects(screen, keys)
+            result = f(self, screen, keys)
+            if result is not None:
+                new_events.extend(result)
+            return new_events
+        return []
+
+    return _pinput
 
 
 def update(f):
@@ -33,6 +51,7 @@ def render(f):
     def _render(self: "Scene", screen: Any) -> List[Event]:
         if self.visible:
             new_events = self.render_objects(screen)
+            self.set_cursor(screen)
             result = f(self, screen)
             if result is not None:
                 new_events.extend(result)
@@ -52,7 +71,6 @@ class Scene:
         self.enable: bool = True
         self.visible: bool = True
         self.timers: List[Timer] = []
-        self.capture_inputs: List[NObject] = []
 
     def activate(self):
         """activate sets the scene to be enabled and visible.
@@ -71,15 +89,20 @@ class Scene:
         """
         pass
 
+    def pinput_objects(self, screen: Any, keys: List[Event]) -> List[Event]:
+        """pinput_objects process input for all nobjects in a scene.
+        """
+        events: List[Event] = []
+        for obj in self.nobjects:
+            events.extend(obj.pinput(screen, keys))
+        return events
+
     def update_objects(self, *events: Event) -> List[Event]:
         """update_objects updates all nobjects in a scene.
         """
         new_events: List[Event] = []
-        if len(getattr(self, "capture_inputs", [])):
-            new_events.extend(self.capture_inputs[-1].update(*events))
-        else:
-            for obj in self.nobjects:
-                new_events.extend(obj.update(*events))
+        for obj in self.nobjects:
+            new_events.extend(obj.update(*events))
         return new_events
 
     def render_objects(self, screen: Any) -> List[Event]:
@@ -89,6 +112,22 @@ class Scene:
         for obj in self.nobjects:
             events.extend(obj.render(screen))
         return events
+
+    def set_cursor(self, screen: Any):
+        """set_cursor sets the cursor position to the object that requires
+        user input.
+        """
+        for obj in self.nobjects:
+            cursor_pos = obj.set_cursor()
+            if cursor_pos:
+                curses.curs_set(True)
+                screen.addstr(cursor_pos[0], cursor_pos[1], "")
+                return
+        curses.curs_set(False)
+
+    @pinput
+    def pinput(self, screen: Any, keys: List[int]) -> List[int]:
+        return []
 
     @update
     def update(self, *events: Event) -> List[Event]:
@@ -108,16 +147,12 @@ class Scene:
         """add_object adds a new nobject to the scene.
         """
         self.nobjects.append(obj)
-        if getattr(obj, "capture_input", None):
-            self.capture_inputs.append(obj)
         return True
 
     def del_object(self, obj: NObject) -> bool:
         """del_object deletes an nobject from the scene.
         """
         self.nobjects.remove(obj)
-        if getattr(obj, "capture_input", None):
-            self.capture_inputs.remove(obj)
         return True
 
     def new_timer(self, timeout: int, enable: bool = True) -> Timer:
