@@ -117,7 +117,35 @@ class SceneLast(Scene):
 
 
 if __name__ == "__main__":
-    h = Handler()
-    h.add_scene(SceneMain())
-    h.add_scene(SceneLast())
-    h.run()
+    # h = Handler()
+    # h.add_scene(SceneMain())
+    # h.add_scene(SceneLast())
+    # h.run()
+    import curses
+    import sys
+
+    screen = curses.initscr()
+    curses.noecho()
+    curses.cbreak()
+    curses.curs_set(0)
+    screen.keypad(True)
+    try:
+        screen.clear()
+        while True:
+            screen.border(0)
+    except KeyboardInterrupt:
+        pass
+    except curses.error as ex:
+        curses.nocbreak()
+        screen.keypad(False)
+        curses.echo()
+        curses.endwin()
+        curses.curs_set(1)
+        print(ex)
+    finally:
+        curses.nocbreak()
+        screen.keypad(False)
+        curses.echo()
+        curses.endwin()
+        curses.curs_set(1)
+        sys.exit(1)

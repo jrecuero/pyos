@@ -180,7 +180,19 @@ class KeyHandler:
     def __init__(self, keyreg: Dict[str, Callable[[], List[Event]]]):
         self.keyreg = keyreg
 
+    def register(self, key: str, cb: Callable[[], List[Event]]):
+        """register adds a key to be handle.
+        """
+        self.keyreg[key] = cb
+
+    def deregister(self, key):
+        """deregister removes a key to be handle.
+        """
+        del self.keyreg[key]
+
     def update(self, event: Event) -> List[Event]:
+        """update looks fo the proper handle for the key being entered.
+        """
         event_to_return: List[Event] = []
         if event.evt == EVT.ENG.KEY and event.get_key() is not None:
             key = event.get_key()

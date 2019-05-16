@@ -15,7 +15,7 @@ from engine import (
     ScrollSelector,
     KeyHandler,
     Event,
-    # EventNextScene,
+    EventNextScene,
     update_scene,
 )
 
@@ -56,7 +56,10 @@ class SceneMain(Scene):
         self.add_object(Caller(15, 0, caller))
         self.add_object(Selector(16, 0, ["Yes", "No", "Cancel"], selected=2))
         self.add_object(ScrollSelector(18, 0, ["Yes", "No", "Cancel"], selected=1))
-        self.kh = KeyHandler({"x": lambda: exit(0)})
+        # self.kh = KeyHandler({"x": lambda: exit(0), "n": lambda: [EventNextScene()]})
+        self.kh = KeyHandler({})
+        self.kh.register("x", lambda: exit(0))
+        self.kh.register("n", lambda: [EventNextScene()])
 
     @update_scene
     def update(self, *events: Event) -> List[Event]:
@@ -82,7 +85,21 @@ class SceneMain(Scene):
         return event_to_return
 
 
+class SceneLast(Scene):
+    def setup(self):
+        self.add_object(String(10, 0, "This is the last page"))
+        self.add_object(BoxText(12, 0, "This is the last page"))
+
+    @update_scene
+    def update(self, *events: Event) -> List[Event]:
+        event_to_return: List[Event] = []
+        for event in events:
+            event.exit_on_key("x")
+        return event_to_return
+
+
 if __name__ == "__main__":
     h = Handler()
     h.add_scene(SceneMain())
+    h.add_scene(SceneLast())
     h.run()
