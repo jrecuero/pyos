@@ -71,6 +71,7 @@ class Scene:
         self.enable: bool = True
         self.visible: bool = True
         self.timers: List[Timer] = []
+        self.border: bool = True
 
     def activate(self):
         """activate sets the scene to be enabled and visible.
@@ -108,6 +109,8 @@ class Scene:
     def render_objects(self, screen: Any) -> List[Event]:
         """render_objects renders all nobjects in a scene.
         """
+        if self.border:
+            screen.border(0)
         events: List[Event] = []
         for obj in self.nobjects:
             events.extend(obj.render(screen))
@@ -124,6 +127,12 @@ class Scene:
                 screen.addstr(cursor_pos[0], cursor_pos[1], "")
                 return
         curses.curs_set(False)
+
+    def colors(self, color_pairs):
+        """colors setups ncurses for using given list of color pairs.
+        """
+        for index, (fg, bg) in enumerate(color_pairs):
+            curses.init_pair(index + 1, fg, bg)
 
     @pinput
     def pinput(self, screen: Any, keys: List[int]) -> List[int]:

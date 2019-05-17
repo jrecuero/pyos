@@ -116,6 +116,42 @@ class String(NObject):
         return []
 
 
+class XString(String):
+    """XString class identifies a formatted string nobject.
+    """
+
+    def __init__(self, y: int, x: int, text_data: str, fmt: Optional[Any] = None):
+        super(XString, self).__init__(y, x, text_data)
+        self.fmt: Any = fmt if fmt is not None else curses.A_NORMAL
+
+    @render
+    def render(self, screen) -> List[Event]:
+        """render renders an string nobject.
+        """
+        screen.addstr(self.y, self.x, self.text_data, self.fmt)
+        return []
+
+
+class Formatted(NObject):
+    """Formatted class identifies a formatted nobject.
+    """
+
+    def __init__(self, y: int, x: int, data: List[List[Any]]):
+        super(Formatted, self).__init__(y, x, 1, -1)
+        self.data = data
+
+    @render
+    def render(self, screen) -> List[Event]:
+        """render renders an string nobject.
+        """
+        x = self.x
+        for entry in self.data:
+            st, fmt = entry if len(entry) == 2 else (entry[0], curses.A_NORMAL)
+            screen.addstr(self.y, x, st, fmt)
+            x += len(st)
+        return []
+
+
 class Block(NObject):
     """Block class identifies a block of strings nobject.
     """
@@ -155,6 +191,43 @@ class Box(NObject):
         screen.addch(self.y, self.x + self.dx - 1, chr(9491))
         screen.addch(self.y + self.dy, self.x + self.dx - 1, chr(9499))
         return []
+
+
+class BoxGrid(NObject):
+    """BoxGrid identifies a grid of bordered objects.
+    """
+
+    def __init__(self, y: int, x: int, dy: int, dx: int, ynbr: int, xnbr: int):
+        super(BoxGrid, self).__init__(y, x, dy, dx)
+        self.ynbr: int = ynbr
+        self.xnbr: int = xnbr
+
+    def draw_box(self, screen: Any, y: int, x: int, dy: int, dx: int):
+        for _x in range(1, dx):
+            screen.addch(y, x + _x, chr(9473))
+        for _x in range(1, dx):
+            screen.addch(y + dy, x + _x, chr(9473))
+        for _y in range(1, dy):
+            screen.addch(y + _y, x, chr(9475))
+        for _y in range(1, dy):
+            screen.addch(y + _y, x + dx - 1, chr(9475))
+        screen.addch(y, x, chr(9487))
+        screen.addch(y + dy, x, chr(9495))
+        screen.addch(y, x + dx - 1, chr(9491))
+        screen.addch(y + dy, x + dx - 1, chr(9499))
+
+    @render
+    def render(self, screen: Any) -> List[Event]:
+        """render renders a bordered box nobject.
+        """
+        y: int = self.y
+        x: int = self.x
+        for ynbr in range(1, self.ynbr + 1):
+            for xnbr in range(1, self.xnbr + 1):
+                self.draw_box(screen, y, x, self.dy, self.dx)
+                x += self.dx + 1
+            x = self.x
+            y += self.dy + 1
 
 
 class BoxText(NObject):

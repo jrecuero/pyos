@@ -132,7 +132,9 @@ if __name__ == "__main__":
     try:
         screen.clear()
         while True:
-            screen.border(0)
+            screen.border()
+            screen.addstr(2, 2, "Please enter a number...")
+            screen.refresh()
     except KeyboardInterrupt:
         pass
     except curses.error as ex:

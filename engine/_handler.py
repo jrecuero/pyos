@@ -1,4 +1,5 @@
 from typing import Any, List, Optional
+import sys
 import curses
 import time
 from ._event import EVT, Timer, Event, EventKey, EventTimer
@@ -10,7 +11,11 @@ class Handler:
     """
 
     def __init__(self, tick: float = 0.01):
-        self.screen: Any = None
+        self.screen: Any = curses.initscr()
+        curses.cbreak()
+        curses.start_color()
+        # curses.noecho()
+        self.screen.keypad(True)
         self.scenes: List[Scene] = []
         self.iscene: int = -1
         self.key: int = -1
@@ -20,10 +25,17 @@ class Handler:
         self.pinput_events: List[Event] = []
         self.keys: List[int] = []
 
+    def colors(self, color_pairs):
+        """colors setups ncurses for using given list of color pairs.
+        """
+        for index, (fg, bg) in enumerate(color_pairs):
+            curses.init_pair(index + 1, fg, bg)
+
     def run(self):
         """run runs all scenes.
         """
-        curses.wrapper(self.__main)
+        # curses.wrapper(self.__main)
+        self.__main(self.screen)
 
     def __get_input(self) -> int:
         """__get_input is an internal method that loops for any user input key
@@ -37,19 +49,35 @@ class Handler:
         """__main is an internal method that implements the handler main
         loop functionality.
         """
-        self.screen = screen
-        self.screen.nodelay(True)
-        curses.start_color()
-        curses.curs_set(False)
-        while True:
-            time.sleep(self.tick)
-            key = self.__get_input()
-            if key != -1:
-                self.keys.append(key)
-            self.screen.erase()
-            self.pinput()
-            self.update()
-            self.render()
+        try:
+            self.screen = screen
+            self.screen.nodelay(True)
+            curses.curs_set(False)
+            while True:
+                time.sleep(self.tick)
+                key = self.__get_input()
+                if key != -1:
+                    self.keys.append(key)
+                self.screen.erase()
+                self.pinput()
+                self.update()
+                self.render()
+        except KeyboardInterrupt:
+            pass
+        except curses.error as ex:
+            curses.nocbreak()
+            screen.keypad(False)
+            curses.echo()
+            curses.endwin()
+            curses.curs_set(1)
+            print(ex)
+        finally:
+            curses.nocbreak()
+            screen.keypad(False)
+            curses.echo()
+            curses.endwin()
+            curses.curs_set(1)
+            sys.exit(1)
 
     def new_timer(self, timeout: int, enable: bool = True) -> Timer:
         """new_timer creates and adds a timer event to the handler.
