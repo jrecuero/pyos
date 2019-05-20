@@ -193,18 +193,6 @@ class Box(NObject):
     def render(self, screen) -> List[Event]:
         """render renders a bordered box nobject.
         """
-        # for x in range(1, self.dx):
-        #     screen.addch(self.y, self.x + x, chr(9473))
-        # for x in range(1, self.dx):
-        #     screen.addch(self.y + self.dy, self.x + x, chr(9473))
-        # for y in range(1, self.dy):
-        #     screen.addch(self.y + y, self.x, chr(9475))
-        # for y in range(1, self.dy):
-        #     screen.addch(self.y + y, self.x + self.dx - 1, chr(9475))
-        # screen.addch(self.y, self.x, chr(9487))
-        # screen.addch(self.y + self.dy, self.x, chr(9495))
-        # screen.addch(self.y, self.x + self.dx - 1, chr(9491))
-        # screen.addch(self.y + self.dy, self.x + self.dx - 1, chr(9499))
         draw_box(screen, self.y, self.x, self.dy, self.dx)
         return []
 
@@ -217,20 +205,6 @@ class BoxGrid(NObject):
         super(BoxGrid, self).__init__(y, x, dy, dx)
         self.ynbr: int = ynbr
         self.xnbr: int = xnbr
-
-    # def draw_box(self, screen: Any, y: int, x: int, dy: int, dx: int):
-    #     for _x in range(1, dx):
-    #         screen.addch(y, x + _x, chr(9473))
-    #     for _x in range(1, dx):
-    #         screen.addch(y + dy, x + _x, chr(9473))
-    #     for _y in range(1, dy):
-    #         screen.addch(y + _y, x, chr(9475))
-    #     for _y in range(1, dy):
-    #         screen.addch(y + _y, x + dx - 1, chr(9475))
-    #     screen.addch(y, x, chr(9487))
-    #     screen.addch(y + dy, x, chr(9495))
-    #     screen.addch(y, x + dx - 1, chr(9491))
-    #     screen.addch(y + dy, x + dx - 1, chr(9499))
 
     @render
     def render(self, screen: Any) -> List[Event]:
@@ -372,11 +346,11 @@ class Input(NObject):
     def pinput(self, screen, keys) -> List[Event]:
         if self.capture_input and len(keys):
             key = keys.pop()
-            if key == 10:
+            if key == 10:  # return carrier
                 self.capture_input = False
                 self.text_output.append(self.input_str)
                 return [EventInput(self.input_str)]
-            elif key == 127:
+            elif key == 127:  # backspace
                 self.input_str = self.input_str[:-1]
             else:
                 self.input_str += chr(key)

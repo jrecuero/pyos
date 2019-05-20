@@ -1,7 +1,7 @@
 from typing import List, Any
 import curses
 
-# from ._loggar import log
+from ._loggar import log
 from ._event import Event, Timer, EventTimer
 from ._nobject import NObject
 
@@ -13,6 +13,7 @@ def pinput(f):
 
     def _pinput(self: "Scene", screen: Any, keys: List[int]) -> List[Event]:
         if self.visible:
+            screen = self.screen_to_use(screen)
             new_events = self.pinput_objects(screen, keys)
             result = f(self, screen, keys)
             if result is not None:
@@ -31,9 +32,7 @@ def update(f):
     def _update(self: "Scene", *events: Event) -> List[Event]:
         if self.enable:
             new_events = list(events)
-            for t in self.timers:
-                if t.inc():
-                    new_events.append(EventTimer(t))
+            new_events.extend(self.update_timers())
             new_events.extend(self.update_objects(*new_events))
             result = f(self, *new_events)
             if result is not None:
@@ -50,6 +49,7 @@ def render(f):
 
     def _render(self: "Scene", screen: Any) -> List[Event]:
         if self.visible:
+            screen = self.screen_to_use(screen)
             new_events = self.render_objects(screen)
             self.set_cursor(screen)
             result = f(self, screen)
@@ -72,6 +72,19 @@ class Scene:
         self.visible: bool = True
         self.timers: List[Timer] = []
         self.border: bool = True
+        self.screen: Any = None
+
+    def __get_input(self, screen: Any) -> int:
+        """__get_input is an internal method that loops for any user input key
+        being entered.
+        """
+        key: int = screen.getch()
+        curses.flushinp()
+        return key
+
+    def get_input(self, screen: Any) -> int:
+        screen = self.screen_to_use(screen)
+        return self.__get_input(screen)
 
     def activate(self):
         """activate sets the scene to be enabled and visible.
@@ -85,6 +98,11 @@ class Scene:
         self.enable = False
         self.visible = False
 
+    def screen_to_use(self, screen: Any) -> Any:
+        """screen_to_use returns the screen to be used by the scene.
+        """
+        return self.screen if self.screen else screen
+
     def setup(self):
         """setup abstract method allows to setup the scene.
         """
@@ -96,6 +114,15 @@ class Scene:
         events: List[Event] = []
         for obj in self.nobjects:
             events.extend(obj.pinput(screen, keys))
+        return events
+
+    def update_timers(self):
+        """update_timers proceeds to update all scene timers.
+        """
+        events = []
+        for t in self.timers:
+            if t.inc():
+                events.append(EventTimer(t))
         return events
 
     def update_objects(self, *events: Event) -> List[Event]:
@@ -134,6 +161,15 @@ class Scene:
         for index, (fg, bg) in enumerate(color_pairs):
             curses.init_pair(index + 1, fg, bg)
 
+    def screen_erase(self, screen: Any):
+        """screen_erase proceeds to erase scene screen.
+        """
+        screen = self.screen_to_use(screen)
+        log.Erase("Scene {}".format(self.name)).Screen(
+            "{}".format(self.screen_to_use(screen))
+        ).call()
+        screen.erase()
+
     @pinput
     def pinput(self, screen: Any, keys: List[int]) -> List[int]:
         return []
@@ -150,6 +186,8 @@ class Scene:
         """render calls all events renders methods and return a list with new
         events to be added to the scene.
         """
+        # curses.doupdate()
+        self.screen_to_use(screen).refresh()
         return []
 
     def add_object(self, obj: NObject) -> bool:

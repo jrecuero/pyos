@@ -15,7 +15,7 @@ class Handler:
         self.screen: Any = curses.initscr()
         curses.cbreak()
         curses.start_color()
-        # curses.noecho()
+        curses.noecho()
         self.screen.keypad(True)
         self.scenes: List[Scene] = []
         self.iscene: int = -1
@@ -46,6 +46,12 @@ class Handler:
         curses.flushinp()
         return key
 
+    def get_input(self) -> int:
+        if self.iscene != -1:
+            return self.scenes[self.iscene].get_input(self.screen)
+        else:
+            return self.__get_input()
+
     def __main(self, screen: Any):
         """__main is an internal method that implements the handler main
         loop functionality.
@@ -56,14 +62,16 @@ class Handler:
             curses.curs_set(False)
             while True:
                 time.sleep(self.tick)
-                key = self.__get_input()
+                # key = self.__get_input()
+                key = self.get_input()
                 if key != -1:
                     self.keys.append(key)
-                self.screen.erase()
+                # self.screen.erase()
+                self.screen_erase()
                 self.pinput()
                 self.update()
                 self.render()
-                curses.doupdate()
+                # curses.doupdate()
         except KeyboardInterrupt:
             pass
         except curses.error as ex:
@@ -125,7 +133,7 @@ class Handler:
             return self.scenes[self.iscene]
         return None
 
-    def _move_to_scene(self, iscene: int) -> int:
+    def _move_to_scene(self, iscene: int = 0) -> int:
         """_move_to_scene moves the handler to the given scene.
         """
         if self.iscene != -1:
@@ -161,6 +169,13 @@ class Handler:
         """
         return self._move_to_scene(self.iscene - 1)
 
+    def first_scene(self) -> int:
+        return self._move_to_scene()
+
+    def last_scene(self) -> int:
+        last = len(self.scenes) - 1
+        return self._move_to_scene(last)
+
     def set_scene_first(self) -> Optional[Scene]:
         """set_scene_first sets the handler scene to be the first.
         """
@@ -177,12 +192,20 @@ class Handler:
         """
         pass
 
-    def update_unblockable(self):
+    def update_timers(self):
+        """update_timers proceeds to update all scene timers.
+        """
         events = []
         for t in self.timers:
             if t.inc():
                 events.append(EventTimer(t))
         return events
+
+    def screen_erase(self):
+        """screen_erase proceeds to erase active scene screen.
+        """
+        if self.iscene != -1:
+            self.scenes[self.iscene].screen_erase(self.screen)
 
     def pinput(self):
         """pinput checks any user input for the main scene.
@@ -199,7 +222,7 @@ class Handler:
             events.extend(self.render_events)
             if len(self.keys):
                 events.append(EventKey(self.keys.pop()))
-            events.extend(self.update_unblockable())
+            events.extend(self.update_timers())
             update_events = self.scenes[self.iscene].update(*events)
             for upd_event in update_events:
                 if upd_event.evt == EVT.SCN.ISCENE:

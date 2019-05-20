@@ -21,6 +21,9 @@ from engine import (
     KeyHandler,
     Event,
     EventNextScene,
+    EventPrevScene,
+    EventFirstScene,
+    EventLastScene,
     update_scene,
 )
 
@@ -30,7 +33,7 @@ c_normal = curses.A_NORMAL
 
 class SceneMain(Scene):
     def __init__(self):
-        super(SceneMain, self).__init__()
+        super(SceneMain, self).__init__("Main")
 
     def setup(self):
         def updater(message: str) -> str:
@@ -73,6 +76,7 @@ class SceneMain(Scene):
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
         self.kh.register("n", lambda: [EventNextScene()])
+        self.kh.register("l", lambda: [EventLastScene()])
 
     @update_scene
     def update(self, *events: Event) -> List[Event]:
@@ -98,21 +102,60 @@ class SceneMain(Scene):
         return event_to_return
 
 
-class SceneLast(Scene):
+class SceneKeyHandler(Scene):
+    @update_scene
+    def update(self, *events: Event) -> List[Event]:
+        event_to_return: List[Event] = []
+        for event in events:
+            # event.exit_on_key("x")
+            if event.evt == EVT.ENG.KEY:
+                event_to_return.extend(self.kh.update(event))
+        return event_to_return
+
+
+class SceneSecond(SceneKeyHandler):
+    def __init__(self):
+        super(SceneSecond, self).__init__("Second")
+
     def setup(self):
+        self.screen = curses.newwin(20, 40, 10, 10)
+        self.add_object(BoxText(4, 2, "SECOND PAGE"))
+        self.kh = KeyHandler({})
+        self.kh.register("x", lambda: exit(0))
+        self.kh.register("n", lambda: [EventNextScene()])
+        self.kh.register("p", lambda: [EventPrevScene()])
+        self.kh.register("f", lambda: [EventFirstScene()])
+
+
+class SceneThird(SceneKeyHandler):
+    def __init__(self):
+        super(SceneThird, self).__init__("Second")
+
+    def setup(self):
+        self.add_object(BoxText(1, 1, "THIRD PAGE"))
+        self.kh = KeyHandler({})
+        self.kh.register("x", lambda: exit(0))
+        self.kh.register("n", lambda: [EventNextScene()])
+        self.kh.register("p", lambda: [EventPrevScene()])
+        self.kh.register("f", lambda: [EventFirstScene()])
+
+
+class SceneLast(SceneKeyHandler):
+    def __init__(self):
+        super(SceneLast, self).__init__("Last")
+
+    def setup(self):
+        self.screen = curses.newwin(40, 40, 5, 5)
         self.add_object(String(2, 2, "This is the last page"))
         self.add_object(BoxText(4, 2, "This is the last page"))
         # self.add_object(String(11, 3, "1234567890"))
         # self.add_object(Box(10, 2, 2, 12))
         # self.add_object(Box(10, 15, 2, 12))
         self.add_object(BoxGrid(10, 2, 2, 4, 4, 4))
-
-    @update_scene
-    def update(self, *events: Event) -> List[Event]:
-        event_to_return: List[Event] = []
-        for event in events:
-            event.exit_on_key("x")
-        return event_to_return
+        self.kh = KeyHandler({})
+        self.kh.register("x", lambda: exit(0))
+        self.kh.register("p", lambda: [EventPrevScene()])
+        self.kh.register("n", lambda: [EventFirstScene()])
 
 
 if __name__ == "__main__":
@@ -125,5 +168,7 @@ if __name__ == "__main__":
         ]
     )
     h.add_scene(main_scene)
+    h.add_scene(SceneSecond())
+    h.add_scene(SceneThird())
     h.add_scene(SceneLast())
     h.run()
