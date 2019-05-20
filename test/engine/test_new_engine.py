@@ -1,7 +1,7 @@
 from typing import List
 import curses
 from engine import (
-    log,
+    # log,
     EVT,
     Handler,
     Scene,
@@ -34,7 +34,7 @@ class SceneMain(Scene):
 
     def setup(self):
         def updater(message: str) -> str:
-            log.Scene("SceneMain").Method("updater").call()
+            # log.Scene("SceneMain").Method("updater").call()
             if message == "@copyright":
                 return "by jose carlos"
             elif message == "by jose carlos":

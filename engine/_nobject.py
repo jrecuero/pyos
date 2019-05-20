@@ -50,6 +50,21 @@ def render(f):
     return _render
 
 
+def draw_box(screen: Any, y: int, x: int, dy: int, dx: int):
+    for _x in range(1, dx):
+        screen.addch(y, x + _x, chr(9473))
+    for _x in range(1, dx):
+        screen.addch(y + dy, x + _x, chr(9473))
+    for _y in range(1, dy):
+        screen.addch(y + _y, x, chr(9475))
+    for _y in range(1, dy):
+        screen.addch(y + _y, x + dx - 1, chr(9475))
+    screen.addch(y, x, chr(9487))
+    screen.addch(y + dy, x, chr(9495))
+    screen.addch(y, x + dx - 1, chr(9491))
+    screen.addch(y + dy, x + dx - 1, chr(9499))
+
+
 class NObject:
     """NObject class represents any object to be rendered.
     """
@@ -178,18 +193,19 @@ class Box(NObject):
     def render(self, screen) -> List[Event]:
         """render renders a bordered box nobject.
         """
-        for x in range(1, self.dx):
-            screen.addch(self.y, self.x + x, chr(9473))
-        for x in range(1, self.dx):
-            screen.addch(self.y + self.dy, self.x + x, chr(9473))
-        for y in range(1, self.dy):
-            screen.addch(self.y + y, self.x, chr(9475))
-        for y in range(1, self.dy):
-            screen.addch(self.y + y, self.x + self.dx - 1, chr(9475))
-        screen.addch(self.y, self.x, chr(9487))
-        screen.addch(self.y + self.dy, self.x, chr(9495))
-        screen.addch(self.y, self.x + self.dx - 1, chr(9491))
-        screen.addch(self.y + self.dy, self.x + self.dx - 1, chr(9499))
+        # for x in range(1, self.dx):
+        #     screen.addch(self.y, self.x + x, chr(9473))
+        # for x in range(1, self.dx):
+        #     screen.addch(self.y + self.dy, self.x + x, chr(9473))
+        # for y in range(1, self.dy):
+        #     screen.addch(self.y + y, self.x, chr(9475))
+        # for y in range(1, self.dy):
+        #     screen.addch(self.y + y, self.x + self.dx - 1, chr(9475))
+        # screen.addch(self.y, self.x, chr(9487))
+        # screen.addch(self.y + self.dy, self.x, chr(9495))
+        # screen.addch(self.y, self.x + self.dx - 1, chr(9491))
+        # screen.addch(self.y + self.dy, self.x + self.dx - 1, chr(9499))
+        draw_box(screen, self.y, self.x, self.dy, self.dx)
         return []
 
 
@@ -202,19 +218,19 @@ class BoxGrid(NObject):
         self.ynbr: int = ynbr
         self.xnbr: int = xnbr
 
-    def draw_box(self, screen: Any, y: int, x: int, dy: int, dx: int):
-        for _x in range(1, dx):
-            screen.addch(y, x + _x, chr(9473))
-        for _x in range(1, dx):
-            screen.addch(y + dy, x + _x, chr(9473))
-        for _y in range(1, dy):
-            screen.addch(y + _y, x, chr(9475))
-        for _y in range(1, dy):
-            screen.addch(y + _y, x + dx - 1, chr(9475))
-        screen.addch(y, x, chr(9487))
-        screen.addch(y + dy, x, chr(9495))
-        screen.addch(y, x + dx - 1, chr(9491))
-        screen.addch(y + dy, x + dx - 1, chr(9499))
+    # def draw_box(self, screen: Any, y: int, x: int, dy: int, dx: int):
+    #     for _x in range(1, dx):
+    #         screen.addch(y, x + _x, chr(9473))
+    #     for _x in range(1, dx):
+    #         screen.addch(y + dy, x + _x, chr(9473))
+    #     for _y in range(1, dy):
+    #         screen.addch(y + _y, x, chr(9475))
+    #     for _y in range(1, dy):
+    #         screen.addch(y + _y, x + dx - 1, chr(9475))
+    #     screen.addch(y, x, chr(9487))
+    #     screen.addch(y + dy, x, chr(9495))
+    #     screen.addch(y, x + dx - 1, chr(9491))
+    #     screen.addch(y + dy, x + dx - 1, chr(9499))
 
     @render
     def render(self, screen: Any) -> List[Event]:
@@ -224,7 +240,7 @@ class BoxGrid(NObject):
         x: int = self.x
         for ynbr in range(1, self.ynbr + 1):
             for xnbr in range(1, self.xnbr + 1):
-                self.draw_box(screen, y, x, self.dy, self.dx)
+                draw_box(screen, y, x, self.dy, self.dx)
                 x += self.dx + 1
             x = self.x
             y += self.dy + 1
@@ -464,6 +480,13 @@ class ScrollSelector(Selector):
             y, x, tokens, selected=selected, dy=dy, dx=dx, horizontal=False
         )
         self.expanded: bool = False
+        self.box_height: int = len(self.tokens) + 1
+        self.box_width: int = 0
+        for t in self.tokens:
+            if len(t) > self.box_width:
+                self.box_width = len(t)
+        self.box_width += 2
+        # self.popup_screen: Any = None
 
     @pinput
     def pinput(self, screen, keys) -> List[Event]:
@@ -477,6 +500,9 @@ class ScrollSelector(Selector):
             elif self.expanded and "\n" == chr(key):
                 self.expanded = False
                 self.capture_input = False
+                # self.popup_screen.erase()
+                # del self.popup_screen
+                # self.popup_screen = None
                 return [EventSelected(self.selected, self.tokens[self.selected])]
             elif not self.expanded and "\n" == chr(key):
                 selected = self.selected
@@ -490,7 +516,8 @@ class ScrollSelector(Selector):
         """render renders an string nobject.
         """
         if self.expanded:
-            ypos, xpos = self.y, self.x
+            draw_box(screen, self.y, self.x, self.box_height, self.box_width)
+            ypos, xpos = self.y + 1, self.x + 1
             screen.addstr(ypos, xpos, " " * len(self.tokens[self.selected]))
             for index, token in enumerate(self.tokens):
                 screen.addstr(
@@ -500,6 +527,21 @@ class ScrollSelector(Selector):
                     curses.A_REVERSE if self.selected == index else len(token),
                 )
                 ypos += 1
+
+            # if self.popup_screen is None:
+            #     self.popup_screen = curses.newwin(5, 20, self.y, self.x)
+            # self.popup_screen.box()
+            # ypos, xpos = 1, 1
+            # self.popup_screen.addstr(ypos, xpos, " " * len(self.tokens[self.selected]))
+            # for index, token in enumerate(self.tokens):
+            #     self.popup_screen.addstr(
+            #         ypos,
+            #         xpos,
+            #         token,
+            #         curses.A_REVERSE if self.selected == index else len(token),
+            #     )
+            #     ypos += 1
+            # self.popup_screen.noutrefresh()
         else:
             screen.addstr(self.y, self.x, self.tokens[self.selected], curses.A_REVERSE)
         return []

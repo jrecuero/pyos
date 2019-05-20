@@ -4,6 +4,7 @@ import curses
 import time
 from ._event import EVT, Timer, Event, EventKey, EventTimer
 from ._scene import Scene
+from ._loggar import log
 
 
 class Handler:
@@ -62,21 +63,22 @@ class Handler:
                 self.pinput()
                 self.update()
                 self.render()
+                curses.doupdate()
         except KeyboardInterrupt:
             pass
         except curses.error as ex:
-            curses.nocbreak()
-            screen.keypad(False)
-            curses.echo()
-            curses.endwin()
-            curses.curs_set(1)
-            print(ex)
+            # curses.nocbreak()
+            # screen.keypad(False)
+            # curses.echo()
+            # curses.curs_set(1)
+            # curses.endwin()
+            log.Error({"Exception": "{}".format(ex)}).call()
         finally:
             curses.nocbreak()
             screen.keypad(False)
             curses.echo()
-            curses.endwin()
             curses.curs_set(1)
+            curses.endwin()
             sys.exit(1)
 
     def new_timer(self, timeout: int, enable: bool = True) -> Timer:
