@@ -1,5 +1,6 @@
 from typing import Any, List, Optional
-import sys
+
+# import sys
 import curses
 import time
 from ._event import EVT, Timer, Event, EventKey, EventTimer
@@ -73,13 +74,15 @@ class Handler:
                 self.render()
                 # curses.doupdate()
         except KeyboardInterrupt:
-            pass
+            log.Error("KeyboardInterrupt").call()
         except curses.error as ex:
             # curses.nocbreak()
             # screen.keypad(False)
             # curses.echo()
             # curses.curs_set(1)
             # curses.endwin()
+            log.Error({"curses.error": "{}".format(ex)}).call()
+        except Exception as ex:
             log.Error({"Exception": "{}".format(ex)}).call()
         finally:
             curses.nocbreak()
@@ -87,7 +90,7 @@ class Handler:
             curses.echo()
             curses.curs_set(1)
             curses.endwin()
-            sys.exit(1)
+            # sys.exit(1)
 
     def new_timer(self, timeout: int, enable: bool = True) -> Timer:
         """new_timer creates and adds a timer event to the handler.

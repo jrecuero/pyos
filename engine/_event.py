@@ -13,6 +13,7 @@ class EVT:
         TIMER: int = 200
         INPUT: int = 300
         SELECT: int = 400
+        MENU: int = 500
 
     class SCN:
         """SCN class contains enums to identify engine scenes.
@@ -130,6 +131,16 @@ class EventSelected(Event):
 
     def __init__(self, index: int, data: str):
         super(EventSelected, self).__init__(EVT.ENG.SELECT, index=index, data=data)
+
+
+class EventMenuItem(Event):
+    """EventMenuItem class identifies when a menu item is selected.
+    """
+
+    def __init__(self, select_str: str, callback):
+        super(EventMenuItem, self).__init__(
+            EVT.ENG.MENU, select_str=select_str, callback=callback
+        )
 
 
 class EventIScene(Event):

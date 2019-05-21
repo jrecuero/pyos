@@ -6,6 +6,8 @@ from ._event import (
     EventKey,
     EventTimer,
     EventInput,
+    EventSelected,
+    EventMenuItem,
     KeyHandler,
     EventIScene,
     EventNextScene,
@@ -30,6 +32,7 @@ from ._nobject import (
     Input,
     Selector,
     ScrollSelector,
+    Menu,
 )
 from ._scene import update as update_scene
 from ._scene import render as render_scene
@@ -44,6 +47,8 @@ __all__ = [
     "EventKey",
     "EventTimer",
     "EventInput",
+    "EventSelected",
+    "EventMenuItem",
     "KeyHandler",
     "EventIScene",
     "EventNextScene",
@@ -66,6 +71,7 @@ __all__ = [
     "Input",
     "Selector",
     "ScrollSelector",
+    "Menu",
     "update_scene",
     "render_scene",
     "Scene",

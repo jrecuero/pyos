@@ -1,7 +1,7 @@
 from typing import List, Any
 import curses
 
-from ._loggar import log
+# from ._loggar import log
 from ._event import Event, Timer, EventTimer
 from ._nobject import NObject
 
@@ -91,12 +91,16 @@ class Scene:
         """
         self.enable = True
         self.visible = True
+        for obj in self.nobjects:
+            obj.activate()
 
     def deactivate(self):
         """deactivate sets the scene to be disabled and not visible.
         """
         self.enable = False
         self.visible = False
+        for obj in self.nobjects:
+            obj.deactivate()
 
     def screen_to_use(self, screen: Any) -> Any:
         """screen_to_use returns the screen to be used by the scene.
@@ -165,9 +169,9 @@ class Scene:
         """screen_erase proceeds to erase scene screen.
         """
         screen = self.screen_to_use(screen)
-        log.Erase("Scene {}".format(self.name)).Screen(
-            "{}".format(self.screen_to_use(screen))
-        ).call()
+        # log.Erase("Scene {}".format(self.name)).Screen(
+        #     "{}".format(self.screen_to_use(screen))
+        # ).call()
         screen.erase()
 
     @pinput

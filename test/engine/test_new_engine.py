@@ -18,6 +18,7 @@ from engine import (
     Input,
     Selector,
     ScrollSelector,
+    Menu,
     KeyHandler,
     Event,
     EventNextScene,
@@ -133,6 +134,24 @@ class SceneThird(SceneKeyHandler):
 
     def setup(self):
         self.add_object(BoxText(1, 1, "THIRD PAGE"))
+        self.add_object(
+            Menu(
+                5,
+                2,
+                (
+                    (
+                        "^File",
+                        (
+                            ("^Open", None),
+                            ("^Save", (("^Text", None), ("^Html", None))),
+                            ("^Close", None),
+                        ),
+                    ),
+                    ("^Action", (("^Execute", None), ("^Terminate", None))),
+                    ("^Exit", None),
+                ),
+            )
+        )
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
         self.kh.register("n", lambda: [EventNextScene()])

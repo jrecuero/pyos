@@ -1,8 +1,13 @@
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Dict
+
+# from collections import OrderedDict
 import curses
 from ._event import Event, EventInput, EventSelected, Timer, EVT
 
-# from ._loggar import log
+from ._loggar import log
+
+
+c_marked = curses.A_BOLD | curses.A_UNDERLINE
 
 
 def pinput(f):
@@ -518,4 +523,78 @@ class ScrollSelector(Selector):
             # self.popup_screen.noutrefresh()
         else:
             screen.addstr(self.y, self.x, self.tokens[self.selected], curses.A_REVERSE)
+        return []
+
+
+class Menu(NObject):
+    """Menu class identifies a menu object.
+    """
+
+    def __init__(self, y: int, x: int, tokens: List):
+        dx: int = sum([len(t[0]) for t in tokens]) + 1
+        super(Menu, self).__init__(y, x, 2, dx)
+        self.tokens: List = tokens
+        self.menu_items: List = self.tokens
+        self.selected_items: List = [
+            {"pos": [self.y, self.x, self.dy, self.dx], "items": list(self.menu_items)}
+        ]
+        self.menu_pos: List = []
+        self.shortcuts: List[str] = []
+        self.capture_input: bool = True
+
+    def _draw_menu_items(self, screen: Any, menu_items: Dict, top: bool):
+        y, x, dy, dx = menu_items["pos"]
+        items = menu_items["items"]
+        draw_box(screen, y, x, dy, dx)
+        y, x = y + 1, x + 1
+        dx = max([len(t[0]) for t in items])
+        self.shortcuts = []
+        self.menu_pos = []
+        for t, v in [x for x in items]:
+            mark: int = t.find("^")
+            dy = len(v) + 1 if v is not None else -1
+            self.menu_pos.append([y + 1, x, dy, dx])
+            screen.addstr(y, x, t[:mark])
+            screen.addstr(y, x + mark, t[mark + 1], c_marked)
+            screen.addstr(y, x + mark + 1, t[mark + 2 :])
+            if top:
+                x += len(t)
+            else:
+                y += 1
+            self.shortcuts.append(t[t.find("^") + 1].upper())
+
+    def activate(self):
+        """activate sets the nobject as enabled and visible.
+        """
+        super(Menu, self).activate()
+        self.capture_input = True
+
+    @pinput
+    def pinput(self, screen, keys) -> List[Event]:
+        if self.capture_input and len(keys):
+            key = keys.pop()
+            log.Menu("Key {}".format(key)).call()
+            if key == 27:  # escape
+                log.Menu("Key ESCAPE").call()
+            else:
+                key = chr(key).upper()
+            if key in self.shortcuts:
+                index: int = self.shortcuts.index(key)
+                selected_item = self.menu_items[index][1]
+                if selected_item is None:
+                    self.menu_items = self.tokens
+                    self.selected_items = self.selected_items[:1]
+                    self.capture_input = False
+                else:
+                    self.selected_items.append(
+                        {"pos": self.menu_pos[index], "items": list(selected_item)}
+                    )
+                    self.menu_items = list(selected_item)
+                    self.dx = sum([len(t[0]) for t in self.menu_items]) + 1
+        return []
+
+    @render
+    def render(self, screen) -> List[Event]:
+        for index, item in enumerate(self.selected_items):
+            self._draw_menu_items(screen, item, index == 0)
         return []
