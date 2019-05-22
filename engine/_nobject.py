@@ -530,9 +530,9 @@ class Menu(NObject):
     """Menu class identifies a menu object.
     """
 
-    def __init__(self, y: int, x: int, tokens: List):
-        dx: int = sum([len(t[0]) for t in tokens]) + 1
-        super(Menu, self).__init__(y, x, 2, dx)
+    def __init__(self, y: int, x: int, tokens: List, dy: int = 2, dx: int = -1):
+        _dx: int = dx if dx != -1 else sum([len(t[0]) for t in tokens]) + 1
+        super(Menu, self).__init__(y, x, dy, _dx)
         self.tokens: List = tokens
         self.menu_items: List = self.tokens
         self.selected_items: List = [
