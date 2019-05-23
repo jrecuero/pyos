@@ -141,12 +141,13 @@ class Chain(object):
             return True
         return False
 
-    def check_collision(self, screen, collisions: str) -> bool:
+    def check_collision(self, screen, collisions: str) -> str:
         # if chr(screen.inch(self.chain[0].pos[0], self.chain[0].pos[1]) & 255) == "*":
-        if chr(screen.inch(self.head.y, self.head.x) & 255) in collisions:
+        obj = chr(screen.inch(self.head.y, self.head.x) & 255)
+        if obj in collisions:
             self.add_link("#")
-            return True
-        return False
+            return obj
+        return None
 
     def draw(self, screen):
         for link in self.chain:
@@ -176,13 +177,14 @@ if __name__ == "__main__":
     screen.keypad(True)
     screen.nodelay(True)
     max_y, max_x = screen.getmaxyx()
-    patterns = "*$%"
+    patterns = {"*": 10, "$": 20, "%": 30}
     obj = [
         random.randint(2, max_y - 3),
         random.randint(2, max_x - 2),
-        random.choice(patterns),
+        random.choice(list(patterns.keys())),
     ]
     try:
+        score = 0
         tick_time = 50
         snake = Chain(1, "#")
         snake.start_at(Move.RIGHT, [5, 15])
@@ -190,6 +192,7 @@ if __name__ == "__main__":
             screen.erase()
             # screen.border(0)
             draw_box(screen, 0, 0, max_y - 2, max_x)
+            screen.addstr(0, 2, "[ Score: {} ]".format(score))
             screen.addstr(
                 max_y - 1, max_x - 10, "{}, {}".format(max_y, max_x), curses.A_BOLD
             )
@@ -209,12 +212,13 @@ if __name__ == "__main__":
                     snake.move_to(Move.DOWN)
             snake.tick()
             snake.wall_collision(screen)
-            if snake.check_collision(screen, patterns):
-                # tick_time -= 10 if tick_time > 50 else 0
+            hit = snake.check_collision(screen, list(patterns.keys()))
+            if hit is not None:
+                score += patterns[hit]
                 obj = [
                     random.randint(2, max_y - 3),
                     random.randint(2, max_x - 2),
-                    random.choice(patterns),
+                    random.choice(list(patterns.keys())),
                 ]
             snake.draw(screen)
             screen.refresh()
