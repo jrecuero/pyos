@@ -34,6 +34,18 @@ class Move(object):
             return False
         return True
 
+    @staticmethod
+    def left_or_right():
+        return random.choice([Move.RIGHT, Move.LEFT])
+
+    @staticmethod
+    def up_or_down():
+        return random.choice([Move.DOWN, Move.UP])
+
+    @staticmethod
+    def any():
+        return random.choice([Move.DOWN, Move.UP, Move.LEFT, Move.RIGHT])
+
 
 class Link(object):
     def __init__(self, sprite: str, move: int = Move.NONE, pushed: bool = False):
@@ -139,25 +151,25 @@ class Chain(object):
             if self.head.x == 1:
                 self.move_to(Move.RIGHT)
             else:
-                self.move_to(Move.LEFT)
+                self.move_to(Move.left_or_right())
             return True
-        if (self.head.move == Move.DOWN) and (self.head.y == max_y - 2):
+        elif (self.head.move == Move.DOWN) and (self.head.y == max_y - 2):
             if self.head.x == 1:
                 self.move_to(Move.RIGHT)
             else:
-                self.move_to(Move.LEFT)
+                self.move_to(Move.left_or_right())
             return True
-        if (self.head.move == Move.LEFT) and (self.head.x == 1):
+        elif (self.head.move == Move.LEFT) and (self.head.x == 1):
             if self.head.y == 1:
                 self.move_to(Move.DOWN)
             else:
-                self.move_to(Move.UP)
+                self.move_to(Move.up_or_down())
             return True
-        if (self.head.move == Move.RIGHT) and (self.head.x == max_x - 2):
+        elif (self.head.move == Move.RIGHT) and (self.head.x == max_x - 2):
             if self.head.y == 1:
                 self.move_to(Move.DOWN)
             else:
-                self.move_to(Move.UP)
+                self.move_to(Move.up_or_down())
             return True
         return False
 
@@ -192,15 +204,16 @@ def draw_box(screen: Any, y: int, x: int, dy: int, dx: int):
 class SnakeHandler(object):
     def __init__(self):
         self.snake: Chain = Chain(1, "#")
-        self.snake.start_at(Move.RIGHT, [5, 15])
-        self.patterns: Dict[str, int] = {"*": 10, "$": 20, "%": 30}
+        self.snake.start_at(Move.any(), [15, 15])
+        # self.patterns: Dict[str, int] = {"*": 10, "$": 20, "%": 30}
+        self.patterns: Dict[str, int] = dict([(str(x), x) for x in range(1, 10)])
         self.colliders: List = []
         self.score: int = 0
 
     def _new_collider(self, max_y: int, max_x: int) -> List:
         obj = [
-            random.randint(2, max_y - 2),
-            random.randint(2, max_x - 1),
+            random.randint(2, max_y - 3),
+            random.randint(2, max_x - 2),
             random.choice(list(self.patterns.keys())),
         ]
         return obj

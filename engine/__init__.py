@@ -20,6 +20,7 @@ from ._nobject import render as render_nobj
 from ._nobject import (
     NObject,
     Char,
+    XChar,
     String,
     XString,
     Formatted,
@@ -60,6 +61,7 @@ __all__ = [
     "render_nobj",
     "NObject",
     "Char",
+    "XChar",
     "String",
     "XString",
     "Formatted",

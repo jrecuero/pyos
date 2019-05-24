@@ -3,17 +3,45 @@ from typing import Any, List, Optional
 import sys
 import traceback
 import curses
-import time
+
 from ._event import EVT, Timer, Event, EventKey, EventTimer
 from ._scene import Scene
 from ._loggar import log
+
+
+def curses_exc(exit: bool = False):
+    def _curses_exc(f):
+        def __curses_exc(self, *args):
+            try:
+                return f(self, *args)
+            except KeyboardInterrupt:
+                self.restore_screen(self.screen)
+                log.Error("KeyboardInterrupt").call()
+            except curses.error as ex:
+                self.restore_screen(self.screen)
+                log.Error({"curses.error": "{}".format(ex)}).call()
+                for l in traceback.format_exc().splitlines():
+                    print(l)
+            except Exception as ex:
+                self.restore_screen(self.screen)
+                log.Error({"Exception": "{}".format(ex)}).call()
+                for l in traceback.format_exc().splitlines():
+                    print(l)
+            finally:
+                if exit:
+                    self.restore_screen(self.screen)
+                    sys.exit(0)
+
+        return __curses_exc
+
+    return _curses_exc
 
 
 class Handler:
     """Handler class handles a full scene scenario.
     """
 
-    def __init__(self, tick: float = 0.01):
+    def __init__(self, tick: float = 10):
         self.screen: Any = curses.initscr()
         curses.cbreak()
         curses.start_color()
@@ -56,8 +84,8 @@ class Handler:
         else:
             return self.__get_input()
 
-    def __restore_screen(self, screen):
-        """__restore_screen restores the terminal screen to the original
+    def restore_screen(self, screen):
+        """restore_screen restores the terminal screen to the original
         configuration.
         """
         curses.nocbreak()
@@ -66,44 +94,62 @@ class Handler:
         curses.curs_set(1)
         curses.endwin()
 
+    # def __main(self, screen: Any):
+    #     """__main is an internal method that implements the handler main
+    #     loop functionality.
+    #     """
+    #     try:
+    #         self.screen = screen
+    #         self.screen.nodelay(True)
+    #         curses.curs_set(False)
+    #         while True:
+    #             time.sleep(self.tick)
+    #             # key = self.__get_input()
+    #             key = self.get_input()
+    #             if key != -1:
+    #                 self.keys.append(key)
+    #             # self.screen.erase()
+    #             self.screen_erase()
+    #             self.pinput()
+    #             self.update()
+    #             self.render()
+    #             # curses.doupdate()
+    #     except KeyboardInterrupt:
+    #         self.restore_screen(screen)
+    #         log.Error("KeyboardInterrupt").call()
+    #         for l in traceback.format_exc().splitlines():
+    #             print(l)
+    #     except curses.error as ex:
+    #         self.restore_screen(screen)
+    #         log.Error({"curses.error": "{}".format(ex)}).call()
+    #         for l in traceback.format_exc().splitlines():
+    #             print(l)
+    #     except Exception as ex:
+    #         self.restore_screen(screen)
+    #         log.Error({"Exception": "{}".format(ex)}).call()
+    #         for l in traceback.format_exc().splitlines():
+    #             print(l)
+    #     finally:
+    #         self.restore_screen(screen)
+    #         sys.exit(l)
+
+    @curses_exc(True)
     def __main(self, screen: Any):
         """__main is an internal method that implements the handler main
         loop functionality.
         """
-        try:
-            self.screen = screen
-            self.screen.nodelay(True)
-            curses.curs_set(False)
-            while True:
-                time.sleep(self.tick)
-                # key = self.__get_input()
-                key = self.get_input()
-                if key != -1:
-                    self.keys.append(key)
-                # self.screen.erase()
-                self.screen_erase()
-                self.pinput()
-                self.update()
-                self.render()
-                # curses.doupdate()
-        except KeyboardInterrupt:
-            self.__restore_screen(screen)
-            log.Error("KeyboardInterrupt").call()
-            for l in traceback.format_exc().splitlines():
-                print(l)
-        except curses.error as ex:
-            self.__restore_screen(screen)
-            log.Error({"curses.error": "{}".format(ex)}).call()
-            for l in traceback.format_exc().splitlines():
-                print(l)
-        except Exception as ex:
-            self.__restore_screen(screen)
-            log.Error({"Exception": "{}".format(ex)}).call()
-            for l in traceback.format_exc().splitlines():
-                print(l)
-        finally:
-            self.__restore_screen(screen)
-            sys.exit(1)
+        self.screen = screen
+        self.screen.nodelay(True)
+        curses.curs_set(False)
+        while True:
+            curses.napms(self.tick)
+            key = self.get_input()
+            if key != -1:
+                self.keys.append(key)
+            self.screen_erase()
+            self.pinput()
+            self.update()
+            self.render()
 
     def new_timer(self, timeout: int, enable: bool = True) -> Timer:
         """new_timer creates and adds a timer event to the handler.
@@ -128,9 +174,22 @@ class Handler:
         scn = Scene()
         return self.add_scene(scn)
 
+    @curses_exc()
     def add_scene(self, scn: Scene) -> Scene:
         """add_scene adds a scene to the handler.
         """
+        # try:
+        #     scn.setup(self.screen)
+        #     self.scenes.append(scn)
+        #     if self.iscene == -1:
+        #         self.iscene = len(self.scenes) - 1
+        #     return scn
+        # except Exception as ex:
+        #     self.restore_screen(self.screen)
+        #     log.Error({"Exception": "{}".format(ex)}).call()
+        #     for l in traceback.format_exc().splitlines():
+        #         print(l)
+        #     sys.exit(0)
         scn.setup(self.screen)
         self.scenes.append(scn)
         if self.iscene == -1:

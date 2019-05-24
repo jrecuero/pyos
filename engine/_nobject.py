@@ -136,6 +136,22 @@ class Char(NObject):
         return []
 
 
+class XChar(Char):
+    """XChar class identifies a formatted character nobject.
+    """
+
+    def __init__(self, y: int, x: int, text_data: str, fmt: Optional[Any] = None):
+        super(XChar, self).__init__(y, x, text_data)
+        self.fmt: Any = fmt if fmt is not None else curses.A_NORMAL
+
+    @render
+    def render(self, screen) -> List[Event]:
+        """render renders an string nobject.
+        """
+        screen.addstr(self.y, self.x, self.text_data, self.fmt)
+        return []
+
+
 class String(NObject):
     """String class identifies an string nobject.
     """
@@ -148,7 +164,7 @@ class String(NObject):
     def render(self, screen) -> List[Event]:
         """render renders an string nobject.
         """
-        screen.addstr(self.y, self.x, self.text_data, self.dx)
+        screen.addnstr(self.y, self.x, self.text_data, self.dx)
         return []
 
 
@@ -202,7 +218,7 @@ class Block(NObject):
         """
         tokens = self.text_data.split("\n")
         for y, tok in enumerate(tokens):
-            screen.addstr(self.y + y, self.x, tok, len(tok))
+            screen.addnstr(self.y + y, self.x, tok, len(tok))
         return []
 
 
@@ -277,7 +293,7 @@ class BoxText(NObject):
         screen.addch(self.y + self.dy, self.x + self.dx - 1, chr(9499))
         tokens = self.text_data.split("\n")
         for y, tok in enumerate(tokens):
-            screen.addstr(self.y + 1 + y, self.x + 1, tok, len(tok))
+            screen.addnstr(self.y + 1 + y, self.x + 1, tok, len(tok))
         return []
 
 
@@ -346,13 +362,10 @@ class Caller(NObject):
     def render(self, screen) -> List[Event]:
         """render renders a callback nobject.
         """
-        # tokens = str(self.caller()).split("\n")
-        # for y, tok in enumerate(tokens):
-        #     screen.addstr(self.y + y, self.x, tok, len(tok))
         tokens = self.caller()
         for y, x, tok in tokens:
             for i, t in enumerate(str(tok).split("\n")):
-                screen.addstr(y + i, x, t, len(tok))
+                screen.addnstr(y + i, x, t, len(tok))
         return []
 
 
@@ -371,6 +384,7 @@ class Input(NObject):
     def pinput(self, screen, keys) -> List[Event]:
         if self.capture_input and len(keys):
             key = keys.pop()
+            log.Input("Key: {}".format(key)).call()
             if key == 10:  # return carrier
                 self.capture_input = False
                 self.text_output.append(self.input_str)
@@ -385,7 +399,7 @@ class Input(NObject):
     def render(self, screen) -> List[Event]:
         """render renders an input string nobject.
         """
-        screen.addstr(self.y, self.x, self.text_data + self.input_str, self.dx)
+        screen.addstr(self.y, self.x, self.text_data + self.input_str)
         return []
 
     def set_cursor(self) -> Optional[List[int]]:
@@ -499,9 +513,6 @@ class ScrollSelector(Selector):
             elif self.expanded and "\n" == chr(key):
                 self.expanded = False
                 self.capture_input = False
-                # self.popup_screen.erase()
-                # del self.popup_screen
-                # self.popup_screen = None
                 return [EventSelected(self.selected, self.tokens[self.selected])]
             elif not self.expanded and "\n" == chr(key):
                 selected = self.selected
@@ -526,21 +537,6 @@ class ScrollSelector(Selector):
                     curses.A_REVERSE if self.selected == index else len(token),
                 )
                 ypos += 1
-
-            # if self.popup_screen is None:
-            #     self.popup_screen = curses.newwin(5, 20, self.y, self.x)
-            # self.popup_screen.box()
-            # ypos, xpos = 1, 1
-            # self.popup_screen.addstr(ypos, xpos, " " * len(self.tokens[self.selected]))
-            # for index, token in enumerate(self.tokens):
-            #     self.popup_screen.addstr(
-            #         ypos,
-            #         xpos,
-            #         token,
-            #         curses.A_REVERSE if self.selected == index else len(token),
-            #     )
-            #     ypos += 1
-            # self.popup_screen.noutrefresh()
         else:
             screen.addstr(self.y, self.x, self.tokens[self.selected], curses.A_REVERSE)
         return []
