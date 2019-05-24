@@ -1,21 +1,6 @@
-from typing import List, Any, Dict
-
+from typing import List, Any
 import curses
 import random
-from engine import (
-    # log,
-    EVT,
-    Handler,
-    Scene,
-    Event,
-    # Char,
-    # String,
-    Box,
-    Caller,
-    KeyHandler,
-    update_scene,
-    render_scene,
-)
 
 
 class Move(object):
@@ -61,7 +46,6 @@ class Link(object):
 
 class Chain(object):
     def __init__(self, length: int, sprite: str):
-        self._timeout: int = 0
         self.chain: List[Link] = []
         for _ in range(length):
             self.chain.append(Link(sprite))
@@ -93,12 +77,7 @@ class Chain(object):
             new_link.pos = [last_link.y, last_link.x + 1]
         self.chain.append(new_link)
 
-    def tick(self, timeout: int = 0):
-        if timeout:
-            self._timeout += 1
-            if timeout > self._timeout:
-                return
-            self._timeout = 0
+    def tick(self):
         pushed: bool = False
         pushed_move: int = Move.NONE
         next_pushed: bool = False
@@ -134,14 +113,15 @@ class Chain(object):
             self.head.pushed = True
             self.head.move = move
 
-    def wall_collision(self, max_y: int, max_x: int) -> bool:
+    def wall_collision(self, screen) -> bool:
+        max_y, max_x = screen.getmaxyx()
         if (self.head.move == Move.UP) and (self.head.y == 1):
             if self.head.x == 1:
                 self.move_to(Move.RIGHT)
             else:
                 self.move_to(Move.LEFT)
             return True
-        if (self.head.move == Move.DOWN) and (self.head.y == max_y - 2):
+        if (self.head.move == Move.DOWN) and (self.head.y == max_y - 3):
             if self.head.x == 1:
                 self.move_to(Move.RIGHT)
             else:
@@ -189,92 +169,73 @@ def draw_box(screen: Any, y: int, x: int, dy: int, dx: int):
     screen.addch(y + dy, x + dx - 1, chr(9499))
 
 
-class SnakeHandler(object):
-    def __init__(self):
-        self.snake: Chain = Chain(1, "#")
-        self.snake.start_at(Move.RIGHT, [5, 15])
-        self.patterns: Dict[str, int] = {"*": 10, "$": 20, "%": 30}
-        self.colliders: List = []
-        self.score: int = 0
-
-    def _new_collider(self, max_y: int, max_x: int) -> List:
-        obj = [
-            random.randint(2, max_y - 2),
-            random.randint(2, max_x - 1),
-            random.choice(list(self.patterns.keys())),
-        ]
-        return obj
-
-    def new_collider(self, max_y: int, max_x: int) -> List:
-        self.colliders = []
-        self.colliders.append(self._new_collider(max_y, max_x))
-
-
-class BoardScene(Scene):
-    def __init__(self, sh: SnakeHandler):
-        super(BoardScene, self).__init__("Board Scene")
-        self.border = False
-        self.max_y: int = 0
-        self.max_x: int = 0
-        self.sh: SnakeHandler = sh
-
-    def setup(self, screen: Any):
-        def draw_snake():
-            result: List = []
-            for link in self.sh.snake.chain:
-                result.append([link.y, link.x, link.sprite])
-            return result
-
-        def draw_collider():
-            result: List = []
-            for obj in self.sh.colliders:
-                result.append([obj[0], obj[1], obj[2]])
-            return result
-
-        def draw_score():
-            return [[0, 3, " [ Score: {} ] ".format(self.sh.score)]]
-
-        def move_snake(move_to):
-            def _move_snake():
-                self.sh.snake.move_to(move_to)
-                return []
-
-            return _move_snake
-
-        # self.max_x, self.max_y = screen.getmaxyx()
-        self.max_y, self.max_x = curses.LINES - 1, curses.COLS - 1
-        self.add_object(Box(0, 0, self.max_y - 1, self.max_x))
-        self.add_object(Caller(-1, -1, draw_score))
-        self.add_object(Caller(-1, -1, draw_snake))
-        self.sh.new_collider(self.max_y, self.max_x)
-        self.add_object(Caller(-1, -1, draw_collider))
-        self.kh = KeyHandler({})
-        self.kh.register("x", lambda: exit(0))
-        self.kh.register(chr(curses.KEY_LEFT), move_snake(Move.LEFT))
-        self.kh.register(chr(curses.KEY_RIGHT), move_snake(Move.RIGHT))
-        self.kh.register(chr(curses.KEY_UP), move_snake(Move.UP))
-        self.kh.register(chr(curses.KEY_DOWN), move_snake(Move.DOWN))
-
-    @update_scene
-    def update(self, *events: Event) -> List[Event]:
-        event_to_return: List[Event] = []
-        for event in events:
-            if event.evt == EVT.ENG.KEY:
-                event_to_return.extend(self.kh.update(event))
-        self.sh.snake.tick(5)
-        return event_to_return
-
-    @render_scene
-    def render(self, screen: Any) -> List[Event]:
-        self.sh.snake.wall_collision(self.max_y, self.max_x)
-        hit = self.sh.snake.check_collision(screen, list(self.sh.patterns.keys()))
-        if hit is not None:
-            self.sh.score += self.sh.patterns[hit]
-            self.sh.new_collider(self.max_y, self.max_x)
-        return super(BoardScene, self).render(screen)
-
-
 if __name__ == "__main__":
-    h = Handler()
-    h.add_scene(BoardScene(SnakeHandler()))
-    h.run()
+    screen = curses.initscr()
+    curses.cbreak()
+    curses.noecho()
+    curses.curs_set(0)
+    screen.keypad(True)
+    screen.nodelay(True)
+    max_y, max_x = screen.getmaxyx()
+    patterns = {"*": 10, "$": 20, "%": 30}
+    obj = [
+        random.randint(2, max_y - 3),
+        random.randint(2, max_x - 2),
+        random.choice(list(patterns.keys())),
+    ]
+    try:
+        score = 0
+        tick_time = 50
+        snake = Chain(1, "#")
+        snake.start_at(Move.RIGHT, [5, 15])
+        while True:
+            screen.erase()
+            # screen.border(0)
+            draw_box(screen, 0, 0, max_y - 2, max_x)
+            screen.addstr(0, 2, "[ Score: {} ]".format(score))
+            screen.addstr(
+                max_y - 1, max_x - 10, "{}, {}".format(max_y, max_x), curses.A_BOLD
+            )
+            screen.addstr(max_y - 1, 2, "{}, {}".format(snake.head.y, snake.head.x))
+            screen.addstr(obj[0], obj[1], obj[2], curses.A_BOLD)
+            key = screen.getch()
+            if key != -1:
+                if "x" == chr(key):
+                    break
+                elif curses.KEY_LEFT == key:
+                    snake.move_to(Move.LEFT)
+                elif curses.KEY_RIGHT == key:
+                    snake.move_to(Move.RIGHT)
+                elif curses.KEY_UP == key:
+                    snake.move_to(Move.UP)
+                elif curses.KEY_DOWN == key:
+                    snake.move_to(Move.DOWN)
+            snake.tick()
+            snake.wall_collision(screen)
+            hit = snake.check_collision(screen, list(patterns.keys()))
+            if hit is not None:
+                score += patterns[hit]
+                obj = [
+                    random.randint(2, max_y - 3),
+                    random.randint(2, max_x - 2),
+                    random.choice(list(patterns.keys())),
+                ]
+            snake.draw(screen)
+            screen.refresh()
+            curses.napms(tick_time)
+    except KeyboardInterrupt:
+        pass
+    except curses.error as ex:
+        curses.nocbreak()
+        screen.keypad(False)
+        curses.echo()
+        curses.endwin()
+        curses.curs_set(1)
+        print(ex)
+    finally:
+        curses.nocbreak()
+        screen.keypad(False)
+        curses.echo()
+        curses.endwin()
+        curses.curs_set(1)
+        # sys.exit(1)

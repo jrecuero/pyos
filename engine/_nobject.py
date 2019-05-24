@@ -120,6 +120,22 @@ class NObject:
         return None
 
 
+class Char(NObject):
+    """Char class identifies a character nobject.
+    """
+
+    def __init__(self, y: int, x: int, text_data: str):
+        super(Char, self).__init__(y, x, 1, 1)
+        self.text_data = text_data
+
+    @render
+    def render(self, screen) -> List[Event]:
+        """render renders an string nobject.
+        """
+        screen.addch(self.y, self.x, self.text_data)
+        return []
+
+
 class String(NObject):
     """String class identifies an string nobject.
     """
@@ -330,9 +346,13 @@ class Caller(NObject):
     def render(self, screen) -> List[Event]:
         """render renders a callback nobject.
         """
-        tokens = str(self.caller()).split("\n")
-        for y, tok in enumerate(tokens):
-            screen.addstr(self.y + y, self.x, tok, len(tok))
+        # tokens = str(self.caller()).split("\n")
+        # for y, tok in enumerate(tokens):
+        #     screen.addstr(self.y + y, self.x, tok, len(tok))
+        tokens = self.caller()
+        for y, x, tok in tokens:
+            for i, t in enumerate(str(tok).split("\n")):
+                screen.addstr(y + i, x, t, len(tok))
         return []
 
 

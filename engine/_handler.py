@@ -1,6 +1,7 @@
 from typing import Any, List, Optional
 
-# import sys
+import sys
+import traceback
 import curses
 import time
 from ._event import EVT, Timer, Event, EventKey, EventTimer
@@ -48,10 +49,22 @@ class Handler:
         return key
 
     def get_input(self) -> int:
+        """get_input gets the input from the active scene.
+        """
         if self.iscene != -1:
             return self.scenes[self.iscene].get_input(self.screen)
         else:
             return self.__get_input()
+
+    def __restore_screen(self, screen):
+        """__restore_screen restores the terminal screen to the original
+        configuration.
+        """
+        curses.nocbreak()
+        screen.keypad(False)
+        curses.echo()
+        curses.curs_set(1)
+        curses.endwin()
 
     def __main(self, screen: Any):
         """__main is an internal method that implements the handler main
@@ -74,23 +87,23 @@ class Handler:
                 self.render()
                 # curses.doupdate()
         except KeyboardInterrupt:
+            self.__restore_screen(screen)
             log.Error("KeyboardInterrupt").call()
+            for l in traceback.format_exc().splitlines():
+                print(l)
         except curses.error as ex:
-            # curses.nocbreak()
-            # screen.keypad(False)
-            # curses.echo()
-            # curses.curs_set(1)
-            # curses.endwin()
+            self.__restore_screen(screen)
             log.Error({"curses.error": "{}".format(ex)}).call()
+            for l in traceback.format_exc().splitlines():
+                print(l)
         except Exception as ex:
+            self.__restore_screen(screen)
             log.Error({"Exception": "{}".format(ex)}).call()
+            for l in traceback.format_exc().splitlines():
+                print(l)
         finally:
-            curses.nocbreak()
-            screen.keypad(False)
-            curses.echo()
-            curses.curs_set(1)
-            curses.endwin()
-            # sys.exit(1)
+            self.__restore_screen(screen)
+            sys.exit(1)
 
     def new_timer(self, timeout: int, enable: bool = True) -> Timer:
         """new_timer creates and adds a timer event to the handler.
@@ -118,7 +131,7 @@ class Handler:
     def add_scene(self, scn: Scene) -> Scene:
         """add_scene adds a scene to the handler.
         """
-        scn.setup()
+        scn.setup(self.screen)
         self.scenes.append(scn)
         if self.iscene == -1:
             self.iscene = len(self.scenes) - 1
@@ -244,3 +257,4 @@ class Handler:
         """
         if self.iscene != -1:
             self.render_events = self.scenes[self.iscene].render(self.screen)
+        curses.doupdate()

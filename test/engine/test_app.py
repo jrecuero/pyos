@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 import curses
 from engine import (
     # log,
@@ -36,7 +36,7 @@ class SceneMain(Scene):
     def __init__(self):
         super(SceneMain, self).__init__("Main")
 
-    def setup(self):
+    def setup(self, screen: Any):
         def updater(message: str) -> str:
             # log.Scene("SceneMain").Method("updater").call()
             if message == "@copyright":
@@ -118,7 +118,7 @@ class SceneSecond(SceneKeyHandler):
     def __init__(self):
         super(SceneSecond, self).__init__("Second")
 
-    def setup(self):
+    def setup(self, screen: Any):
         self.screen = curses.newwin(20, 40, 10, 10)
         self.add_object(BoxText(4, 2, "SECOND PAGE"))
         self.kh = KeyHandler({})
@@ -132,7 +132,7 @@ class SceneThird(SceneKeyHandler):
     def __init__(self):
         super(SceneThird, self).__init__("Second")
 
-    def setup(self):
+    def setup(self, screen: Any):
         self.add_object(BoxText(1, 1, "THIRD PAGE"))
         self.add_object(
             Menu(
@@ -164,7 +164,7 @@ class SceneLast(SceneKeyHandler):
     def __init__(self):
         super(SceneLast, self).__init__("Last")
 
-    def setup(self):
+    def setup(self, screen: Any):
         self.screen = curses.newwin(40, 40, 5, 5)
         self.add_object(String(2, 2, "This is the last page"))
         self.add_object(BoxText(4, 2, "This is the last page"))

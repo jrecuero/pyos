@@ -191,7 +191,7 @@ class Scene:
         events to be added to the scene.
         """
         # curses.doupdate()
-        self.screen_to_use(screen).refresh()
+        self.screen_to_use(screen).noutrefresh()
         return []
 
     def add_object(self, obj: NObject) -> bool:

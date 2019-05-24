@@ -19,6 +19,7 @@ from ._nobject import update as update_nobj
 from ._nobject import render as render_nobj
 from ._nobject import (
     NObject,
+    Char,
     String,
     XString,
     Formatted,
@@ -58,6 +59,7 @@ __all__ = [
     "update_nobj",
     "render_nobj",
     "NObject",
+    "Char",
     "String",
     "XString",
     "Formatted",
