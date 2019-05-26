@@ -6,25 +6,25 @@ from engine import (
     Handler,
     Scene,
     String,
-    XString,
-    Formatted,
-    Block,
-    Box,
-    BoxGrid,
-    BoxText,
-    FlashText,
-    TimeUpdater,
-    Caller,
+    # XString,
+    # Formatted,
+    # Block,
+    # Box,
+    # BoxGrid,
+    # BoxText,
+    # FlashText,
+    Gauge,
+    # Caller,
     Input,
-    Selector,
-    ScrollSelector,
-    Menu,
+    # Selector,
+    # ScrollSelector,
+    # Menu,
     KeyHandler,
     Event,
-    EventNextScene,
-    EventPrevScene,
-    EventFirstScene,
-    EventLastScene,
+    # EventNextScene,
+    # EventPrevScene,
+    # EventFirstScene,
+    # EventLastScene,
     update_scene,
 )
 
@@ -37,10 +37,9 @@ class SceneMain(Scene):
         super(SceneMain, self).__init__("Main")
 
     def setup(self, screen: Any):
-        self.fname: List[str] = []
-        self.lname: List[str] = []
-        self.add_object(Input(10, 2, "First Name: ", self.fname))
-        # self.add_object(Input(11, 2, "Last Name: ", self.lname))
+        self.name: List[str] = []
+        self.add_object(Input(2, 5, "Name: ", self.name))
+        self.add_object(Gauge(10, 5, 1, -1, self.new_timer(50), 20, 7))
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
 
@@ -52,13 +51,9 @@ class SceneMain(Scene):
                 event_to_return.extend(self.kh.update(event))
             elif event.evt == EVT.ENG.INPUT:
                 # msg = event.get_input()
-                if self.fname:
+                if self.name:
                     self.add_object(
-                        String(12, 2, "Your first name is {} ".format(self.fname[0]))
-                    )
-                if self.lname:
-                    self.add_object(
-                        String(13, 2, "Your last name is {} ".format(self.lname[0]))
+                        String(3, 5, "Your name is {} ".format(self.name[0]))
                     )
             else:
                 event_to_return.append(event)

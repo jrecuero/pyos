@@ -164,7 +164,7 @@ class String(NObject):
     def render(self, screen) -> List[Event]:
         """render renders an string nobject.
         """
-        screen.addnstr(self.y, self.x, self.text_data, self.dx)
+        screen.addnstr(self.y, self.x, self.text_data, len(self.text_data))
         return []
 
 
@@ -348,6 +348,44 @@ class TimeUpdater(String):
                 if event.get_timer() == self.__timer:
                     self.text_data = self.__caller(self.text_data)
         return []
+
+
+class Gauge(String):
+    """Gauge class identofies a gauge that grows with time.
+    """
+
+    def __init__(
+        self, y: int, x: int, dy: int, dx: int, t: Timer, total: int, sections: int
+    ):
+        super(Gauge, self).__init__(y, x, "[{}]".format(" " * sections))
+        self.timer: Timer = t
+        self.total: int = total
+        self.total_sections: int = sections
+        self.counter_per_section: int = self.total / self.total_sections
+        self.counter: int = 0
+        self.sections: int = 0
+        self.active: bool = True
+
+    @update
+    def update(self, *events: Event) -> List[Event]:
+        """update updates a timer nobject.
+        """
+        for event in events:
+            if event.evt == EVT.ENG.TIMER:
+                if self.active and event.get_timer() == self.timer:
+                    self.counter += 1
+                    self.sections = int(self.counter / self.counter_per_section)
+                    self.text_data = "[{}{}]".format(
+                        chr(9608) * self.sections,
+                        " " * (self.total_sections - self.sections),
+                    )
+                    log.Gauge(
+                        "counter: {} sections: {} [{}]".format(
+                            self.counter, self.sections, self.text_data
+                        )
+                    ).call()
+                    if self.counter == self.total:
+                        self.active = False
 
 
 class Caller(NObject):
