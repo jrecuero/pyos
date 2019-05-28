@@ -351,7 +351,7 @@ class TimeUpdater(String):
 
 
 class Gauge(String):
-    """Gauge class identofies a gauge that grows with time.
+    """Gauge class identifies a gauge that grows with time.
     """
 
     def __init__(
@@ -386,6 +386,40 @@ class Gauge(String):
                     ).call()
                     if self.counter == self.total:
                         self.active = False
+
+
+class Spinner(String):
+    """Spinner class identifies a spinner that changes with left and right
+    clicks.
+    """
+
+    def __init__(
+        self, y: int, x: int, mini: int, maxi: int, defaulti: int, delta: int = 1
+    ):
+        super(Spinner, self).__init__(
+            y, x, "{}{}{}".format(chr(9664), defaulti, chr(9654))
+        )
+        self.min: int = mini
+        self.max: int = maxi
+        self.default: int = defaulti
+        self.value: int = self.default
+        self.delta: int = delta
+        self.capture_input: bool = True
+
+    @pinput
+    def pinput(self, screen: Any, keys: List) -> List[Event]:
+        if self.capture_input and len(keys):
+            key = keys.pop()
+            if curses.KEY_LEFT == key:
+                self.value = (self.value - 1) if self.value > self.min else self.value
+                self.text_data = "{}{}{}".format(chr(9664), self.value, chr(9654))
+            elif curses.KEY_RIGHT == key:
+                self.value = (self.value + 1) if self.value < self.max else self.value
+                self.text_data = "{}{}{}".format(chr(9664), self.value, chr(9654))
+            elif "\n" == chr(key):
+                self.capture_input = False
+                self.text_data = "[{}]".format(self.value)
+        return []
 
 
 class Caller(NObject):
