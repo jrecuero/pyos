@@ -396,8 +396,9 @@ class Spinner(String):
     def __init__(
         self, y: int, x: int, mini: int, maxi: int, defaulti: int, delta: int = 1
     ):
+        self.pattern = "{0}{1}{2}"
         super(Spinner, self).__init__(
-            y, x, "{}{}{}".format(chr(9664), defaulti, chr(9654))
+            y, x, ("{}".format(self.pattern)).format(chr(9664), defaulti, chr(9654))
         )
         self.min: int = mini
         self.max: int = maxi
@@ -411,15 +412,44 @@ class Spinner(String):
         if self.capture_input and len(keys):
             key = keys.pop()
             if curses.KEY_LEFT == key:
-                self.value = (self.value - 1) if self.value > self.min else self.value
-                self.text_data = "{}{}{}".format(chr(9664), self.value, chr(9654))
+                self.value = (
+                    (self.value - self.delta) if self.value > self.min else self.value
+                )
             elif curses.KEY_RIGHT == key:
-                self.value = (self.value + 1) if self.value < self.max else self.value
-                self.text_data = "{}{}{}".format(chr(9664), self.value, chr(9654))
+                self.value = (
+                    (self.value + self.delta) if self.value < self.max else self.value
+                )
             elif "\n" == chr(key):
                 self.capture_input = False
-                self.text_data = "[{}]".format(self.value)
+                self.pattern = "[{1}]"
+        self.text_data = ("{}".format(self.pattern)).format(
+            chr(9664), self.value, chr(9654)
+        )
         return []
+
+
+class SpinnerScroll(Spinner):
+    """SpinnerScroll class identifies a spinner that changes with left and right
+    clicks.
+    """
+
+    def __init__(
+        self, y: int, x: int, mini: int, maxi: int, defaulti: int, delta: int = 1
+    ):
+        super(SpinnerScroll, self).__init__(y, x, mini, maxi, defaulti, delta)
+        self.patron = "{0}{1}{2}"
+        self.pattern = "[     {}     ]".format(self.patron)
+
+    @render
+    def render(self, screen: Any) -> List[Event]:
+        """render renders a callback nobject.
+        """
+        if self.capture_input:
+            gap: int = int((self.value * 10) / (self.max - self.min))
+            self.pattern = "[{}{}{}]".format(" " * gap, self.patron, " " * (10 - gap))
+        else:
+            self.pattern = "[{1}]"
+        return super(SpinnerScroll, self).render(screen)
 
 
 class Caller(NObject):

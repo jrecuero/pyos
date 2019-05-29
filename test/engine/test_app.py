@@ -15,6 +15,7 @@ from engine import (
     # FlashText,
     Gauge,
     Spinner,
+    SpinnerScroll,
     # Caller,
     Input,
     # Selector,
@@ -41,6 +42,7 @@ class SceneMain(Scene):
         self.name: List[str] = []
         self.add_object(Input(2, 5, "Name: ", self.name))
         self.add_object(Spinner(4, 5, 0, 10, 5))
+        self.add_object(SpinnerScroll(5, 5, 0, 100, 50, 5))
         self.add_object(Gauge(10, 5, 1, -1, self.new_timer(50), 20, 7))
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
