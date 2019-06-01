@@ -11,11 +11,13 @@ def _log_runner(self, attr: str):
     called method.
     """
 
-    def _inner_log_runner(args):
-        if isinstance(args, dict):
+    def _inner_log_runner(*args):
+        if len(args) == 0:
+            self.dicta[attr] = ""
+        elif isinstance(args[0], dict):
             self.dicta[attr] = args
         else:
-            self.dicta[attr] = "{}".format(args)
+            self.dicta[attr] = "{}".format(args[0])
         return self
 
     return _inner_log_runner

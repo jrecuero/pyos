@@ -366,6 +366,21 @@ class Gauge(String):
         self.sections: int = 0
         self.active: bool = True
 
+    def call(self, **kwargs):
+        inc = kwargs.get("inc", 0)
+        self.counter += inc
+        self.sections = int(self.counter / self.counter_per_section)
+        self.text_data = "[{}{}]".format(
+            chr(9608) * self.sections, " " * (self.total_sections - self.sections)
+        )
+        log.Call().Gauge(
+            "counter: {} sections: {} [{}]".format(
+                self.counter, self.sections, self.text_data
+            )
+        ).call()
+        if self.counter == self.total:
+            self.active = False
+
     @update
     def update(self, *events: Event) -> List[Event]:
         """update updates a timer nobject.
@@ -379,7 +394,7 @@ class Gauge(String):
                         chr(9608) * self.sections,
                         " " * (self.total_sections - self.sections),
                     )
-                    log.Gauge(
+                    log.Tmeout().Gauge(
                         "counter: {} sections: {} [{}]".format(
                             self.counter, self.sections, self.text_data
                         )

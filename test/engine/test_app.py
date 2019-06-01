@@ -44,6 +44,9 @@ class SceneMain(Scene):
         self.add_object(Spinner(4, 5, 0, 10, 5))
         self.add_object(SpinnerScroll(5, 5, 0, 100, 50, 5))
         self.add_object(Gauge(10, 5, 1, -1, self.new_timer(50), 20, 7))
+        self.g1 = Gauge(11, 5, 1, -1, None, 20, 7)
+        self.g1_counter = 0
+        self.add_object(self.g1)
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
 
@@ -52,6 +55,7 @@ class SceneMain(Scene):
         event_to_return: List[Event] = []
         for event in events:
             if event.evt == EVT.ENG.KEY:
+                self.g1.call(inc=1)
                 event_to_return.extend(self.kh.update(event))
             elif event.evt == EVT.ENG.INPUT:
                 # msg = event.get_input()
@@ -59,6 +63,7 @@ class SceneMain(Scene):
                     self.add_object(
                         String(3, 5, "Your name is {} ".format(self.name[0]))
                     )
+                self.g1.call(inc=10)
             else:
                 event_to_return.append(event)
         return event_to_return
