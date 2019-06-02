@@ -95,6 +95,11 @@ class NObject:
         self.enable = False
         self.visible = False
 
+    def call(self, **kwargs):
+        """call abstract method that allows to update widget attributes.
+        """
+        pass
+
     @pinput
     def pinput(self, screen, keys) -> List[Event]:
         """pinput abstact method allows to process input for  nobject.
@@ -366,20 +371,18 @@ class Gauge(String):
         self.sections: int = 0
         self.active: bool = True
 
-    def call(self, **kwargs):
-        inc = kwargs.get("inc", 0)
+    def _update(self, inc: int):
         self.counter += inc
         self.sections = int(self.counter / self.counter_per_section)
         self.text_data = "[{}{}]".format(
             chr(9608) * self.sections, " " * (self.total_sections - self.sections)
         )
-        log.Call().Gauge(
-            "counter: {} sections: {} [{}]".format(
-                self.counter, self.sections, self.text_data
-            )
-        ).call()
         if self.counter == self.total:
             self.active = False
+
+    def call(self, **kwargs):
+        inc = kwargs.get("inc", 0)
+        self._update(inc)
 
     @update
     def update(self, *events: Event) -> List[Event]:
@@ -388,19 +391,7 @@ class Gauge(String):
         for event in events:
             if event.evt == EVT.ENG.TIMER:
                 if self.active and event.get_timer() == self.timer:
-                    self.counter += 1
-                    self.sections = int(self.counter / self.counter_per_section)
-                    self.text_data = "[{}{}]".format(
-                        chr(9608) * self.sections,
-                        " " * (self.total_sections - self.sections),
-                    )
-                    log.Tmeout().Gauge(
-                        "counter: {} sections: {} [{}]".format(
-                            self.counter, self.sections, self.text_data
-                        )
-                    ).call()
-                    if self.counter == self.total:
-                        self.active = False
+                    self._update(1)
 
 
 class Spinner(String):
@@ -422,18 +413,39 @@ class Spinner(String):
         self.delta: int = delta
         self.capture_input: bool = True
 
+    def _set(self, value: int):
+        if self.min < value < self.max:
+            self.value = value
+
+    def _update(self, inc: int):
+        value = self.value
+        self.value = self.value + inc
+        if (self.value < self.min) or (self.value > self.max):
+            self.value = value
+
+    def call(self, **kwargs):
+        if kwargs.get("set", False):
+            self._set(kwargs.get("value", self.value))
+        elif kwargs.get("update", False):
+            self._update(kwargs.get("inc", 0))
+        self.text_data = ("{}".format(self.pattern)).format(
+            chr(9664), self.value, chr(9654)
+        )
+
     @pinput
     def pinput(self, screen: Any, keys: List) -> List[Event]:
         if self.capture_input and len(keys):
             key = keys.pop()
             if curses.KEY_LEFT == key:
-                self.value = (
-                    (self.value - self.delta) if self.value > self.min else self.value
-                )
+                self._update(-self.delta)
+                # self.value = (
+                #     (self.value - self.delta) if self.value > self.min else self.value
+                # )
             elif curses.KEY_RIGHT == key:
-                self.value = (
-                    (self.value + self.delta) if self.value < self.max else self.value
-                )
+                self._update(self.delta)
+                # self.value = (
+                #     (self.value + self.delta) if self.value < self.max else self.value
+                # )
             elif "\n" == chr(key):
                 self.capture_input = False
                 self.pattern = "[{1}]"
