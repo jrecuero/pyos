@@ -94,45 +94,6 @@ class Handler:
         curses.curs_set(1)
         curses.endwin()
 
-    # def __main(self, screen: Any):
-    #     """__main is an internal method that implements the handler main
-    #     loop functionality.
-    #     """
-    #     try:
-    #         self.screen = screen
-    #         self.screen.nodelay(True)
-    #         curses.curs_set(False)
-    #         while True:
-    #             time.sleep(self.tick)
-    #             # key = self.__get_input()
-    #             key = self.get_input()
-    #             if key != -1:
-    #                 self.keys.append(key)
-    #             # self.screen.erase()
-    #             self.screen_erase()
-    #             self.pinput()
-    #             self.update()
-    #             self.render()
-    #             # curses.doupdate()
-    #     except KeyboardInterrupt:
-    #         self.restore_screen(screen)
-    #         log.Error("KeyboardInterrupt").call()
-    #         for l in traceback.format_exc().splitlines():
-    #             print(l)
-    #     except curses.error as ex:
-    #         self.restore_screen(screen)
-    #         log.Error({"curses.error": "{}".format(ex)}).call()
-    #         for l in traceback.format_exc().splitlines():
-    #             print(l)
-    #     except Exception as ex:
-    #         self.restore_screen(screen)
-    #         log.Error({"Exception": "{}".format(ex)}).call()
-    #         for l in traceback.format_exc().splitlines():
-    #             print(l)
-    #     finally:
-    #         self.restore_screen(screen)
-    #         sys.exit(l)
-
     @curses_exc(True)
     def __main(self, screen: Any):
         """__main is an internal method that implements the handler main
