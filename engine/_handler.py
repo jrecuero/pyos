@@ -259,7 +259,7 @@ class Handler:
             if len(self.keys):
                 events.append(EventKey(self.keys.pop()))
             events.extend(self.update_timers())
-            update_events = self.scenes[self.iscene].update(*events)
+            update_events = self.scenes[self.iscene].update(self.screen, *events)
             for upd_event in update_events:
                 if upd_event.evt == EVT.SCN.ISCENE:
                     self.set_iscene(upd_event.get_iscene())

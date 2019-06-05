@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 import curses
 from engine import (
     # log,
@@ -80,7 +80,7 @@ class SceneMain(Scene):
         self.kh.register("l", lambda: [EventLastScene()])
 
     @update_scene
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         event_to_return: List[Event] = []
         for event in events:
             if event.evt == EVT.ENG.KEY:
@@ -105,7 +105,7 @@ class SceneMain(Scene):
 
 class SceneKeyHandler(Scene):
     @update_scene
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         event_to_return: List[Event] = []
         for event in events:
             # event.exit_on_key("x")

@@ -51,7 +51,7 @@ class SceneMain(Scene):
         self.kh.register("x", lambda: exit(0))
 
     @update_scene
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         event_to_return: List[Event] = []
         for event in events:
             if event.evt == EVT.ENG.KEY:

@@ -8,14 +8,60 @@ from engine import (
     Handler,
     Scene,
     Event,
+    NObject,
     # Char,
     # String,
     Box,
     Caller,
     KeyHandler,
     update_scene,
-    # render_scene,
+    render_scene,
+    update_nobj,
+    render_nobj,
 )
+
+
+class Point(object):
+    def __init__(self, y: int, x: int):
+        self._y: int = y
+        self._x: int = x
+
+    @property
+    def y(self):
+        return self._y
+
+    @y.setter
+    def y(self, val):
+        self._y = val
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, val):
+        self._x = val
+
+    def set(self, y: int = None, x: int = None):
+        self._y = self.y if y is None else y
+        self._x = self.x if x is None else x
+
+    def inc(self, y: int = None, x: int = None):
+        self._y = self.y if y is None else (self.y + y)
+        self._x = self.x if x is None else (self.x + x)
+
+    def dec(self, y: int = None, x: int = None):
+        self._y = self.y if y is None else (self.y - y)
+        self._x = self.x if x is None else (self.x - x)
+
+    def get(self):
+        return (self.y, self.x)
+
+    def __eq__(self, other: "Point") -> bool:
+        return (self.x == other.x) and (self.y == other.y)
+
+    def __ne__(self, other: "Point") -> bool:
+        return (self.x != other.x) or (self.y != other.y)
 
 
 class Move(object):
@@ -51,30 +97,30 @@ class Link(object):
     def __init__(
         self,
         sprite: str,
-        pos: List[int] = None,
+        pos: Point = None,
         move: int = Move.NONE,
         pushed: bool = False,
     ):
         self.sprite: str = sprite
         self.move: int = move
         self.pushed: bool = pushed
-        self.pos: List[int] = [0, 0] if pos is None else pos
+        self.pos: Point = Point(0, 0) if pos is None else pos
 
     @property
     def y(self):
-        return self.pos[0]
+        return self.pos.y
 
     @y.setter
     def y(self, val):
-        self.pos[0] = val
+        self.pos.y = val
 
     @property
     def x(self):
-        return self.pos[1]
+        return self.pos.x
 
     @x.setter
     def x(self, val):
-        self.pos[1] = val
+        self.pos.x = val
 
     def draw(self):
         return [self.y, self.x, self.sprite]
@@ -119,25 +165,25 @@ class Chain(object):
             return self.shape[0]
         return None
 
-    def start_at(self, move: int, start_pos: List[int]):
+    def start_at(self, move: int, start_pos: Point):
         for link in self.shape:
-            link.pos = list(start_pos)
+            link.pos = start_pos
             link.move = move
             link.pushed = False
-            start_pos[1] -= 1
+            start_pos.x -= 1
 
     def add_link(self, sprite: str):
         new_link = Link(sprite)
         last_link = self.shape[-1]
         new_link.move = last_link.move
         if new_link.move == Move.UP:
-            new_link.pos = [last_link.y + 1, last_link.x]
+            new_link.pos = Point(last_link.y + 1, last_link.x)
         elif new_link.move == Move.DOWN:
-            new_link.pos = [last_link.y - 1, last_link.x]
+            new_link.pos = Point(last_link.y - 1, last_link.x)
         elif new_link.move == Move.RIGHT:
-            new_link.pos = [last_link.y, last_link.x - 1]
+            new_link.pos = Point(last_link.y, last_link.x - 1)
         elif new_link.move == Move.LEFT:
-            new_link.pos = [last_link.y, last_link.x + 1]
+            new_link.pos = Point(last_link.y, last_link.x + 1)
         self.shape.append(new_link)
 
     def update(self, timeout: int = 0):
@@ -226,7 +272,7 @@ class Chain(object):
 class Octopus(Entity):
     def __init__(self, y: int, x: int, sprite: str):
         super(Octopus, self).__init__()
-        self.shape.append(Link(sprite, pos=[y, x]))
+        self.shape.append(Link(sprite, pos=Point(y, x)))
         self.move_timeout: int = random.randint(1, 10)
         self.move_counter: int = 0
         self.atk_timeout: int = 10
@@ -240,16 +286,16 @@ class Octopus(Entity):
         self.atk_counter += 1
         if self.atk_counter == self.atk_timeout:
             self.shape.append(
-                Link(self.head.sprite, pos=[self.head.y, self.head.x - 1])
+                Link(self.head.sprite, pos=Point(self.head.y, self.head.x - 1))
             )
             self.shape.append(
-                Link(self.head.sprite, pos=[self.head.y, self.head.x + 1])
+                Link(self.head.sprite, pos=Point(self.head.y, self.head.x + 1))
             )
             self.shape.append(
-                Link(self.head.sprite, pos=[self.head.y - 1, self.head.x])
+                Link(self.head.sprite, pos=Point(self.head.y - 1, self.head.x))
             )
             self.shape.append(
-                Link(self.head.sprite, pos=[self.head.y + 1, self.head.x])
+                Link(self.head.sprite, pos=Point(self.head.y + 1, self.head.x))
             )
             return True
         elif self.atk_timeout < self.atk_counter < (self.atk_timeout + self.atk_life):
@@ -284,23 +330,62 @@ class Octopus(Entity):
             self.head.x = max_x - 2
 
 
+class Stone(NObject):
+    def __init__(
+        self, y: int, x: int, sprite: str, timeout: int, max_y: int, max_x: int
+    ):
+        super(Stone, self).__init__(y, x, -1, -1)
+        self.sprite: str = sprite
+        self.timeout: int = timeout
+        self.counter: int = 0
+        self.max_y: int = max_y
+        self.max_x: int = max_x
+
+    def wall_collision(self, max_y: int, max_x: int):
+        if self.y < 2:
+            self.y = 2
+        elif self.y > (max_y - 2):
+            self.y = max_y - 2
+        if self.x < 2:
+            self.x = 2
+        elif self.x > (max_x - 2):
+            self.x = max_x - 2
+
+    @update_nobj
+    def update(self, screen: Any, *events: Event) -> List[Event]:
+        self.counter += 1
+        if self.counter > self.timeout:
+            self.counter = 0
+            self.x += random.randint(-1, 1)
+            self.y += random.randint(-1, 1)
+            self.wall_collision(self.max_y, self.max_x)
+        return []
+
+    @render_nobj
+    def render(self, screen) -> List[Event]:
+        screen.addch(self.y, self.x, self.sprite)
+        return []
+
+
 class BoardHandler(object):
-    def __init__(self):
+    def __init__(self, max_y: int, max_x: int):
+        self.max_y: int = max_y
+        self.max_x: int = max_x
+        self.board: List = [
+            [None for x in range(self.max_x)] for y in range(self.max_y)
+        ]
         self.snake: Chain = Chain(1, "#")
-        self.snake.start_at(Move.any(), [15, 15])
+        self.snake.start_at(Move.any(), Point(15, 15))
         self.octopus: Octopus = Octopus(10, 10, "@")
-        # self.patterns: Dict[str, int] = {"*": 10, "$": 20, "%": 30}
         self.patterns: Dict[str, int] = dict([(str(x), x) for x in range(1, 10)])
         self.colliders: List = []
         self.score: int = 0
 
     def _new_collider(self, max_y: int, max_x: int) -> List:
-        obj = [
-            random.randint(2, max_y - 3),
-            random.randint(2, max_x - 2),
+        return Link(
             random.choice(list(self.patterns.keys())),
-        ]
-        return obj
+            pos=Point(random.randint(2, max_y - 3), random.randint(2, max_x - 2)),
+        )
 
     def new_collider(self, max_y: int, max_x: int) -> List:
         self.colliders = []
@@ -314,12 +399,14 @@ class BoardHandler(object):
         self.octopus.wall_collision(max_y, max_x)
         self.snake.wall_collision(max_y, max_x)
 
-    def collision(self, screen: Any, max_y: int, max_x: int):
+    def collision(self, screen: Any, max_y: int, max_x: int) -> bool:
         self.wall_collision(max_y, max_x)
-        hit = self.snake.check_collision(screen, list(self.patterns.keys()))
-        if hit is not None:
-            self.score += self.patterns[hit]
-            self.new_collider(max_y, max_x)
+        for hit in self.colliders:
+            if hit.pos == self.snake.head.pos:
+                self.score += self.patterns[hit.sprite]
+                self.new_collider(max_y, max_x)
+                return True
+        return False
 
     def move_snake(self, move_to: int):
         def _move_snake():
@@ -334,24 +421,25 @@ class BoardHandler(object):
     def draw_collider(self):
         result: List = []
         for obj in self.colliders:
-            result.append([obj[0], obj[1], obj[2]])
+            result.append([obj.y, obj.x, obj.sprite])
         return result
 
 
 class BoardScene(Scene):
-    def __init__(self, sh: BoardHandler):
+    def __init__(self):
         super(BoardScene, self).__init__("Board Scene")
         self.border = False
-        self.max_y: int = 0
-        self.max_x: int = 0
-        self.sh: BoardHandler = sh
+        self.max_y: int = curses.LINES - 1
+        self.max_x: int = curses.COLS - 1
+        self.sh: BoardHandler = BoardHandler(self.max_y, self.max_x)
 
     def setup(self, screen: Any):
 
         # self.max_x, self.max_y = screen.getmaxyx()
-        self.max_y, self.max_x = curses.LINES - 1, curses.COLS - 1
+        # self.max_y, self.max_x = curses.LINES - 1, curses.COLS - 1
         self.sh.new_collider(self.max_y, self.max_x)
         self.add_object(Box(0, 0, self.max_y - 1, self.max_x))
+        self.add_object(Stone(10, 10, "S", 10, self.max_y, self.max_x))
         self.add_object(Caller(-1, -1, self.sh.draw_score))
         self.add_object(Caller(-1, -1, self.sh.snake.draw))
         self.add_object(Caller(-1, -1, self.sh.octopus.draw))
@@ -364,7 +452,7 @@ class BoardScene(Scene):
         self.kh.register(chr(curses.KEY_DOWN), self.sh.move_snake(Move.DOWN))
 
     @update_scene
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         event_to_return: List[Event] = []
         for event in events:
             if event.evt == EVT.ENG.KEY:
@@ -372,7 +460,7 @@ class BoardScene(Scene):
         self.sh.update()
         return event_to_return
 
-    # @render_scene
+    @render_scene
     def render(self, screen: Any) -> List[Event]:
         self.sh.collision(screen, self.max_y, self.max_x)
         return super(BoardScene, self).render(screen)
@@ -380,5 +468,5 @@ class BoardScene(Scene):
 
 if __name__ == "__main__":
     h = Handler()
-    h.add_scene(BoardScene(BoardHandler()))
+    h.add_scene(BoardScene())
     h.run()

@@ -30,9 +30,9 @@ def update(f):
     method only if the nobject is enabled.
     """
 
-    def _update(self: "NObject", *events: Event) -> List[Event]:
+    def _update(self: "NObject", screen: Any, *events: Event) -> List[Event]:
         if self.enable:
-            result = f(self, *events)
+            result = f(self, screen, *events)
             if result is not None:
                 return result
         return []
@@ -107,7 +107,7 @@ class NObject:
         return []
 
     @update
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         """update abstract method allows to update the nobject.
         """
         return []
@@ -316,7 +316,7 @@ class FlashText(String):
         self.__off_counter = 0
 
     @update
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         """update updates a flashing block of strings nobject.
         """
         for event in events:
@@ -345,7 +345,7 @@ class TimeUpdater(String):
         self.__caller = caller
 
     @update
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         """update updates a timer nobject.
         """
         for event in events:
@@ -385,7 +385,7 @@ class Gauge(String):
         self._update(inc)
 
     @update
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         """update updates a timer nobject.
         """
         for event in events:
@@ -580,7 +580,7 @@ class Selector(NObject):
         return []
 
     @update
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         """update updates a selector nobject.
         """
         return []

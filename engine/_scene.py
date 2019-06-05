@@ -29,12 +29,13 @@ def update(f):
     updates present in the scene.
     """
 
-    def _update(self: "Scene", *events: Event) -> List[Event]:
+    def _update(self: "Scene", screen: Any, *events: Event) -> List[Event]:
         if self.enable:
+            screen = self.screen_to_use(screen)
             new_events = list(events)
-            new_events.extend(self.update_timers())
-            new_events.extend(self.update_objects(*new_events))
-            result = f(self, *new_events)
+            new_events.extend(self.update_timers(screen))
+            new_events.extend(self.update_objects(screen, *new_events))
+            result = f(self, screen, *new_events)
             if result is not None:
                 return result
         return []
@@ -120,7 +121,7 @@ class Scene:
             events.extend(obj.pinput(screen, keys))
         return events
 
-    def update_timers(self):
+    def update_timers(self, screen: Any):
         """update_timers proceeds to update all scene timers.
         """
         events = []
@@ -129,12 +130,12 @@ class Scene:
                 events.append(EventTimer(t))
         return events
 
-    def update_objects(self, *events: Event) -> List[Event]:
+    def update_objects(self, screen: Any, *events: Event) -> List[Event]:
         """update_objects updates all nobjects in a scene.
         """
         new_events: List[Event] = []
         for obj in self.nobjects:
-            new_events.extend(obj.update(*events))
+            new_events.extend(obj.update(screen, *events))
         return new_events
 
     def render_objects(self, screen: Any) -> List[Event]:
@@ -179,7 +180,7 @@ class Scene:
         return []
 
     @update
-    def update(self, *events: Event) -> List[Event]:
+    def update(self, screen: Any, *events: Event) -> List[Event]:
         """update calls all events updates methods a return a list with new
         events to be added to the scene.
         """
