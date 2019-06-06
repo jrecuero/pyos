@@ -63,11 +63,11 @@ def draw_box(screen: Any, y: int, x: int, dy: int, dx: int):
     for _y in range(1, dy):
         screen.addch(y + _y, x, chr(9475))
     for _y in range(1, dy):
-        screen.addch(y + _y, x + dx - 1, chr(9475))
+        screen.addch(y + _y, x + dx, chr(9475))
     screen.addch(y, x, chr(9487))
     screen.addch(y + dy, x, chr(9495))
-    screen.addch(y, x + dx - 1, chr(9491))
-    screen.addch(y + dy, x + dx - 1, chr(9499))
+    screen.addch(y, x + dx, chr(9491))
+    screen.addch(y + dy, x + dx, chr(9499))
 
 
 class NObject:
@@ -99,6 +99,11 @@ class NObject:
         """call abstract method that allows to update widget attributes.
         """
         pass
+
+    def box(self, screen: Any, fmt=curses.A_NORMAL):
+        screen.attron(fmt)
+        draw_box(screen, self.y, self.x, self.dy, self.dx)
+        screen.attroff(fmt)
 
     @pinput
     def pinput(self, screen, keys) -> List[Event]:

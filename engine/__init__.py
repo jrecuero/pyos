@@ -39,6 +39,7 @@ from ._nobject import (
     ScrollSelector,
     Menu,
 )
+from ._physic import Point, BB, Shape, Arena
 from ._scene import update as update_scene
 from ._scene import render as render_scene
 from ._scene import Scene
@@ -86,4 +87,8 @@ __all__ = [
     "render_scene",
     "Scene",
     "Handler",
+    "Point",
+    "BB",
+    "Shape",
+    "Arena",
 ]
