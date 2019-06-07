@@ -188,13 +188,14 @@ class KeyHandler:
     abstract way.
     """
 
-    def __init__(self, keyreg: Dict[str, Callable[[], List[Event]]]):
-        self.keyreg = keyreg
+    def __init__(self, keyreg: Dict[str, Callable[[], List[Event]]] = None):
+        self.keyreg = keyreg if keyreg is not None else {}
 
     def register(self, key: str, cb: Callable[[], List[Event]]):
         """register adds a key to be handle.
         """
-        self.keyreg[key] = cb
+        if cb is not None:
+            self.keyreg[key] = cb
 
     def deregister(self, key):
         """deregister removes a key to be handle.

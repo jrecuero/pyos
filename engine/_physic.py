@@ -113,6 +113,14 @@ class Move(object):
         return _to_string.get(move, "none")
 
     @staticmethod
+    def allowed(move: int, to_move: int):
+        if (move in [Move.UP, Move.DOWN]) and (to_move in [Move.UP, Move.DOWN]):
+            return False
+        elif (move in [Move.LEFT, Move.RIGHT]) and (to_move in [Move.LEFT, Move.RIGHT]):
+            return False
+        return True
+
+    @staticmethod
     def left_or_right():
         return random.choice([Move.RIGHT, Move.LEFT])
 
@@ -176,13 +184,16 @@ class Shape(object):
         self.__n = 0
         self.shape: List[BB] = []
         self._counter: int = 0
-        self._timeout: int = kwargs.get("timeout", 0)
+        self.name: str = kwargs.get("name", None)
+        self.timeout: int = kwargs.get("timeout", 0)
         self.visible: bool = kwargs.get("visible", True)
         self.solid: bool = kwargs.get("solid", True)
         self.movable: bool = kwargs.get("movable", True)
         self.layer: int = kwargs.get("layer", 0)
-        # self.delta: Point = Point(1, 0)
-        self.delta: Point = Point(0, 1)
+        self.priority: int = kwargs.get("priority", 0)
+        self.eventor = kwargs.get("eventor", None)
+        self.garbage: bool = False
+        self.collision_callable: bool = False
 
     def __getitem__(self, i):
         if len(self.shape) > i:
@@ -208,8 +219,8 @@ class Shape(object):
         else:
             raise StopIteration
 
-    def append(self, v):
-        self.shape.append(v)
+    def append(self, bb):
+        self.shape.append(bb)
         return self
 
     @property
@@ -219,7 +230,6 @@ class Shape(object):
     def back(self):
         for bb in self.shape:
             bb.back()
-        self.delta = self.delta * -1
 
     def out_of_bounds(self, y: int, x: int, max_y: int, max_x: int) -> bool:
         for i, bb in enumerate(self.shape):
@@ -228,7 +238,10 @@ class Shape(object):
                 return True
         return False
 
-    def collision_with(self, other: "Shape") -> bool:
+    def collisioned(self, other: "Shape"):
+        return True
+
+    def _collision_with(self, other: "Shape") -> bool:
         collision: Set = set()
         for bb in self.shape:
             collision.add(bb.pos.hash())
@@ -236,18 +249,30 @@ class Shape(object):
             collision.add(bb.pos.hash())
         return len(collision) < (len(self.shape) + len(other))
 
+    def collision_with(self, other: "Shape") -> bool:
+        collision: bool = self._collision_with(other)
+        if collision:
+            if other.collision_callable:
+                return other.collisioned(self)
+            return True
+        return False
+
     def _update(self) -> bool:
         self._counter += 1
-        if self._timeout > self._counter:
+        if self.timeout > self._counter:
             return False
         self._counter = 0
         return True
+
+    def next_position(self, bb: BB):
+        if self.movable:
+            raise Exception("next_position not defined for movable Shape")
 
     def update(self, screen: Any) -> List[Event]:
         result: List[Event] = []
         if self.movable and self._update():
             for bb in self.shape:
-                bb.next(bb.pos + self.delta)
+                bb.next(self.next_position(bb))
         return result
 
     def draw(self):
@@ -269,10 +294,15 @@ class Arena(NObject):
         self.shapes: List[Shape] = []
         self._border_fmt = kwargs.get("border_fmt", curses.A_NORMAL)
 
-    def add_shape(self, shape: Shape):
-        for bb in shape:
-            bb.y += self.y
-            bb.x += self.x
+    def eventor(self, event, **kwargs):
+        pass
+
+    def add_shape(self, shape: Shape, relative=True):
+        if relative:
+            for bb in shape:
+                bb.y += self.y
+                bb.x += self.x
+        shape.eventor = self.eventor
         self.shapes.append(shape)
 
     def out_of_bounds(self):

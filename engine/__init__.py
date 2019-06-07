@@ -15,6 +15,7 @@ from ._event import (
     EventFirstScene,
     EventLastScene,
 )
+from ._key_handler import ArrowKeyHandler
 from ._nobject import update as update_nobj
 from ._nobject import render as render_nobj
 from ._nobject import (
@@ -39,7 +40,7 @@ from ._nobject import (
     ScrollSelector,
     Menu,
 )
-from ._physic import Point, BB, Shape, Arena
+from ._physic import Point, Move, BB, Shape, Arena
 from ._scene import update as update_scene
 from ._scene import render as render_scene
 from ._scene import Scene
@@ -56,6 +57,7 @@ __all__ = [
     "EventSelected",
     "EventMenuItem",
     "KeyHandler",
+    "ArrowKeyHandler",
     "EventIScene",
     "EventNextScene",
     "EventPrevScene",
@@ -88,6 +90,7 @@ __all__ = [
     "Scene",
     "Handler",
     "Point",
+    "Move",
     "BB",
     "Shape",
     "Arena",
