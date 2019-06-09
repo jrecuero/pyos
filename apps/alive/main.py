@@ -61,6 +61,9 @@ class MoveShape(Shape):
             new_pos.x = bb.x - 1
         else:
             pass
+        # log.Actor("{}:{}:{}".format(self.name, self.head.pos, self.head.move)).NextPos(
+        #     "{}:{}".format(new_pos, bb.move)
+        # ).call()
         return new_pos
 
 
@@ -110,22 +113,39 @@ class ActorShape(MoveShape):
 
     def shoot(self):
         def _shoot():
-            log.Shoot("").call()
-            self.eventor("shooting", actor=self)
+            self.eventor("shoot", actor=self)
             return []
 
         return _shoot
+
+    def out_of_bounds(self, y: int, x: int, max_y: int, max_x: int) -> bool:
+        # log.Head("{}:{}".format(self.head.move, self.head.pos)).call()
+        super(ActorShape, self).out_of_bounds(y, x, max_y, max_x)
 
 
 class BulletShape(MoveShape):
     def __init__(self, **kwargs):
         super(BulletShape, self).__init__(**kwargs)
+        self.name = "Bullet"
+        self.priority = 10
         self.parent: Shape = kwargs.get("parent", None)
         self.timeout: int = self.parent.timeout / 2
         parent_head = self.parent.head
         self.append(
             BB("*", pos=Point(parent_head.y, parent_head.x), move=parent_head.move)
         )
+
+    def out_of_bounds(self, y: int, x: int, max_y: int, max_x: int) -> bool:
+        if super(BulletShape, self).out_of_bounds(y, x, max_y, max_x):
+            self.eventor("delete", actor=self)
+
+    def collision_with(self, other: "Shape") -> bool:
+        if (other != self.parent) and self._collision_with(other):
+            if other.collision_callable:
+                other.collisioned(self)
+            self.eventor("delete", actor=self)
+            log.Delete("").CollisionWith("{}".format(other.name)).call()
+        return False
 
 
 class CoinShape(Shape):
@@ -165,9 +185,12 @@ class GameHandler(Arena):
         super(GameHandler, self).__init__(x, y, max_y, max_x)
 
     def eventor(self, event, **kwargs):
-        actor = kwargs.get("actor", None)
-        log.Event("{} is {}".format(actor.name, event)).call()
-        self.add_shape(BulletShape(parent=actor), relative=False)
+        if event == "shoot":
+            actor = kwargs.get("actor", None)
+            self.add_shape(BulletShape(parent=actor), relative=False)
+        elif event == "delete":
+            actor = kwargs.get("actor", None)
+            self.shapes.remove(actor)
 
 
 class BoardScene(Scene):
@@ -178,7 +201,6 @@ class BoardScene(Scene):
         self.max_x: int = curses.COLS - 1
 
     def cash(self, bb, money):
-        log.Money("{}".format(money)).call()
         return True
 
     def setup(self, screen: Any):
@@ -190,7 +212,7 @@ class BoardScene(Scene):
         shape.append(BB("#", pos=phead, move=Move.RIGHT, fmt=curses.color_pair(1)))
         for i in range(2):
             shape.append(BB("-", pos=phead.decr(x=1 + i), fmt=curses.color_pair(2)))
-        coin = CoinShape(max_y=self.max_y, max_x=self.max_x, cash=self.cash)
+        coin = CoinShape(max_y=self.max_y - 4, max_x=self.max_x - 4, cash=self.cash)
         self.ghandler.add_shape(shape)
         self.ghandler.add_shape(Shape(movable=False).append(BB("$", pos=Point(1, 20))))
         self.ghandler.add_shape(coin)
