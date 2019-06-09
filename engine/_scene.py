@@ -108,7 +108,7 @@ class Scene:
         """
         return self.screen if self.screen else screen
 
-    def setup(self):
+    def setup(self, screen: Any):
         """setup abstract method allows to setup the scene.
         """
         pass

@@ -130,13 +130,26 @@ class NObject:
         return None
 
 
-class Char(NObject):
+class TextData(NObject):
+    """TextData class identifies all object that have to render some string.
+    """
+
+    def __init__(self, y: int, x: int, dy: int, dx: int, text_data: str):
+        super(TextData, self).__init__(y, x, dy, dx)
+        self.text_data = text_data
+
+    def set_text(self, text_data: str):
+        """set_text updates the text to be displayed.
+        """
+        self.text_data = text_data
+
+
+class Char(TextData):
     """Char class identifies a character nobject.
     """
 
     def __init__(self, y: int, x: int, text_data: str):
-        super(Char, self).__init__(y, x, 1, 1)
-        self.text_data = text_data
+        super(Char, self).__init__(y, x, 1, 1, text_data)
 
     @render
     def render(self, screen) -> List[Event]:
@@ -162,13 +175,12 @@ class XChar(Char):
         return []
 
 
-class String(NObject):
+class String(TextData):
     """String class identifies an string nobject.
     """
 
     def __init__(self, y: int, x: int, text_data: str):
-        super(String, self).__init__(y, x, 1, len(text_data))
-        self.text_data = text_data
+        super(String, self).__init__(y, x, 1, len(text_data), text_data)
 
     @render
     def render(self, screen) -> List[Event]:
@@ -214,13 +226,12 @@ class Formatted(NObject):
         return []
 
 
-class Block(NObject):
+class Block(TextData):
     """Block class identifies a block of strings nobject.
     """
 
     def __init__(self, y: int, x: int, text_data: str):
-        super(Block, self).__init__(y, x, 0, 0)
-        self.text_data = text_data
+        super(Block, self).__init__(y, x, 0, 0, text_data)
 
     @render
     def render(self, screen) -> List[Event]:
@@ -267,14 +278,13 @@ class BoxGrid(NObject):
             y += self.dy + 1
 
 
-class BoxText(NObject):
+class BoxText(TextData):
     """BoxText class identifies a bordered box containing a block of strings
     nobject.
     """
 
     def __init__(self, y: int, x: int, text_data: str, dy: int = -1, dx: int = -1):
-        super(BoxText, self).__init__(y, x, dy, dx)
-        self.text_data: str = text_data
+        super(BoxText, self).__init__(y, x, dy, dx, text_data)
         tokens = self.text_data.split("\n")
         if self.dy == -1:
             self.dy = len(tokens) + 1
@@ -289,18 +299,19 @@ class BoxText(NObject):
         """render renders a bordered box containing a block of strings
         nobject.
         """
-        for x in range(1, self.dx):
-            screen.addch(self.y, self.x + x, chr(9473))
-        for x in range(1, self.dx):
-            screen.addch(self.y + self.dy, self.x + x, chr(9473))
-        for y in range(1, self.dy):
-            screen.addch(self.y + y, self.x, chr(9475))
-        for y in range(1, self.dy):
-            screen.addch(self.y + y, self.x + self.dx - 1, chr(9475))
-        screen.addch(self.y, self.x, chr(9487))
-        screen.addch(self.y + self.dy, self.x, chr(9495))
-        screen.addch(self.y, self.x + self.dx - 1, chr(9491))
-        screen.addch(self.y + self.dy, self.x + self.dx - 1, chr(9499))
+        # for x in range(1, self.dx):
+        #     screen.addch(self.y, self.x + x, chr(9473))
+        # for x in range(1, self.dx):
+        #     screen.addch(self.y + self.dy, self.x + x, chr(9473))
+        # for y in range(1, self.dy):
+        #     screen.addch(self.y + y, self.x, chr(9475))
+        # for y in range(1, self.dy):
+        #     screen.addch(self.y + y, self.x + self.dx - 1, chr(9475))
+        # screen.addch(self.y, self.x, chr(9487))
+        # screen.addch(self.y + self.dy, self.x, chr(9495))
+        # screen.addch(self.y, self.x + self.dx - 1, chr(9491))
+        # screen.addch(self.y + self.dy, self.x + self.dx - 1, chr(9499))
+        draw_box(screen, self.y, self.x, self.dy, self.dx)
         tokens = self.text_data.split("\n")
         for y, tok in enumerate(tokens):
             screen.addnstr(self.y + 1 + y, self.x + 1, tok, len(tok))
@@ -399,7 +410,19 @@ class Gauge(String):
                     self._update(1)
 
 
-class Spinner(String):
+class Capture(object):
+    """Capture class identifies any object that has to receive input from the
+    user.
+    """
+
+    def __init__(self):
+        self.capture_input = True
+
+    def set_capture(self, capture_input: bool = True):
+        self.capture_input = capture_input
+
+
+class Spinner(String, Capture):
     """Spinner class identifies a spinner that changes with left and right
     clicks.
     """
@@ -408,15 +431,18 @@ class Spinner(String):
         self, y: int, x: int, mini: int, maxi: int, defaulti: int, delta: int = 1
     ):
         self.pattern = "{0}{1}{2}"
-        super(Spinner, self).__init__(
-            y, x, ("{}".format(self.pattern)).format(chr(9664), defaulti, chr(9654))
+        String.__init__(
+            self,
+            y,
+            x,
+            ("{}".format(self.pattern)).format(chr(9664), defaulti, chr(9654)),
         )
+        Capture.__init__(self)
         self.min: int = mini
         self.max: int = maxi
         self.default: int = defaulti
         self.value: int = self.default
         self.delta: int = delta
-        self.capture_input: bool = True
 
     def _set(self, value: int):
         if self.min < value < self.max:
@@ -503,16 +529,18 @@ class Caller(NObject):
         return []
 
 
-class Input(NObject):
+class Input(TextData, Capture):
     """Input class identifies an input string nobject.
     """
 
     def __init__(self, y: int, x: int, text_data: str, text_output: List[str]):
-        super(Input, self).__init__(y, x, 1, len(text_data))
-        self.text_data: str = text_data
+        TextData.__init__(self, y, x, 1, len(text_data), text_data)
+        Capture.__init__(self)
         self.input_str: str = ""
         self.text_output: List[str] = text_output
-        self.capture_input = True
+
+    def clear(self):
+        self.input_str = ""
 
     @pinput
     def pinput(self, screen, keys) -> List[Event]:
@@ -542,7 +570,48 @@ class Input(NObject):
         return None
 
 
-class Selector(NObject):
+class TextInput(TextData, Capture):
+    """TextInput class identifies a text input string nobject.
+    """
+
+    def __init__(self, y: int, x: int, text_data: str, in_cb):
+        TextData.__init__(self, y, x, 1, len(text_data), text_data)
+        Capture.__init__(self)
+        self.text_data: str = text_data
+        self.input_str: str = ""
+        self.in_cb = in_cb
+
+    def clear(self):
+        self.input_str = ""
+
+    @pinput
+    def pinput(self, screen, keys) -> List[Event]:
+        if self.capture_input and len(keys):
+            key = keys.pop()
+            if key == 10:  # return carrier
+                self.capture_input = False
+                self.in_cb(self.input_str)
+                return [EventInput(self.input_str)]
+            elif key == 127:  # backspace
+                self.input_str = self.input_str[:-1]
+            else:
+                self.input_str += chr(key)
+        return []
+
+    @render
+    def render(self, screen) -> List[Event]:
+        """render renders an input string nobject.
+        """
+        screen.addstr(self.y, self.x, self.text_data + self.input_str)
+        return []
+
+    def set_cursor(self) -> Optional[List[int]]:
+        if self.capture_input:
+            return [self.y, self.x + len(self.text_data + self.input_str)]
+        return None
+
+
+class Selector(NObject, Capture):
     """Selector class identifies a list of tokens that are highlighted and
     can be selected using cursor movement.
     """
@@ -559,9 +628,9 @@ class Selector(NObject):
     ):
         dy = 1 if dy == -1 else dy
         dx = sum([len(t) for t in tokens]) if dx == -1 else dx
-        super(Selector, self).__init__(y, x, dy, dx)
+        NObject.__init__(self, y, x, dy, dx)
+        Capture.__init__(self)
         self.tokens: List[str] = tokens
-        self.capture_input = True
         self.selected: int = selected
         self.horizontal: bool = horizontal
 
@@ -676,13 +745,14 @@ class ScrollSelector(Selector):
         return []
 
 
-class Menu(NObject):
+class Menu(NObject, Capture):
     """Menu class identifies a menu object.
     """
 
     def __init__(self, y: int, x: int, tokens: List, dy: int = 2, dx: int = -1):
         _dx: int = dx if dx != -1 else sum([len(t[0]) for t in tokens]) + 1
-        super(Menu, self).__init__(y, x, dy, _dx)
+        NObject.__init__(self, y, x, dy, _dx)
+        Capture.__init__(self)
         self.tokens: List = tokens
         self.menu_items: List = self.tokens
         self.selected_items: List = [
@@ -690,7 +760,6 @@ class Menu(NObject):
         ]
         self.menu_pos: List = []
         self.shortcuts: List[str] = []
-        self.capture_input: bool = True
 
     def _draw_menu_items(self, screen: Any, menu_items: Dict, top: bool):
         y, x, dy, dx = menu_items["pos"]
