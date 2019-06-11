@@ -3,7 +3,7 @@ import curses
 
 # from ._loggar import log
 from ._event import Event, Timer, EventTimer
-from ._nobject import NObject
+from ._nobject import NObject, Panel
 
 
 def pinput(f):
@@ -206,6 +206,16 @@ class Scene:
         """
         self.nobjects.remove(obj)
         return True
+
+    def add_to_panel(self, panel: Panel, obj: NObject) -> bool:
+        if panel.add(obj):
+            return self.add_object(obj)
+        return False
+
+    def remove_from_panel(self, panel: Panel, obj: NObject) -> bool:
+        if panel.remove(obj):
+            return self.del_object(obj)
+        return False
 
     def new_timer(self, timeout: int, enable: bool = True) -> Timer:
         """new_timer creates and adds a timer event to the scene.

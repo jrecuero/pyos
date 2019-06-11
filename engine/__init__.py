@@ -40,6 +40,7 @@ from ._nobject import (
     Selector,
     ScrollSelector,
     Menu,
+    Panel,
 )
 from ._physic import Point, Move, BB, Shape, Arena
 from ._scene import update as update_scene
@@ -87,6 +88,7 @@ __all__ = [
     "Selector",
     "ScrollSelector",
     "Menu",
+    "Panel",
     "update_scene",
     "render_scene",
     "Scene",

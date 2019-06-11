@@ -247,11 +247,15 @@ class Box(NObject):
     """Box class identifies a bordered box nobject.
     """
 
+    def __init__(self, y: int, x: int, dy: int, dx: int, fmt=curses.A_NORMAL):
+        super(Box, self).__init__(y, x, dy, dx)
+        self.fmt = fmt
+
     @render
     def render(self, screen) -> List[Event]:
         """render renders a bordered box nobject.
         """
-        draw_box(screen, self.y, self.x, self.dy, self.dx)
+        self.box(screen, self.fmt)
         return []
 
 
@@ -283,7 +287,15 @@ class BoxText(TextData):
     nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str, dy: int = -1, dx: int = -1):
+    def __init__(
+        self,
+        y: int,
+        x: int,
+        text_data: str,
+        dy: int = -1,
+        dx: int = -1,
+        fmt=curses.A_NORMAL,
+    ):
         super(BoxText, self).__init__(y, x, dy, dx, text_data)
         tokens = self.text_data.split("\n")
         if self.dy == -1:
@@ -293,6 +305,7 @@ class BoxText(TextData):
                 if len(t) > self.dx:
                     self.dx = len(t)
             self.dx += 2
+        self.fmt = fmt
 
     @render
     def render(self, screen) -> List[Event]:
@@ -311,7 +324,8 @@ class BoxText(TextData):
         # screen.addch(self.y + self.dy, self.x, chr(9495))
         # screen.addch(self.y, self.x + self.dx - 1, chr(9491))
         # screen.addch(self.y + self.dy, self.x + self.dx - 1, chr(9499))
-        draw_box(screen, self.y, self.x, self.dy, self.dx)
+        # draw_box(screen, self.y, self.x, self.dy, self.dx)
+        self.box(screen, self.fmt)
         tokens = self.text_data.split("\n")
         for y, tok in enumerate(tokens):
             screen.addnstr(self.y + 1 + y, self.x + 1, tok, len(tok))
@@ -764,7 +778,8 @@ class Menu(NObject, Capture):
     def _draw_menu_items(self, screen: Any, menu_items: Dict, top: bool):
         y, x, dy, dx = menu_items["pos"]
         items = menu_items["items"]
-        draw_box(screen, y, x, dy, dx)
+        # draw_box(screen, y, x, dy, dx)
+        self.box(screen)
         y, x = y + 1, x + 1
         dx = max([len(t[0]) for t in items])
         self.shortcuts = []
@@ -817,3 +832,35 @@ class Menu(NObject, Capture):
         for index, item in enumerate(self.selected_items):
             self._draw_menu_items(screen, item, index == 0)
         return []
+
+
+class Panel(NObject):
+    """Panel class identifies all object grouped in a panel.
+    """
+
+    def __init__(self, y: int, x: int, dy: int, dx: int):
+        super(Panel, self).__init__(y, x, dy, dx)
+        self.children: List[NObject] = []
+        self._render_box: bool = True
+
+    def add(self, obj: NObject) -> bool:
+        obj.y += self.y
+        obj.x += self.x
+        self.children.append(obj)
+        return True
+
+    def remove(self, obj: NObject) -> bool:
+        self.children.remove(obj)
+        return True
+
+    def clear(self) -> bool:
+        self.children = []
+        return True
+
+    def render_box(self, flag: bool):
+        self._render_box = flag
+
+    @render
+    def render(self, screen) -> List[Event]:
+        if self._render_box:
+            self.box(screen)
