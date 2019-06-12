@@ -31,49 +31,63 @@ class RollerScene(Scene):
         self.dialog_screen = {
             "y": 0,
             "x": 0,
-            "dy": int(self.max_y / 2) + 1,
-            "dx": self.max_x,
+            # "dy": int(self.max_y / 2) + 1,
+            "dy": self.max_y - 8,
+            "dx": int(3 * self.max_x / 4),
+        }
+        self.infoma_screen = {
+            "y": 0,
+            "x": int(3 * self.max_x / 4) + 1,
+            # "dy": int(self.max_y / 2) + 1,
+            "dy": self.max_y - 8,
+            "dx": int(self.max_x / 4),
         }
         self.prompt_screen = {
-            "y": int(self.max_y / 2) + 1,
+            # "y": int(self.max_y / 2) + 1,
+            "y": self.max_y - 7,
             "x": 0,
-            "dy": int(self.max_y / 2) - 2,
+            # "dy": int(self.max_y / 2) - 2,
+            "dy": 4,
             "dx": self.max_x,
         }
         self.status_screen = {"y": self.max_y - 2, "x": 0, "dy": 2, "dx": self.max_x}
-        self.actions = ["talk", "move", "look", "exit"]
+        self.stage: str = "CONFIG"
+        self.actions_conf: List[str] = ["first:<str>", "last:<str>", "done"]
+        self.actions_work: List[str] = ["talk", "move", "look", "exit"]
 
     def user_input(self, inputa):
-        if inputa and inputa == "exit":
-            self.del_object(self.prompt)
-            exit(0)
-        elif inputa and inputa in self.actions:
-            self.user_input.set_text("Action:  '{}'".format(inputa))
-        else:
-            self.user_input.set_text("Action not available")
+        if self.stage == "WORK":
+            if inputa and inputa == "exit":
+                self.del_object(self.prompt)
+                exit(0)
+            elif inputa and inputa in self.actions_work:
+                self.user_input.set_text("Action:  '{}'".format(inputa))
+            else:
+                self.user_input.set_text("Action not available")
+        elif self.stage == "CONFIG":
+            if inputa and inputa == "done":
+                self.status_textbox.set_text("\t".join(self.actions_work))
+                self.stage = "WORK"
+            else:
+                user_input = inputa.split(":")
+                if inputa and user_input[0] == "first":
+                    self.first_name.set_text(user_input[1])
+                elif inputa and user_input[0] == "last":
+                    self.last_name.set_text(user_input[1])
+                else:
+                    self.user_input.set_text("Action not available")
         self.prompt.clear()
         self.prompt.set_capture()
 
     def setup(self, screen: Any):
-        # self.add_object(BoxText(self.max_y - 2, 0, "Talk\tMove\tLook", 2, self.max_x))
-        self.add_object(
-            BoxText(
-                self.status_screen["y"],
-                self.status_screen["x"],
-                "\t".join(self.actions),
-                self.status_screen["dy"],
-                self.status_screen["dx"],
-            )
+        self.status_textbox = BoxText(
+            self.status_screen["y"],
+            self.status_screen["x"],
+            "\t".join(self.actions_conf),
+            self.status_screen["dy"],
+            self.status_screen["dx"],
         )
-        # self.add_object(Box(self.max_y - 8, 0, 8, self.max_x))
-        # self.add_object(
-        #     Box(
-        #         self.prompt_screen["y"],
-        #         self.prompt_screen["x"],
-        #         self.prompt_screen["dy"],
-        #         self.prompt_screen["dx"],
-        #     )
-        # )
+        self.add_object(self.status_textbox)
         self.prompt_panel = Panel(
             self.prompt_screen["y"],
             self.prompt_screen["x"],
@@ -81,7 +95,6 @@ class RollerScene(Scene):
             self.prompt_screen["dx"],
         )
         self.add_object(self.prompt_panel)
-        # self.add_object(Box(0, 0, self.max_y, self.max_x))
         self.add_object(
             Box(
                 self.dialog_screen["y"],
@@ -90,24 +103,22 @@ class RollerScene(Scene):
                 self.dialog_screen["dx"],
             )
         )
-        self.add_object(Box(0, 0, self.max_y, self.max_x))
-        # self.prompt = TextInput(self.max_y - 7, 1, "> ", self.user_input)
-        # self.prompt = TextInput(
-        #     self.prompt_screen["y"] + 1,
-        #     self.prompt_screen["x"] + 1,
-        #     "> ",
-        #     self.user_input,
-        # )
-        # self.add_object(self.prompt)
+        self.infoma_panel = Panel(
+            self.infoma_screen["y"],
+            self.infoma_screen["x"],
+            self.infoma_screen["dy"],
+            self.infoma_screen["dx"],
+        )
+        self.add_object(self.infoma_panel)
+        # self.add_object(Box(0, 0, self.max_y, self.max_x))
         self.prompt = TextInput(1, 1, "> ", self.user_input)
         self.add_to_panel(self.prompt_panel, self.prompt)
-        # self.user_input = String(self.max_y - 6, 1, "")
-        # self.user_input = String(
-        #     self.prompt_screen["y"] + 2, self.prompt_screen["x"] + 1, ""
-        # )
-        # self.add_object(self.user_input)
         self.user_input = String(2, 1, "")
         self.add_to_panel(self.prompt_panel, self.user_input)
+        self.first_name = String(1, 1, "First Name")
+        self.last_name = String(2, 1, "Last Name")
+        self.add_to_panel(self.infoma_panel, self.first_name)
+        self.add_to_panel(self.infoma_panel, self.last_name)
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
 
