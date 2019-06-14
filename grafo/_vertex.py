@@ -67,8 +67,15 @@ class Edge(VtoV):
     def __init__(self, label: str, parent: Vertex, child: Vertex, link: Link = Link.BI):
         super(Edge, self).__init__(label, parent, child)
         self.link: Link = link
+        self.set_parent(parent)
+
+    def set_parent(self, parent: Vertex):
+        self.parent = parent
         self.src = self.parent if self.link != Link.UP else self.child
         self.dst = self.child if self.link != Link.UP else self.parent
+
+    def auto_label(self):
+        self.label = "{}-{}".format(self.parent.label, self.child.label)
 
     def peer(self, vertex: Vertex) -> Vertex:
         """peer looks for the other vertex in the edge

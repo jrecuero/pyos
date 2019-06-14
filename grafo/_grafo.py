@@ -7,9 +7,10 @@ from ._vertex import Vertex, Edge, Path, Link
 class Grafo(Iderable):
     __slots__ = ["root", "_anchor", "path", "vertices", "edges"]
 
-    def __init__(self, label: str):
+    def __init__(self, label: str, **kwargs):
         super(Grafo, self).__init__(label)
-        self.root: Vertex = Vertex("root/0")
+        root_name: str = kwargs.get("root", "root/0")
+        self.root: Vertex = Vertex(root_name)
         self.root.hooked = True
         self._anchor: Vertex = self.root
         self.path: Path = None
@@ -36,7 +37,7 @@ class Grafo(Iderable):
         """
         if parent is None:
             parent = self.anchor
-            edge.parent = parent
+            edge.set_parent(parent)
         if not parent.hooked:
             raise Exception("Parent {} not found in grafo".format(parent))
         edge.parent.add_edge(edge)
