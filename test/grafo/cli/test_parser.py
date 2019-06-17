@@ -1,17 +1,16 @@
-'''test_parser module test parser version 2.0.
+"""test_parser module test parser version 2.0.
 
 version: 2.0
-'''
+"""
 
 import pytest
-from jc2cli.parser.parser import Parser, new_syntax
-import jc2cli.parser.token as Token
-import jc2cli.parser.lex.cli.lexer as Lexer
+from grafo.cli.parser import Parser, Token, Syntax
+from grafo.cli.parser.lex import CliLexer
 
 
 @pytest.fixture
 def parser(request):
-    lexer = Lexer.Lexer()
+    lexer = CliLexer()
     return Parser(lexer)
 
 
@@ -27,31 +26,53 @@ def test_parser_unscan(parser):
     assert parser.buffer.size == 1
 
 
-@pytest.mark.parametrize(('inputs', 'results'),
-                         [('SELECT table', (Token.IDENT, 'SELECT')),
-                          ('[data]', (Lexer.OPENBRACKET, '[')),
-                          ('  table', (Token.WS, '  ')), ])
+@pytest.mark.parametrize(
+    ("inputs", "results"),
+    [
+        ("SELECT table", (Token.IDENT, "SELECT")),
+        ("[data]", (CliLexer.OPENBRACKET, "[")),
+        ("  table", (Token.WS, "  ")),
+    ],
+)
 def test_parser_scan(parser, inputs, results):
     parser.set_line(inputs)
     got = parser.scan()
     assert got == results
 
 
-@pytest.mark.parametrize(('inputs', 'results'),
-                         [('SELECT table', (Token.IDENT, 'SELECT')),
-                          ('[data]', (Lexer.OPENBRACKET, '[')),
-                          ('  table', (Token.IDENT, 'table')), ])
+@pytest.mark.parametrize(
+    ("inputs", "results"),
+    [
+        ("SELECT table", (Token.IDENT, "SELECT")),
+        ("[data]", (CliLexer.OPENBRACKET, "[")),
+        ("  table", (Token.IDENT, "table")),
+    ],
+)
 def test_parser_scan_ignore_white_space(parser, inputs, results):
     parser.set_line(inputs)
     got = parser.scan_ignore_white_space()
     assert got == results
 
 
-@pytest.mark.parametrize(('inputs', 'results'),
-                         [('SELECT table', new_syntax('SELECT', ['table'], [Token.IDENT])),
-                          ('SELECT [table]?', new_syntax('SELECT',
-                                                         ['[', 'table', ']', '?'],
-                                                         [Lexer.OPENBRACKET, Token.IDENT, Lexer.CLOSEBRACKET, Lexer.QUESTION])), ])
+@pytest.mark.parametrize(
+    ("inputs", "results"),
+    [
+        ("SELECT table", Syntax("SELECT", ["table"], [Token.IDENT])),
+        (
+            "SELECT [table]?",
+            Syntax(
+                "SELECT",
+                ["[", "table", "]", "?"],
+                [
+                    CliLexer.OPENBRACKET,
+                    Token.IDENT,
+                    CliLexer.CLOSEBRACKET,
+                    CliLexer.QUESTION,
+                ],
+            ),
+        ),
+    ],
+)
 def test_parser_parse(parser, inputs, results):
     parser.set_line(inputs)
     got, error = parser.parse()

@@ -1,14 +1,13 @@
-'''scanner module provides all character scanning functionality in order to
+"""scanner module provides all character scanning functionality in order to
 scan any lexical languages.
 
 version: 2.0
-'''
+"""
 
-import jc2cli.parser.token as Token
+from ._token import Token
 
 
 class Reader(object):
-
     def __init__(self, line):
         self.line = line
         self.hook = 0
@@ -25,7 +24,6 @@ class Reader(object):
 
 
 class Buffer(object):
-
     def __init__(self):
         self.data = None
 
@@ -40,7 +38,6 @@ class Buffer(object):
 
 
 class Scanner(object):
-
     def __init__(self, lexer, line=None):
         self.lexer = lexer
         self.reader = None if line is None else Reader(line)
@@ -56,7 +53,7 @@ class Scanner(object):
         self.reader.unread_char()
 
     def is_white_space(self, ch):
-        return ch in [' ', '\t', '\n']
+        return ch in [" ", "\t", "\n"]
 
     def is_letter(self, ch):
         return ch.isalpha()

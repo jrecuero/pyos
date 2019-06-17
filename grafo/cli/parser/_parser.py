@@ -1,31 +1,21 @@
-'''parser module provides all character parsing functionality in order to
+"""parser module provides all character parsing functionality in order to
 parse any lexical language.
 
 version: 2.0
-'''
+"""
 
-import jc2cli.parser.scanner as Scanner
-import jc2cli.parser.token as Token
+from ._scanner import Scanner
+from ._token import Token
 
 
 class Syntax(object):
-
-    def __init__(self):
-        self.command = None
-        self.arguments = []
-        self.tokens = []
-
-
-def new_syntax(command, argos, tokens):
-    syntax = Syntax()
-    syntax.command = command
-    syntax.arguments = argos
-    syntax.tokens = tokens
-    return syntax
+    def __init__(self, command=None, argos=None, tokens=None):
+        self.command = command
+        self.arguments = argos if argos else []
+        self.tokens = tokens if tokens else []
 
 
 class Buffer(object):
-
     def __init__(self):
         self.token = None
         self.literal = None
@@ -33,10 +23,9 @@ class Buffer(object):
 
 
 class Parser(object):
-
     def __init__(self, lexer, line=None):
         self.lexer = lexer
-        self.scanner = Scanner.Scanner(lexer, line)
+        self.scanner = Scanner(lexer, line)
         self.buffer = Buffer()
 
     def set_line(self, line):
