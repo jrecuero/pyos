@@ -38,7 +38,6 @@ class Handler(object):
         return False, index, path
 
     def _match(self, tokens: List) -> Union[bool, int, List[Node]]:
-        print(tokens)
         self.context = Context()
         match, index, path = self.find_path(tokens, 0, [])
         return match, index, path
@@ -56,5 +55,4 @@ class Handler(object):
             command, _ = self.context.last_command[0]
             if command.content.klass == Kontent.COMMAND:
                 cargs = self.context.last_command_args()
-                print(cargs)
                 command.content.call(**cargs)

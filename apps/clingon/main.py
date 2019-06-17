@@ -17,38 +17,62 @@ def match(pattern: str):
     print()
 
 
+def run_config(**kwargs):
+    print("command config ...")
+
+
 def run_name(**kwargs):
-    print("command 'name' callback with: {}".format(kwargs))
+    # print("command 'name' callback with: {}".format(kwargs))
+    print("your name is {}".format(" ".join(kwargs["name_str"])))
+
+
+def create_config_command(h: Handler) -> Node:
+    node = Node("CONFIG", content=CommandContent("config", command=run_config))
+    h.add_node(None, node)
+    h.add_node(node, Node("END", content=EndContent()))
+    return node
+
+
+def create_name_command(h: Handler, parent: Node) -> Node:
+    node_name = Node("NAME", content=CommandContent("name", command=run_name))
+    node_fname = Node("FNAME", content=KeywordContent("fname"))
+    node_lname = Node("LNAME", content=KeywordContent("lname"))
+    node_str = Node("STR", content=StrContent("name_str"))
+    h.add_node(parent, node_name)
+    h.add_node(node_name, node_fname)
+    h.add_node(node_fname, node_lname)
+    h.add_node(node_lname, node_str)
+    h.add_node(node_str, node_str, loop=True)
+    h.add_node(node_str, Node("END", content=EndContent()))
+    return node_str
+
+
+def create_age_command(h: Handler, parent: Node) -> Node:
+    node_age = Node("AGE", content=CommandContent("age"))
+    node_int = Node("INT", content=IntContent("age_int"))
+    h.add_node(parent, node_age)
+    h.add_node(node_age, node_int)
+    h.add_node(node_int, Node("END", content=EndContent()))
+    return node_int
+
+
+def create_status_command(h: Handler, parent: Node) -> Node:
+    node_status = Node("STATUS", content=CommandContent("status"))
+    node_str = Node("STR", content=StrContent("status_str"))
+    h.add_node(parent, node_status)
+    h.add_node(node_status, node_str)
+    h.add_node(node_str, Node("END", content=EndContent()))
+    return node_str
 
 
 if __name__ == "__main__":
-    n1 = Node("CONFIG", content=CommandContent("config"))
-    n2 = Node("NAME", content=CommandContent("name", command=run_name))
-    n3 = Node("FNAME", content=KeywordContent("fname"))
-    n4 = Node("LNAME", content=KeywordContent("lname"))
-    n4str = Node("STR", content=StrContent("name_str"))
-    n5 = Node("AGE", content=CommandContent("age"))
-    n5str = Node("INT", content=IntContent("age_int"))
-    n6 = Node("STATUS", content=CommandContent("status"))
-    n6str = Node("STR", content=StrContent("status_str"))
     h = Handler()
-    h.add_node(None, n1)
-    h.add_node(n1, n2)
-    h.add_node(n2, n3)
-    h.add_node(n3, n4)
-    h.add_node(n4, n4str)
-    h.add_node(n4str, n4str, loop=True)
-    h.add_node(n4str, Node("END", content=EndContent()))
-    h.add_node(n1, n5)
-    h.add_node(n5, n5str)
-    h.add_node(n5str, Node("END", content=EndContent()))
-    h.add_node(n1, n6)
-    h.add_node(n6, n6str)
-    h.add_node(n6str, Node("END", content=EndContent()))
+    node_config = create_config_command(h)
+    create_name_command(h, node_config)
+    create_age_command(h, node_config)
+    create_status_command(h, node_config)
+
     print(h.grafo.to_mermaid())
-    path = h.grafo.paths_from_v_to_v(n1, n3)
-    for p in path:
-        print(p.to_mermaid())
     # match("config name fname lname")
     # match("config lname fname")
     # match("config name fname lname jose")
@@ -56,4 +80,5 @@ if __name__ == "__main__":
     # match("config age 50")
     # match("config age one")
     # match("config status married")
+    h.run("config")
     h.run("config name fname lname jose carlos recuero arias")
