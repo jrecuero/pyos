@@ -4,6 +4,7 @@ from typing import List, Union, Any
 class Kontent(object):
     NONE = 0
     END = 1
+    HOOK = 2
     COMMAND = 10
     MODE = 11
     STR = 20
@@ -16,6 +17,8 @@ class Kontent(object):
             return "none"
         elif klass == Kontent.END:
             return "end"
+        elif klass == Kontent.HOOK:
+            return "hook"
         elif klass == Kontent.COMMAND:
             return "command"
         elif klass == Kontent.MODE:
@@ -68,6 +71,15 @@ class EndContent(Content):
         if tokens[tindex] == self._vault:
             return True, tindex + 1
         return False, tindex
+
+
+class HookContent(Content):
+    def __init__(self, **kwargs):
+        super(HookContent, self).__init__("HOOK", **kwargs)
+        self.klass: int = Kontent.HOOK
+
+    def match(self, tokens: List[str], tindex: int, **kwargs) -> Union[bool, int]:
+        return True, tindex
 
 
 class StrContent(Content):

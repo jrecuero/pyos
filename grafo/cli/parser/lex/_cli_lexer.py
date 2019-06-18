@@ -23,6 +23,25 @@ class Lexer(object):
     OPENMARK = Token.CUSTOM + 8
     # CLOSEMARK token >. #12
     CLOSEMARK = Token.CUSTOM + 9
+    # OPENCURLY token {. #13
+    OPENCURLY = Token.CUSTOM + 10
+    # CLOSECURLY token }. #14
+    CLOSECURLY = Token.CUSTOM + 11
+
+    LOGIC_MAP = {
+        OPENBRACKET: {"opener": True, "closer": False, "segment": 1},
+        CLOSEBRACKET: {"opener": False, "closer": True, "segment": 1},
+        PIPE: {"opener": False, "closer": False},
+        ASTERISK: {"opener": False, "closer": False},
+        PLUS: {"opener": False, "closer": False},
+        QUESTION: {"opener": False, "closer": False},
+        ADMIRATION: {"opener": False, "closer": False},
+        AT: {"opener": False, "closer": False},
+        OPENMARK: {"opener": True, "closer": False, "segment": 2},
+        CLOSEMARK: {"opener": False, "closer": True, "segment": 2},
+        OPENCURLY: {"opener": True, "closer": False, "segment": 3},
+        CLOSECURLY: {"opener": False, "closer": True, "segment": 3},
+    }
 
     def __init__(self):
         self.syntax = Syntax()
@@ -37,7 +56,33 @@ class Lexer(object):
             "@": Lexer.AT,
             "<": Lexer.OPENMARK,
             ">": Lexer.CLOSEMARK,
+            "{": Lexer.OPENCURLY,
+            "}": Lexer.CLOSECURLY,
         }
+
+    @staticmethod
+    def is_opener(token: int) -> bool:
+        token_map = Lexer.LOGIC_MAP.get(token, None)
+        return token_map and token_map["opener"]
+
+    @staticmethod
+    def open_segment(token: int) -> bool:
+        token_map = Lexer.LOGIC_MAP.get(token, None)
+        if token_map and token_map["opener"]:
+            return token_map["segment"]
+        return 0
+
+    @staticmethod
+    def is_closer(token: int) -> bool:
+        token_map = Lexer.LOGIC_MAP.get(token, None)
+        return token_map and token_map["closer"]
+
+    @staticmethod
+    def close_segment(token: int) -> bool:
+        token_map = Lexer.LOGIC_MAP.get(token, None)
+        if token_map and token_map["closer"]:
+            return token_map["segment"]
+        return 0
 
     def parse(self, index, token, lit):
         if index == 1:

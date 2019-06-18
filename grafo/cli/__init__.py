@@ -7,7 +7,7 @@ from ._content import (
     KeywordContent,
     CommandContent,
 )
-from ._node import Node
+from ._node import Node, HookNode, LoopNode
 from ._context import Context
 from ._handler import Handler
 
@@ -15,6 +15,8 @@ __all__ = [
     "END_TOKEN",
     "Content",
     "Node",
+    "HookNode",
+    "LoopNode",
     "Context",
     "EndContent",
     "StrContent",
