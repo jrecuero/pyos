@@ -133,13 +133,13 @@ if __name__ == "__main__":
     h.run("config login localhost ider 101 67890")
 
     import os
-    from grafo.cli.builder import loader, Builder
+    from grafo.cli import Builder
 
     subdir = "commands"
     path = os.path.join(os.path.dirname(__file__), subdir)
-    MAPA = loader(path, subdir)
-    # print(MAPA)
-    # login = MAPA["login"][1]
+    b = Builder()
+    MAPA = b.create_grafo(path)
+
     for c in MAPA.commands:
         print("{}".format(c))
     config = MAPA.get_call("config")
@@ -148,12 +148,3 @@ if __name__ == "__main__":
     login = MAPA.get_call("login")
     rlogin = login(hostname="localhost", user="jrecuero")
     rlogin()
-
-    b = Builder()
-    parents = {}
-    for c in MAPA.commands:
-        if c.parent is None:
-            parents[c.name] = b.build(c.cline)
-    for c in MAPA.commands:
-        if c.parent:
-            b.build(c.cline, parent=parents[c.parent])

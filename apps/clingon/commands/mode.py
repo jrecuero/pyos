@@ -1,4 +1,4 @@
-from grafo.cli.builder import command
+from grafo.cli import command
 
 
 @command("config")

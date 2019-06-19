@@ -37,7 +37,6 @@ class Mapa(object):
         return None
 
 
-# __MAPA = {}
 __mapa = Mapa()
 
 
@@ -56,16 +55,20 @@ def command(line):
     return _command
 
 
-def loader(path, baseline, top=None):
+def loader(path, baseline=None, top=None):
     __mapa.loader_parent = top
     all_mods = os.listdir(path)
     for mod in [m for m in all_mods if not m.startswith("__") and m.endswith(".py")]:
-        module = "{}.{}".format(baseline, mod[:-3])
+        module = (
+            "{}.{}".format(baseline, mod[:-3]) if baseline else "{}".format(mod[:-3])
+        )
         print("importing {}...".format(module))
         __import__(module, locals(), globals())
     for mod in [m for m in all_mods if not (m.startswith(".") or m.startswith("__"))]:
         module = os.path.join(path, mod)
         if os.path.isdir(module):
-            # print(module)
-            loader(module, "{}.{}".format(baseline, mod), mod)
+            if baseline:
+                loader(module, "{}.{}".format(baseline, mod), mod)
+            else:
+                loader(module, mod, mod)
     return __mapa

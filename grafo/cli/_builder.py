@@ -1,4 +1,6 @@
 from typing import List
+import os
+from ._decorator import loader
 from grafo.cli import Handler, Node, HookNode, CommandContent, StrContent, EndContent
 from grafo.cli.parser import Parser, Syntax, Token
 from grafo.cli.parser.lex import CliLexer
@@ -168,6 +170,20 @@ class Builder(object):
         self.handler.add_node(end_node, Node("END", content=EndContent()))
         print(self.handler.grafo.to_mermaid())
         return end_node
+
+    def create_grafo(self, path):
+        subdir = path.split(os.sep)[-1]
+        _mapa = loader(path, subdir)
+
+        parents = {}
+        for c in _mapa.commands:
+            if c.parent is None:
+                parents[c.name] = self.build(c.cline)
+        for c in _mapa.commands:
+            if c.parent:
+                self.build(c.cline, parent=parents[c.parent])
+
+        return _mapa
 
 
 if __name__ == "__main__":

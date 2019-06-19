@@ -10,6 +10,8 @@ from ._content import (
 from ._node import Node, HookNode, LoopNode
 from ._context import Context
 from ._handler import Handler
+from ._builder import Builder
+from ._decorator import command, loader
 
 __all__ = [
     "END_TOKEN",
@@ -24,4 +26,7 @@ __all__ = [
     "KeywordContent",
     "CommandContent",
     "Handler",
+    "Builder",
+    "command",
+    "loader",
 ]
