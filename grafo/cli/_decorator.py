@@ -1,6 +1,7 @@
 from typing import List
 from functools import wraps
 import os
+from grafo.cli import Node
 
 
 class Mapa(object):
@@ -11,9 +12,12 @@ class Mapa(object):
             self.parent: str = parent
             self.call = call
             self.rcall = None
+            self.node: Node = None
 
         def __str__(self):
-            return "[{}.{}] {}".format(self.parent, self.name, self.cline)
+            return "[{}.{}] {} Node:{} {}".format(
+                self.parent, self.name, self.cline, self.node, self.call
+            )
 
     def __init__(self, name: str = None):
         self.name: str = name

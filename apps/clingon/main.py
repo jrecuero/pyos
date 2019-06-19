@@ -2,7 +2,7 @@ from grafo.cli import Handler, Node, HookNode
 from grafo.cli import EndContent, StrContent, IntContent, KeywordContent, CommandContent
 
 
-def match(pattern: str):
+def match(h: Handler, pattern: str):
     match, index, path = h.match(pattern)
     print(pattern)
     print("{:5} {} [".format(str(match), index), end=" ")
@@ -13,6 +13,7 @@ def match(pattern: str):
         for c, t in _commands:
             print(c.label, t, end=" ")
         print()
+    print([str(x) for x in h.context.last_command])
     print("-------")
     print()
 
@@ -111,26 +112,27 @@ def create_login_command(h: Handler, parent: Node) -> Node:
 
 
 if __name__ == "__main__":
-    h = Handler()
-    node_config = create_config_command(h)
-    create_name_command(h, node_config)
-    create_age_command(h, node_config)
-    create_status_command(h, node_config)
-    create_login_command(h, node_config)
+    # h = Handler()
 
-    print(h.grafo.to_mermaid())
-    # match("config name fname lname")
-    # match("config lname fname")
-    # match("config name fname lname jose")
-    # match("config name fname lname jose carlos recuero arias")
-    # match("config age 50")
-    # match("config age one")
-    # match("config status married")
-    h.run("config")
-    h.run("config name fname lname jose carlos recuero arias")
-    # match("config login username jose")
-    h.run("config login localhost username jose 012345")
-    h.run("config login localhost ider 101 67890")
+    # node_config = create_config_command(h)
+    # create_name_command(h, node_config)
+    # create_age_command(h, node_config)
+    # create_status_command(h, node_config)
+    # create_login_command(h, node_config)
+
+    # print(h.grafo.to_mermaid())
+    # # match("config name fname lname")
+    # # match("config lname fname")
+    # # match("config name fname lname jose")
+    # # match("config name fname lname jose carlos recuero arias")
+    # # match("config age 50")
+    # # match("config age one")
+    # # match("config status married")
+    # h.run("config")
+    # h.run("config name fname lname jose carlos recuero arias")
+    # # match("config login username jose")
+    # h.run("config login localhost username jose 012345")
+    # h.run("config login localhost ider 101 67890")
 
     import os
     from grafo.cli import Builder
@@ -142,9 +144,22 @@ if __name__ == "__main__":
 
     for c in MAPA.commands:
         print("{}".format(c))
-    config = MAPA.get_call("config")
-    rconfig = config()
-    rconfig()
-    login = MAPA.get_call("login")
-    rlogin = login(hostname="localhost", user="jrecuero")
-    rlogin()
+
+    # config = MAPA.get_call("config")
+    # rconfig = config()
+    # rconfig()
+    # login = MAPA.get_call("login")
+    # rlogin = login(hostname="localhost", user="jrecuero")
+    # rlogin()
+
+    print("\n+-----+")
+    # match(b.handler, "config")
+    b.handler.run("config")
+
+    print("\n+-----+")
+    # match(b.handler, "config login localhost jrecuero")
+    b.handler.run("config login localhost jrecuero")
+
+    print("\n+-----+")
+    b.handler.run("config set home")
+    b.handler.run("config set home speed 100")

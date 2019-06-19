@@ -56,3 +56,6 @@ class Handler(object):
             if command.content.klass == Kontent.COMMAND:
                 cargs = self.context.last_command_args()
                 command.content.call(**cargs)
+
+    def exit_mode(self):
+        pass

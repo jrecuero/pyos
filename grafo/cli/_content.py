@@ -120,7 +120,8 @@ class CommandContent(Content):
         super(CommandContent, self).__init__(vault, **kwargs)
         self.klass: int = Kontent.COMMAND
         self.command = kwargs.get("command", None)
+        self.rcommand = None
 
     def call(self, **kwargs):
         if self.command:
-            return self.command(**kwargs)
+            self.rcommand = self.command(**kwargs)

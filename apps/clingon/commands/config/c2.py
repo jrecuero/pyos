@@ -1,12 +1,12 @@
 from grafo.cli import command
 
 
-@command("speed value")
-def speed(**kwargs):
-    val = kwargs.get("value", 0)
+@command("set profile")
+def set(**kwargs):
+    profile = kwargs.get("profile", None)
 
     def _exit():
-        print("your speed was {}".format(val))
+        print("exit set {}".format(profile))
 
-    print("set speed to {}".format(val))
+    print("enter set {}".format(profile))
     return _exit

@@ -1,7 +1,9 @@
 from typing import List
 import os
 from ._decorator import loader
-from grafo.cli import Handler, Node, HookNode, CommandContent, StrContent, EndContent
+from ._node import Node, HookNode
+from ._content import CommandContent, StrContent, EndContent, Kontent
+from ._handler import Handler
 from grafo.cli.parser import Parser, Syntax, Token
 from grafo.cli.parser.lex import CliLexer
 
@@ -169,19 +171,33 @@ class Builder(object):
         end_node = active_hooker.terminate()
         self.handler.add_node(end_node, Node("END", content=EndContent()))
         print(self.handler.grafo.to_mermaid())
-        return end_node
+        return command_node, end_node
 
     def create_grafo(self, path):
         subdir = path.split(os.sep)[-1]
         _mapa = loader(path, subdir)
 
         parents = {}
-        for c in _mapa.commands:
-            if c.parent is None:
-                parents[c.name] = self.build(c.cline)
-        for c in _mapa.commands:
-            if c.parent:
-                self.build(c.cline, parent=parents[c.parent])
+        for map_cmd in _mapa.commands:
+            if map_cmd.parent is None:
+                map_cmd.node, end_node = self.build(map_cmd.cline)
+                map_cmd.node.content.command = map_cmd.call
+                # parents[map_cmd.name] = map_cmd.node
+                parents[map_cmd.name] = end_node
+            else:
+                map_cmd.node, end_node = self.build(
+                    map_cmd.cline, parent=parents[map_cmd.parent]
+                )
+                if map_cmd.node.content.klass in [Kontent.COMMAND]:
+                    parents[map_cmd.name] = end_node
+                    map_cmd.node.content.command = map_cmd.call
+        # for map_cmd in _mapa.commands:
+        #     if map_cmd.parent:
+        #         map_cmd.node, _ = self.build(
+        #             map_cmd.cline, parent=parents[map_cmd.parent]
+        #         )
+        #         if map_cmd.node.content.klass in [Kontent.COMMAND]:
+        #             map_cmd.node.content.command = map_cmd.call
 
         return _mapa
 
