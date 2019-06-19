@@ -33,6 +33,7 @@ class Parser(object):
 
     def parse(self):
         index = 1
+        self.lexer.new_syntax()
         while True:
             tok, lit = self.scan_ignore_white_space()
             if tok == Token.ILLEGAL:

@@ -9,8 +9,8 @@ def match(pattern: str):
     for p in path:
         print(p.label, end=" ")
     print("]")
-    for commands in h.context.commands:
-        for c, t in commands:
+    for _commands in h.context.commands:
+        for c, t in _commands:
             print(c.label, t, end=" ")
         print()
     print("-------")
@@ -131,3 +131,29 @@ if __name__ == "__main__":
     # match("config login username jose")
     h.run("config login localhost username jose 012345")
     h.run("config login localhost ider 101 67890")
+
+    import os
+    from grafo.cli.builder import loader, Builder
+
+    subdir = "commands"
+    path = os.path.join(os.path.dirname(__file__), subdir)
+    MAPA = loader(path, subdir)
+    # print(MAPA)
+    # login = MAPA["login"][1]
+    for c in MAPA.commands:
+        print("{}".format(c))
+    config = MAPA.get_call("config")
+    rconfig = config()
+    rconfig()
+    login = MAPA.get_call("login")
+    rlogin = login(hostname="localhost", user="jrecuero")
+    rlogin()
+
+    b = Builder()
+    parents = {}
+    for c in MAPA.commands:
+        if c.parent is None:
+            parents[c.name] = b.build(c.cline)
+    for c in MAPA.commands:
+        if c.parent:
+            b.build(c.cline, parent=parents[c.parent])

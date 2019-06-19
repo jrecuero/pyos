@@ -44,7 +44,7 @@ class Lexer(object):
     }
 
     def __init__(self):
-        self.syntax = Syntax()
+        self.syntax: Syntax = None
         self._char_map = {
             "[": Lexer.OPENBRACKET,
             "]": Lexer.CLOSEBRACKET,
@@ -83,6 +83,9 @@ class Lexer(object):
         if token_map and token_map["closer"]:
             return token_map["segment"]
         return 0
+
+    def new_syntax(self):
+        self.syntax = Syntax()
 
     def parse(self, index, token, lit):
         if index == 1:

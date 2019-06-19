@@ -117,7 +117,7 @@ class Builder(object):
         print(error)
         return None
 
-    def build(self, line: str, parent: Node = None):
+    def build(self, line: str, parent: Node = None) -> Node:
         syntax: Syntax = self.parse(line)
         command_node = Node(syntax.command, content=CommandContent(syntax.command))
         active_hooker: Hooker = Hooker(self.handler, parent)
@@ -167,6 +167,7 @@ class Builder(object):
         end_node = active_hooker.terminate()
         self.handler.add_node(end_node, Node("END", content=EndContent()))
         print(self.handler.grafo.to_mermaid())
+        return end_node
 
 
 if __name__ == "__main__":
@@ -174,13 +175,15 @@ if __name__ == "__main__":
     # b.parse("login hostname [user username | id ider] password")
     # b.build("login hostname [user username | id ider] password")
 
-    b.build("login hostname username password")
-    # b.build("login hostname [username password]")
-    b.reset()
-    b.build("login hostname [username password]?")
-    b.reset()
-    b.build("login hostname [username password]*")
-    b.reset()
-    b.build("login hostname [username password]+")
-    b.reset()
-    b.build("login hostname [username | password]")
+    # b.build("login hostname username password")
+    # b.reset()
+    # b.build("login hostname [username password]?")
+    # b.reset()
+    # b.build("login hostname [username password]*")
+    # b.reset()
+    # b.build("login hostname [username password]+")
+    # b.reset()
+    # b.build("login hostname [username | password]")
+
+    next_node = b.build("config")
+    b.build("login hostname username password", parent=next_node)
