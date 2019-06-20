@@ -1,8 +1,8 @@
 from typing import List
 import os
-from ._decorator import loader
+from ._decorator import loader, builtin, command
 from ._node import Node, HookNode
-from ._content import CommandContent, StrContent, EndContent, Kontent
+from ._content import CommandContent, StrContent, EndContent
 from ._handler import Handler
 from grafo.cli.parser import Parser, Syntax, Token
 from grafo.cli.parser.lex import CliLexer
@@ -106,6 +106,7 @@ class Builder(object):
         self.lexer: CliLexer = CliLexer()
         self.parser: Parser = Parser(self.lexer)
         self.handler = Handler()
+        self.__modes: List[Node] = []
 
     def reset(self):
         self.lexer: CliLexer = CliLexer()
@@ -178,28 +179,40 @@ class Builder(object):
         _mapa = loader(path, subdir)
 
         parents = {}
-        for map_cmd in _mapa.commands:
+        for map_cmd in [c for c in _mapa.commands if not c.builtin]:
             if map_cmd.parent is None:
                 map_cmd.node, end_node = self.build(map_cmd.cline)
-                map_cmd.node.content.command = map_cmd.call
-                # parents[map_cmd.name] = map_cmd.node
-                parents[map_cmd.name] = end_node
             else:
                 map_cmd.node, end_node = self.build(
                     map_cmd.cline, parent=parents[map_cmd.parent]
                 )
-                if map_cmd.node.content.klass in [Kontent.COMMAND]:
-                    parents[map_cmd.name] = end_node
-                    map_cmd.node.content.command = map_cmd.call
-        # for map_cmd in _mapa.commands:
-        #     if map_cmd.parent:
-        #         map_cmd.node, _ = self.build(
-        #             map_cmd.cline, parent=parents[map_cmd.parent]
-        #         )
-        #         if map_cmd.node.content.klass in [Kontent.COMMAND]:
-        #             map_cmd.node.content.command = map_cmd.call
+            if map_cmd.node.content.is_command():
+                map_cmd.node.content.set_mode(map_cmd.is_mode)
+                map_cmd.node.content.call = map_cmd.call
+                parents[map_cmd.name] = end_node
+            if map_cmd.node.content.is_mode():
+                self.__modes.append(end_node)
+        for map_cmd in [c for c in _mapa.commands if c.builtin]:
+            map_cmd.node, _ = self.build(map_cmd.cline)
+            map_cmd.node.content.builtin = True
+            map_cmd.node.content.call = map_cmd.call
+            for mode in self.__modes:
+                map_cmd.node, _ = self.build(map_cmd.cline, parent=mode)
+                map_cmd.node.content.builtin = True
+                map_cmd.node.content.call = map_cmd.call
 
         return _mapa
+
+
+@builtin
+@command("exit")
+def _exit(**kwargs):
+    h = kwargs.get("__handler__", None)
+    print([str(m) for m in h.context.modes])
+    mode = h.context.pop_mode()
+    print(mode)
+    print("exit {}".format(mode[0][1]))
+    return None
 
 
 if __name__ == "__main__":

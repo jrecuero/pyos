@@ -6,17 +6,24 @@ from grafo.cli import Node
 
 class Mapa(object):
     class Command(object):
-        def __init__(self, name: str, cline: str, parent: str, call):
+        def __init__(self, name: str, cline: str, parent: str, call, is_mode: bool):
             self.name: str = name
             self.cline: str = cline
             self.parent: str = parent
             self.call = call
             self.rcall = None
             self.node: Node = None
+            self.is_mode: bool = is_mode
+            self.builtin: bool = False
 
         def __str__(self):
-            return "[{}.{}] {} Node:{} {}".format(
-                self.parent, self.name, self.cline, self.node, self.call
+            return "[{}.{}] {} Node:{} <{}> {}".format(
+                self.parent,
+                self.name,
+                self.cline,
+                self.node,
+                self.call.__name__,
+                self.builtin,
             )
 
     def __init__(self, name: str = None):
@@ -24,9 +31,11 @@ class Mapa(object):
         self.commands: List[Mapa.Command] = []
         self.loader_parent: str = None
 
-    def add(self, line: str, func):
+    def add(self, line: str, func, is_mode=False):
         cname = line.split()[0]
-        self.commands.append(Mapa.Command(cname, line, self.loader_parent, func))
+        self.commands.append(
+            Mapa.Command(cname, line, self.loader_parent, func, is_mode)
+        )
 
     def get(self, cname: str) -> "Mapa.Command":
         for c in self.commands:
@@ -44,11 +53,33 @@ class Mapa(object):
 __mapa = Mapa()
 
 
+def builtin(func):
+    last = __mapa.commands[-1]
+    last.builtin = True
+
+    @wraps(func)
+    def _builtin_wrapper(**kwargs):
+        return func(**kwargs)
+
+    return _builtin_wrapper
+
+
 def command(line):
     def _command(func):
-        # cmd = line.split()[0]
-        # __MAPA[cmd] = (line, func)
         __mapa.add(line, func)
+
+        @wraps(func)
+        def _wrapper(**kwargs):
+            return func(**kwargs)
+
+        return _wrapper
+
+    return _command
+
+
+def mode(line):
+    def _command(func):
+        __mapa.add(line, func, is_mode=True)
 
         @wraps(func)
         def _wrapper(**kwargs):

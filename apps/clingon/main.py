@@ -49,14 +49,14 @@ def run_login(**kwargs):
 
 
 def create_config_command(h: Handler) -> Node:
-    node = Node("CONFIG", content=CommandContent("config", command=run_config))
+    node = Node("CONFIG", content=CommandContent("config", call=run_config))
     h.add_node(None, node)
     h.add_node(node, Node("END", content=EndContent()))
     return node
 
 
 def create_name_command(h: Handler, parent: Node) -> Node:
-    node_name = Node("NAME", content=CommandContent("name", command=run_name))
+    node_name = Node("NAME", content=CommandContent("name", call=run_name))
     node_fname = Node("FNAME", content=KeywordContent("fname"))
     node_lname = Node("LNAME", content=KeywordContent("lname"))
     node_str = Node("STR", content=StrContent("name_str"))
@@ -88,7 +88,7 @@ def create_status_command(h: Handler, parent: Node) -> Node:
 
 
 def create_login_command(h: Handler, parent: Node) -> Node:
-    node_login = Node("LOGIN", content=CommandContent("login", command=run_login))
+    node_login = Node("LOGIN", content=CommandContent("login", call=run_login))
     node_hostname = Node("HOSTNAME", content=StrContent("hostname"))
     node_start_hook = HookNode("START-HOOK")
     node_end_hook = HookNode("END-HOOK")
@@ -152,14 +152,37 @@ if __name__ == "__main__":
     # rlogin = login(hostname="localhost", user="jrecuero")
     # rlogin()
 
+    # print("\n+-----+")
+    # # match(b.handler, "config")
+    # b.handler.run("config")
+    # print(b.handler.context.modes)
+
+    # print("\n+-----+")
+    # # match(b.handler, "config login localhost jrecuero")
+    # b.handler.run("config login localhost jrecuero")
+
+    # print("\n+-----+")
+    # b.handler.run("config set home")
+    # print(b.handler.context.modes)
+    # print(b.handler.context.flat_modes())
+    # # b.handler.run("config set home speed 100")
+
+    # line = "none"
+    # while line:
+    #     line = input("? ")
+    #     b.handler.run(line)
+
     print("\n+-----+")
-    # match(b.handler, "config")
+    # b.handler.run("exit")
     b.handler.run("config")
-
-    print("\n+-----+")
-    # match(b.handler, "config login localhost jrecuero")
-    b.handler.run("config login localhost jrecuero")
-
-    print("\n+-----+")
-    b.handler.run("config set home")
-    b.handler.run("config set home speed 100")
+    b.handler.run("exit")
+    b.handler.run("config")
+    b.handler.run("set home")
+    b.handler.run("exit")
+    b.handler.run("config")
+    b.handler.run("set home")
+    b.handler.run("speed 256")
+    b.handler.run("speed 512")
+    b.handler.run("exit")
+    b.handler.run("exit")
+    # print([str(_) for _ in b._Builder__modes])

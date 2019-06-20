@@ -1,7 +1,7 @@
 from typing import List, Union
 from grafo import Grafo, Edge, Link
 from ._node import Node
-from ._content import END_TOKEN, Kontent
+from ._content import END_TOKEN
 from ._context import Context
 
 
@@ -11,6 +11,10 @@ class Handler(object):
         self.context: Context = Context()
 
     def add_node(self, parent: Node, child: Node, loop: bool = False) -> bool:
+        # Grafo adds next node to the previous node if parent is set to None,
+        # but for CLI node has to be attached to the root when parent is set to
+        # None.
+        parent = parent if parent else self.grafo.root
         edge: Edge = Edge("", parent, child, Link.DOWN)
         ok = self.grafo.add_edge(parent, edge, loop)
         if not ok:
@@ -19,7 +23,7 @@ class Handler(object):
         return True
 
     def add_node_to_context(self, node: Node, token: str) -> Node:
-        self.context.add(node, token)
+        self.context.add_node(node, token)
         return node
 
     def find_path(
@@ -38,7 +42,7 @@ class Handler(object):
         return False, index, path
 
     def _match(self, tokens: List) -> Union[bool, int, List[Node]]:
-        self.context = Context()
+        self.context.new_match()
         match, index, path = self.find_path(tokens, 0, [])
         return match, index, path
 
@@ -47,15 +51,32 @@ class Handler(object):
         tokens.append(END_TOKEN)
         return self._match(tokens)
 
+    # def run(self, line: str):
+    #     tokens = line.split()
+    #     tokens.append(END_TOKEN)
+    #     match, index, path = self._match(tokens)
+    #     if match and path[-1].content.is_end():
+    #         command, _ = self.context.match_last_command[0]
+    #         if command.content.is_command():
+    #             cargs = self.context.last_command_args()
+    #             command.content.call(**cargs)
+    #         if command.content.is_mode():
+    #             self.context.push_mode()
+
     def run(self, line: str):
-        tokens = line.split()
+        tokens = self.context.flat_modes() if self.context.modes else []
+        tokens.extend(line.split())
         tokens.append(END_TOKEN)
         match, index, path = self._match(tokens)
-        if match and path[-1].content.klass == Kontent.END:
-            command, _ = self.context.last_command[0]
-            if command.content.klass == Kontent.COMMAND:
+        if match and path[-1].content.is_end():
+            command, _ = self.context.match_last_command[0]
+            if command.content.is_command():
                 cargs = self.context.last_command_args()
+                if command.content.builtin:
+                    cargs["__handler__"] = self
                 command.content.call(**cargs)
+            if command.content.is_mode():
+                self.context.push_mode()
 
     def exit_mode(self):
         pass

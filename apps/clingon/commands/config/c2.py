@@ -1,7 +1,7 @@
-from grafo.cli import command
+from grafo.cli import mode
 
 
-@command("set profile")
+@mode("set profile")
 def set(**kwargs):
     profile = kwargs.get("profile", None)
 

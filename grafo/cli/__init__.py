@@ -11,7 +11,7 @@ from ._node import Node, HookNode, LoopNode
 from ._context import Context
 from ._handler import Handler
 from ._builder import Builder
-from ._decorator import command, loader
+from ._decorator import command, mode, loader
 
 __all__ = [
     "END_TOKEN",
@@ -28,5 +28,6 @@ __all__ = [
     "Handler",
     "Builder",
     "command",
+    "mode",
     "loader",
 ]

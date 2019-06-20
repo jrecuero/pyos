@@ -61,6 +61,15 @@ class Content(object):
     def complete(self, tokens: List[str], tindex: int, **kwargs) -> List[str]:
         return [""]
 
+    def is_command(self):
+        return self.klass in [Kontent.COMMAND, Kontent.MODE]
+
+    def is_mode(self):
+        return self.klass in [Kontent.MODE]
+
+    def is_end(self):
+        return self.klass in [Kontent.END]
+
 
 class EndContent(Content):
     def __init__(self, **kwargs):
@@ -118,10 +127,20 @@ class IntContent(Content):
 class CommandContent(Content):
     def __init__(self, vault: str, **kwargs):
         super(CommandContent, self).__init__(vault, **kwargs)
-        self.klass: int = Kontent.COMMAND
-        self.command = kwargs.get("command", None)
-        self.rcommand = None
+        self._is_mode: bool = False
+        self.builtin: bool = False
+        self.klass: int = Kontent.NONE
+        self.set_mode(kwargs.get("is_mode", False))
+        self.call = kwargs.get("command", None)
+        self.rcall = None
+
+    def set_mode(self, is_mode=False):
+        self._is_mode = is_mode
+        if self._is_mode:
+            self.klass = Kontent.MODE
+        else:
+            self.klass = Kontent.COMMAND
 
     def call(self, **kwargs):
-        if self.command:
-            self.rcommand = self.command(**kwargs)
+        if self.call:
+            self.rcall = self.command(**kwargs)
