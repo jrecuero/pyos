@@ -141,6 +141,11 @@ class CommandContent(Content):
         else:
             self.klass = Kontent.COMMAND
 
-    def call(self, **kwargs):
+    def the_call(self, **kwargs):
         if self.call:
-            self.rcall = self.command(**kwargs)
+            self.rcall = self.call(**kwargs)
+
+    def the_rcall(self, **kwargs):
+        if self.rcall:
+            self.rcall(**kwargs)
+            self.rcall = None

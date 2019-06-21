@@ -10,7 +10,7 @@ class Lexer(object):
     # PIPE token |. #5
     PIPE = Token.CUSTOM + 2
     # ASTERISK token *. #6
-    ASTERISK = Token.CUSTOM + 2
+    ASTERISK = Token.CUSTOM + 3
     # PLUS token +. #7
     PLUS = Token.CUSTOM + 4
     # QUESTION mark token ?. #8

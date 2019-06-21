@@ -10,13 +10,15 @@ class Handler(object):
         self.grafo: Grafo = kwargs.get("grafo", Grafo("cli", root="cli"))
         self.context: Context = Context()
 
-    def add_node(self, parent: Node, child: Node, loop: bool = False) -> bool:
+    def add_node(
+        self, parent: Node, child: Node, loop: bool = False, first: bool = False
+    ) -> bool:
         # Grafo adds next node to the previous node if parent is set to None,
         # but for CLI node has to be attached to the root when parent is set to
         # None.
         parent = parent if parent else self.grafo.root
         edge: Edge = Edge("", parent, child, Link.DOWN)
-        ok = self.grafo.add_edge(parent, edge, loop)
+        ok = self.grafo.add_edge(parent, edge, loop, first)
         if not ok:
             assert "Error add_node {} -> {}".format(parent, child)
         edge.auto_label()
@@ -51,17 +53,15 @@ class Handler(object):
         tokens.append(END_TOKEN)
         return self._match(tokens)
 
-    # def run(self, line: str):
-    #     tokens = line.split()
-    #     tokens.append(END_TOKEN)
-    #     match, index, path = self._match(tokens)
-    #     if match and path[-1].content.is_end():
-    #         command, _ = self.context.match_last_command[0]
-    #         if command.content.is_command():
-    #             cargs = self.context.last_command_args()
-    #             command.content.call(**cargs)
-    #         if command.content.is_mode():
-    #             self.context.push_mode()
+    def pop_mode(self):
+        if self.context.pop_mode():
+            mode_node = self.context.last_command_matched_node()
+            cargs = self.context.last_command_matched_args()
+            if mode_node.content.builtin:
+                cargs["__handler__"] = self
+            mode_node.content.the_rcall(**cargs)
+            return mode_node.content
+        return None
 
     def run(self, line: str):
         tokens = self.context.flat_modes() if self.context.modes else []
@@ -71,10 +71,10 @@ class Handler(object):
         if match and path[-1].content.is_end():
             command, _ = self.context.match_last_command[0]
             if command.content.is_command():
-                cargs = self.context.last_command_args()
+                cargs = self.context.last_command_matched_args()
                 if command.content.builtin:
                     cargs["__handler__"] = self
-                command.content.call(**cargs)
+                command.content.the_call(**cargs)
             if command.content.is_mode():
                 self.context.push_mode()
 

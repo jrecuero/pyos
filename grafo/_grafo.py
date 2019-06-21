@@ -31,7 +31,9 @@ class Grafo(Iderable):
         else:
             raise Exception("Vertex {} not in grafo".format(vertex))
 
-    def add_edge(self, parent: Vertex, edge: Edge, loop: bool = False):
+    def add_edge(
+        self, parent: Vertex, edge: Edge, loop: bool = False, first: bool = False
+    ):
         """add_edge adds a new edge to the grafo and hook it up to the given
         vertex.
         """
@@ -40,8 +42,8 @@ class Grafo(Iderable):
             edge.set_parent(parent)
         if not parent.hooked:
             raise Exception("Parent {} not found in grafo".format(parent))
-        edge.parent.add_edge(edge, loop)
-        edge.child.add_edge(edge, loop)
+        edge.parent.add_edge(edge, loop, first)
+        edge.child.add_edge(edge, loop, first)
         edge.child.hooked = True
         self.vertices[edge.child.ider] = edge.child
         self.edges[edge.ider] = edge

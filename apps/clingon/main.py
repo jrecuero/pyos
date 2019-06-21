@@ -9,12 +9,6 @@ def match(h: Handler, pattern: str):
     for p in path:
         print(p.label, end=" ")
     print("]")
-    for _commands in h.context.commands:
-        for c, t in _commands:
-            print(c.label, t, end=" ")
-        print()
-    print([str(x) for x in h.context.last_command])
-    print("-------")
     print()
 
 
@@ -172,17 +166,24 @@ if __name__ == "__main__":
     #     line = input("? ")
     #     b.handler.run(line)
 
-    print("\n+-----+")
+    # print("\n+-----+")
+    # # b.handler.run("exit")
+    # b.handler.run("config")
     # b.handler.run("exit")
-    b.handler.run("config")
-    b.handler.run("exit")
-    b.handler.run("config")
-    b.handler.run("set home")
-    b.handler.run("exit")
-    b.handler.run("config")
-    b.handler.run("set home")
-    b.handler.run("speed 256")
-    b.handler.run("speed 512")
-    b.handler.run("exit")
-    b.handler.run("exit")
-    # print([str(_) for _ in b._Builder__modes])
+    # b.handler.run("config")
+    # b.handler.run("set home")
+    # b.handler.run("exit")
+    # b.handler.run("config")
+    # b.handler.run("set home")
+    # b.handler.run("speed 256")
+    # b.handler.run("speed 512")
+    # b.handler.run("exit")
+    # b.handler.run("exit")
+    # # print([str(_) for _ in b._Builder__modes])
+
+    line = "none"
+    while line:
+        line = input("? ")
+        b.handler.run(line)
+
+    # match(b.handler, "setup localhost")

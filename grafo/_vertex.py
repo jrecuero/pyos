@@ -22,29 +22,39 @@ class Vertex(Iderable):
     def __str__(self) -> str:
         return self.label
 
-    def add_parent(self, parent: "Vertex", loop: bool = False) -> None:
+    def add_parent(
+        self, parent: "Vertex", loop: bool = False, first: bool = False
+    ) -> None:
         """add_parent adds a parent vertex. This has to be added when the
         vertex belongs to an edge as child.
         """
         if (loop or self != parent) and (parent not in self.parents):
-            self.parents.append(parent)
+            if first:
+                self.parents.insert(0, parent)
+            else:
+                self.parents.append(parent)
 
-    def add_child(self, child: "Vertex", loop: bool = False) -> None:
+    def add_child(
+        self, child: "Vertex", loop: bool = False, first: bool = False
+    ) -> None:
         """add_child adds a child vertex. This has to be added when the
         vertex belongs to an edge as parent.
         """
         if (loop or self != child) and (child not in self.children):
-            self.children.append(child)
+            if first:
+                self.children.insert(0, child)
+            else:
+                self.children.append(child)
 
-    def add_edge(self, edge: "Edge", loop: bool = False) -> bool:
+    def add_edge(self, edge: "Edge", loop: bool = False, first: bool = False) -> bool:
         """add_edge adds an edge to the vertex. This has to be added when the
         vertex belongs to an edge as parent or child.
         """
         if self not in [edge.parent, edge.child]:
             return False
         self.edges.append(edge)
-        self.add_parent(edge.parent, loop)
-        self.add_child(edge.child, loop)
+        self.add_parent(edge.parent, loop, first)
+        self.add_child(edge.child, loop, first)
         return True
 
 

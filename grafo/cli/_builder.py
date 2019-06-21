@@ -1,9 +1,10 @@
 from typing import List
 import os
-from ._decorator import loader, builtin, command
+from ._decorator import loader
 from ._node import Node, HookNode
 from ._content import CommandContent, StrContent, EndContent
 from ._handler import Handler
+from ._builtins import _exit, _help
 from grafo.cli.parser import Parser, Syntax, Token
 from grafo.cli.parser.lex import CliLexer
 
@@ -87,6 +88,8 @@ class SegmentHooker(Hooker):
 
     def add_skip(self):
         self.handler.add_node(self.hook_start, self.hook_end)
+        if not self.__hooked_end:
+            self.handler.add_node(self.hook_next, self.hook_end)
         self.__hooked_end = True
 
     def add_loop(self):
@@ -156,8 +159,8 @@ class Builder(object):
                 active_hooker = hookers.pop()
             elif token == CliLexer.ASTERISK:
                 closer.pop()
-                active_hooker.add_skip()
                 active_hooker.add_loop()
+                active_hooker.add_skip()
                 hookers[-1].next = active_hooker.terminate()
                 active_hooker = hookers.pop()
             elif token == CliLexer.PLUS:
@@ -170,7 +173,7 @@ class Builder(object):
             hookers[-1].next = active_hooker.terminate()
             active_hooker = hookers.pop()
         end_node = active_hooker.terminate()
-        self.handler.add_node(end_node, Node("END", content=EndContent()))
+        self.handler.add_node(end_node, Node("END", content=EndContent()), first=True)
         print(self.handler.grafo.to_mermaid())
         return command_node, end_node
 
@@ -193,10 +196,7 @@ class Builder(object):
             if map_cmd.node.content.is_mode():
                 self.__modes.append(end_node)
         for map_cmd in [c for c in _mapa.commands if c.builtin]:
-            map_cmd.node, _ = self.build(map_cmd.cline)
-            map_cmd.node.content.builtin = True
-            map_cmd.node.content.call = map_cmd.call
-            for mode in self.__modes:
+            for mode in [None] + self.__modes:
                 map_cmd.node, _ = self.build(map_cmd.cline, parent=mode)
                 map_cmd.node.content.builtin = True
                 map_cmd.node.content.call = map_cmd.call
@@ -204,18 +204,10 @@ class Builder(object):
         return _mapa
 
 
-@builtin
-@command("exit")
-def _exit(**kwargs):
-    h = kwargs.get("__handler__", None)
-    print([str(m) for m in h.context.modes])
-    mode = h.context.pop_mode()
-    print(mode)
-    print("exit {}".format(mode[0][1]))
-    return None
-
-
 if __name__ == "__main__":
+    # TODO: Avoid vim:editor error messages.
+    print(_exit, _help)
+
     b = Builder()
     # b.parse("login hostname [user username | id ider] password")
     # b.build("login hostname [user username | id ider] password")
