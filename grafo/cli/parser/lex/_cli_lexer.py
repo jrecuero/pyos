@@ -43,6 +43,8 @@ class Lexer(object):
         CLOSECURLY: {"opener": False, "closer": True, "segment": 3},
     }
 
+    __slots__ = ["syntax", "_char_map"]
+
     def __init__(self):
         self.syntax: Syntax = None
         self._char_map = {

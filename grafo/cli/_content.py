@@ -41,6 +41,8 @@ END_TOKEN = EndToken()
 
 
 class Content(object):
+    __slots__ = ["_vault", "klass"]
+
     def __init__(self, vault: Any, **kwargs):
         self._vault: Any = vault
         self.klass: int = Kontent.NONE
@@ -125,6 +127,8 @@ class IntContent(Content):
 
 
 class CommandContent(Content):
+    __slots__ = ["_is_mode", "builtin", "call", "rcall"]
+
     def __init__(self, vault: str, **kwargs):
         super(CommandContent, self).__init__(vault, **kwargs)
         self._is_mode: bool = False
@@ -142,8 +146,13 @@ class CommandContent(Content):
             self.klass = Kontent.COMMAND
 
     def the_call(self, **kwargs):
+        ret_value = None
         if self.call:
-            self.rcall = self.call(**kwargs)
+            ret_value = self.call(**kwargs)
+            if isinstance(ret_value, tuple):
+                self.rcall = ret_value[1]
+                ret_value = ret_value[0]
+        return ret_value
 
     def the_rcall(self, **kwargs):
         if self.rcall:

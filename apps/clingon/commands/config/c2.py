@@ -1,4 +1,4 @@
-from grafo.cli import mode
+from grafo.cli import mode, STREAM
 
 
 @mode("set profile")
@@ -6,7 +6,7 @@ def set(**kwargs):
     profile = kwargs.get("profile", None)
 
     def _exit(**kwargs):
-        print("exiting set {}".format(profile))
+        STREAM.out("exiting set {}".format(profile))
 
-    print("entering set {}".format(profile))
-    return _exit
+    STREAM.out("entering set {}".format(profile))
+    return None, _exit

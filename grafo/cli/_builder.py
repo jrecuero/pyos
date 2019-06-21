@@ -10,6 +10,8 @@ from grafo.cli.parser.lex import CliLexer
 
 
 class Hooker(object):
+    __slots__ = ["handler", "hook_next"]
+
     def __init__(self, handler: Handler, parent_node: Node):
         self.handler: Handler = handler
         self.hook_next: Node = parent_node
@@ -52,6 +54,8 @@ class Hooker(object):
 
 
 class SegmentHooker(Hooker):
+    __slots = ["hook_start", "hook_end", "__hooked_end"]
+
     def __init__(self, handler: Handler, parent_node: Node):
         super(SegmentHooker, self).__init__(handler, parent_node)
         self.hook_start: Node = HookNode("Hook-Start")
@@ -105,6 +109,8 @@ class SegmentHooker(Hooker):
 
 
 class Builder(object):
+    __slots__ = ["lexer", "parser", "handler", "__modes"]
+
     def __init__(self):
         self.lexer: CliLexer = CliLexer()
         self.parser: Parser = Parser(self.lexer)

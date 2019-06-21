@@ -9,6 +9,8 @@ from ._token import Token
 
 
 class Syntax(object):
+    __slots__ = ["command", "arguments", "tokens"]
+
     def __init__(self, command=None, argos=None, tokens=None):
         self.command = command
         self.arguments = argos if argos else []
@@ -16,6 +18,8 @@ class Syntax(object):
 
 
 class Buffer(object):
+    __slots__ = ["token", "literal", "size"]
+
     def __init__(self):
         self.token = None
         self.literal = None
@@ -23,6 +27,8 @@ class Buffer(object):
 
 
 class Parser(object):
+    __slots__ = ["lexer", "scanner", "buffer"]
+
     def __init__(self, lexer, line=None):
         self.lexer = lexer
         self.scanner = Scanner(lexer, line)

@@ -8,6 +8,8 @@ from ._token import Token
 
 
 class Reader(object):
+    __slots__ = ["line", "hook"]
+
     def __init__(self, line):
         self.line = line
         self.hook = 0
@@ -24,6 +26,8 @@ class Reader(object):
 
 
 class Buffer(object):
+    __slots__ = ["data"]
+
     def __init__(self):
         self.data = None
 
@@ -38,6 +42,8 @@ class Buffer(object):
 
 
 class Scanner(object):
+    __slots__ = ["lexer", "reader"]
+
     def __init__(self, lexer, line=None):
         self.lexer = lexer
         self.reader = None if line is None else Reader(line)

@@ -4,6 +4,8 @@ from ._content import Kontent
 
 
 class Context(object):
+    __slots__ = ["match_commands", "match_last_command", "_modes"]
+
     def __init__(self):
         self.match_commands: List = []
         self.match_last_command: List = []

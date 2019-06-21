@@ -1,4 +1,4 @@
-from grafo.cli import Handler, Node, HookNode
+from grafo.cli import Handler, Node, HookNode, STREAM
 from grafo.cli import EndContent, StrContent, IntContent, KeywordContent, CommandContent
 
 
@@ -184,6 +184,12 @@ if __name__ == "__main__":
     line = "none"
     while line:
         line = input("? ")
-        b.handler.run(line)
+        result = b.handler.run(line)
+        STREAM.out("command {} returned: {}".format(line, result))
 
     # match(b.handler, "setup localhost")
+
+    print("Running silence")
+    STREAM.output = lambda x: x
+    result = b.handler.run("help")
+    print("silenced command help returned: {}".format(result))

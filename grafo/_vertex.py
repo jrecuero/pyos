@@ -77,6 +77,8 @@ class Edge(VtoV):
     def __init__(self, label: str, parent: Vertex, child: Vertex, link: Link = Link.BI):
         super(Edge, self).__init__(label, parent, child)
         self.link: Link = link
+        self.src: Vertex = None
+        self.dst: Vertex = None
         self.set_parent(parent)
 
     def set_parent(self, parent: Vertex):

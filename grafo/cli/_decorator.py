@@ -6,6 +6,17 @@ from grafo.cli import Node
 
 class Mapa(object):
     class Command(object):
+        __slots__ = [
+            "name",
+            "cline",
+            "parent",
+            "call",
+            "rcall",
+            "node",
+            "is_mode",
+            "builtin",
+        ]
+
         def __init__(self, name: str, cline: str, parent: str, call, is_mode: bool):
             self.name: str = name
             self.cline: str = cline
@@ -25,6 +36,8 @@ class Mapa(object):
                 self.call.__name__,
                 self.builtin,
             )
+
+    __slots__ = ["name", "commands", "loader_parent"]
 
     def __init__(self, name: str = None):
         self.name: str = name

@@ -6,6 +6,8 @@ from ._context import Context
 
 
 class Handler(object):
+    __slots__ = ["grafo", "context"]
+
     def __init__(self, **kwargs):
         self.grafo: Grafo = kwargs.get("grafo", Grafo("cli", root="cli"))
         self.context: Context = Context()
@@ -64,6 +66,7 @@ class Handler(object):
         return None
 
     def run(self, line: str):
+        ret_value = None
         tokens = self.context.flat_modes() if self.context.modes else []
         tokens.extend(line.split())
         tokens.append(END_TOKEN)
@@ -74,9 +77,10 @@ class Handler(object):
                 cargs = self.context.last_command_matched_args()
                 if command.content.builtin:
                     cargs["__handler__"] = self
-                command.content.the_call(**cargs)
+                ret_value = command.content.the_call(**cargs)
             if command.content.is_mode():
                 self.context.push_mode()
+        return ret_value
 
     def exit_mode(self):
         pass

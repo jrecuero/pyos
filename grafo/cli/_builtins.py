@@ -1,4 +1,5 @@
 from ._decorator import builtin, command
+from ._streamer import STREAM
 
 
 @builtin
@@ -18,5 +19,6 @@ def _help(**kwargs):
         children = h.context.active_mode_node().children
     else:
         children = h.grafo.root.children
-    for m in children:
-        print(str(m))
+    ret_value = [str(m) for m in children]
+    STREAM.out("\n".join(ret_value))
+    return ret_value

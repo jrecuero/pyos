@@ -4,6 +4,8 @@ from ._content import Content, HookContent
 
 
 class Node(Vertex):
+    __slots__ = ["content"]
+
     def __init__(self, label: str, content: Optional[Content] = None):
         super(Node, self).__init__(label)
         self.content: Content = content
