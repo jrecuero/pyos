@@ -145,27 +145,12 @@ class TextData(NObject):
 
 
 class Char(TextData):
-    """Char class identifies a character nobject.
+    """Char class identifies a formatted character nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str):
+    def __init__(self, y: int, x: int, text_data: str, fmt=curses.A_NORMAL):
         super(Char, self).__init__(y, x, 1, 1, text_data)
-
-    @render
-    def render(self, screen) -> List[Event]:
-        """render renders an string nobject.
-        """
-        screen.addch(self.y, self.x, self.text_data)
-        return []
-
-
-class XChar(Char):
-    """XChar class identifies a formatted character nobject.
-    """
-
-    def __init__(self, y: int, x: int, text_data: str, fmt: Optional[Any] = None):
-        super(XChar, self).__init__(y, x, text_data)
-        self.fmt: Any = fmt if fmt is not None else curses.A_NORMAL
+        self.fmt: Any = fmt
 
     @render
     def render(self, screen) -> List[Event]:
@@ -176,27 +161,12 @@ class XChar(Char):
 
 
 class String(TextData):
-    """String class identifies an string nobject.
+    """String class identifies a formatted string nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str):
+    def __init__(self, y: int, x: int, text_data: str, fmt=curses.A_NORMAL):
         super(String, self).__init__(y, x, 1, len(text_data), text_data)
-
-    @render
-    def render(self, screen) -> List[Event]:
-        """render renders an string nobject.
-        """
-        screen.addnstr(self.y, self.x, self.text_data, len(self.text_data))
-        return []
-
-
-class XString(String):
-    """XString class identifies a formatted string nobject.
-    """
-
-    def __init__(self, y: int, x: int, text_data: str, fmt: Optional[Any] = None):
-        super(XString, self).__init__(y, x, text_data)
-        self.fmt: Any = fmt if fmt is not None else curses.A_NORMAL
+        self.fmt: Any = fmt
 
     @render
     def render(self, screen) -> List[Event]:
@@ -230,8 +200,9 @@ class Block(TextData):
     """Block class identifies a block of strings nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str):
+    def __init__(self, y: int, x: int, text_data: str, fmt=curses.A_NORMAL):
         super(Block, self).__init__(y, x, 0, 0, text_data)
+        self.fmt = fmt
 
     @render
     def render(self, screen) -> List[Event]:
@@ -239,7 +210,7 @@ class Block(TextData):
         """
         tokens = self.text_data.split("\n")
         for y, tok in enumerate(tokens):
-            screen.addnstr(self.y + y, self.x, tok, len(tok))
+            screen.addnstr(self.y + y, self.x, tok, len(tok), self.fmt)
         return []
 
 
@@ -295,6 +266,7 @@ class BoxText(TextData):
         dy: int = -1,
         dx: int = -1,
         fmt=curses.A_NORMAL,
+        cfmt=curses.A_NORMAL,
     ):
         super(BoxText, self).__init__(y, x, dy, dx, text_data)
         tokens = self.text_data.split("\n")
@@ -306,29 +278,17 @@ class BoxText(TextData):
                     self.dx = len(t)
             self.dx += 2
         self.fmt = fmt
+        self.cfmt = cfmt
 
     @render
     def render(self, screen) -> List[Event]:
         """render renders a bordered box containing a block of strings
         nobject.
         """
-        # for x in range(1, self.dx):
-        #     screen.addch(self.y, self.x + x, chr(9473))
-        # for x in range(1, self.dx):
-        #     screen.addch(self.y + self.dy, self.x + x, chr(9473))
-        # for y in range(1, self.dy):
-        #     screen.addch(self.y + y, self.x, chr(9475))
-        # for y in range(1, self.dy):
-        #     screen.addch(self.y + y, self.x + self.dx - 1, chr(9475))
-        # screen.addch(self.y, self.x, chr(9487))
-        # screen.addch(self.y + self.dy, self.x, chr(9495))
-        # screen.addch(self.y, self.x + self.dx - 1, chr(9491))
-        # screen.addch(self.y + self.dy, self.x + self.dx - 1, chr(9499))
-        # draw_box(screen, self.y, self.x, self.dy, self.dx)
         self.box(screen, self.fmt)
         tokens = self.text_data.split("\n")
         for y, tok in enumerate(tokens):
-            screen.addnstr(self.y + 1 + y, self.x + 1, tok, len(tok))
+            screen.addnstr(self.y + 1 + y, self.x + 1, tok, len(tok), self.cfmt)
         return []
 
 

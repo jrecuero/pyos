@@ -6,7 +6,6 @@ from engine import (
     Handler,
     Scene,
     String,
-    XString,
     Formatted,
     Block,
     Box,
@@ -53,9 +52,9 @@ class SceneMain(Scene):
             lname = self.lname[0] if self.lname else ""
             return [[16, 2, "You are {} {}".format(fname, lname)]]
 
-        self.add_object(XString(2, 4, "E", c_marked))
-        self.add_object(XString(2, 5, "ngine", curses.color_pair(1)))
-        self.add_object(XString(2, 11, "Example:", c_marked | curses.color_pair(2)))
+        self.add_object(String(2, 4, "E", c_marked))
+        self.add_object(String(2, 5, "ngine", curses.color_pair(1)))
+        self.add_object(String(2, 11, "Example:", c_marked | curses.color_pair(2)))
         self.add_object(
             Formatted(2, 20, [["I", c_marked], ["nput "], ["E", c_marked], ["xit"]])
         )
