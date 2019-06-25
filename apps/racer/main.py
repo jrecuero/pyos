@@ -17,10 +17,12 @@ from engine import (
     # render_scene,
     KeyHandler,
     # Path,
-    # HPath,
-    # HPathCover,
-    # VPath,
+    HPath,
+    HPathCover,
+    VPath,
+    VPathCover,
     HorizontalPath,
+    VerticalPath,
 )
 
 
@@ -169,24 +171,24 @@ class BoardScene(Scene):
 
         color_1 = curses.color_pair(1)
         color_2 = curses.color_pair(2)
-        d1 = "   \n * \n   "
-        d2 = "*  \n   \n  *"
-        d3 = "*  \n * \n  *"
-        d4 = "* *\n   \n* *"
-        d5 = "* *\n * \n* *"
-        d6 = "* *\n* *\n* *"
-        dice_1 = BoxText(1, 0, d1, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        dice_2 = BoxText(1, 5, d2, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        dice_3 = BoxText(1, 10, d3, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        dice_4 = BoxText(1, 15, d4, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        dice_5 = BoxText(1, 20, d5, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        dice_6 = BoxText(1, 25, d6, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        self.add_object(dice_1)
-        self.add_object(dice_2)
-        self.add_object(dice_3)
-        self.add_object(dice_4)
-        self.add_object(dice_5)
-        self.add_object(dice_6)
+        # d1 = "   \n * \n   "
+        # d2 = "*  \n   \n  *"
+        # d3 = "*  \n * \n  *"
+        # d4 = "* *\n   \n* *"
+        # d5 = "* *\n * \n* *"
+        # d6 = "* *\n* *\n* *"
+        # dice_1 = BoxText(1, 0, d1, dy=4, dx=4, fmt=color_2, cfmt=color_1)
+        # dice_2 = BoxText(1, 5, d2, dy=4, dx=4, fmt=color_2, cfmt=color_1)
+        # dice_3 = BoxText(1, 10, d3, dy=4, dx=4, fmt=color_2, cfmt=color_1)
+        # dice_4 = BoxText(1, 15, d4, dy=4, dx=4, fmt=color_2, cfmt=color_1)
+        # dice_5 = BoxText(1, 20, d5, dy=4, dx=4, fmt=color_2, cfmt=color_1)
+        # dice_6 = BoxText(1, 25, d6, dy=4, dx=4, fmt=color_2, cfmt=color_1)
+        # self.add_object(dice_1)
+        # self.add_object(dice_2)
+        # self.add_object(dice_3)
+        # self.add_object(dice_4)
+        # self.add_object(dice_5)
+        # self.add_object(dice_6)
         # lista_1 = [0, 0, 0, 1, 1, 1, 2, 2, 2, 1, 1, 0, 0, -1, -1, -2, -2, -1, -1, 0]
         lista_1 = [
             0,
@@ -209,6 +211,11 @@ class BoardScene(Scene):
             3,
             4,
             0,
+            1,
+            2,
+            3,
+            2,
+            1,
             0,
             9,
             0,
@@ -216,16 +223,23 @@ class BoardScene(Scene):
             -5,
             -2,
             0,
+            1,
+            9,
             0,
         ]
-        # self.add_object(HPathCover(15, 10, lista_1, color_1))
-        # self.add_object(VPath(10, 10, lista_1, color_1))
         # self.add_object(String(21, 10, "".join([number(x)[0] for x in lista_1])))
         # self.add_object(String(22, 10, "".join([number(x)[1] for x in lista_1])))
         # self.add_object(HPath(20, 10, lista_1, color_1))
-        self.add_object(HorizontalPath(20, 10, 5, lista_1, color_1))
+        # self.add_object(HPathCover(18, 10, lista_1, color_1))
+        # self.add_object(HorizontalPath(20, 10, 5, lista_1, color_1))
+        # for i, v in enumerate(lista_1):
+        #     self.add_object(String(19 - v, 10 + i, str(abs(v)), color_2))
+
+        # self.add_object(VPath(2, 10, lista_1, color_1))
+        # self.add_object(VPathCover(2, 12, lista_1, color_1))
+        self.add_object(VerticalPath(2, 10, 5, lista_1, color_1))
         for i, v in enumerate(lista_1):
-            self.add_object(String(19 - v, 10 + i, str(abs(v))))
+            self.add_object(String(2 + i, 11 + v, str(abs(v)), color_2))
 
         # y: int = 20
         # x: int = 1
@@ -263,7 +277,7 @@ if __name__ == "__main__":
     board_scene.colors(
         [
             (curses.COLOR_RED, curses.COLOR_BLUE),
-            (curses.COLOR_YELLOW, curses.COLOR_BLACK),
+            (curses.COLOR_BLACK, curses.COLOR_WHITE),
         ]
     )
     h.add_scene(board_scene)

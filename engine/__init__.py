@@ -46,6 +46,7 @@ from ._nobject import (
     SinglePath,
     Path,
     HorizontalPath,
+    VerticalPath,
 )
 from ._physic import Point, Move, BB, Shape, Arena
 from ._scene import update as update_scene
@@ -99,6 +100,7 @@ __all__ = [
     "SinglePath",
     "Path",
     "HorizontalPath",
+    "VerticalPath",
     "update_scene",
     "render_scene",
     "Scene",
