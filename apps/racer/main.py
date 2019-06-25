@@ -8,21 +8,21 @@ from engine import (
     Event,
     # NObject,
     Char,
-    String,
-    BoxText,
+    # String,
+    # BoxText,
     # Caller,
     # TimerText,
     # ArrowKeyHandler,
     update_scene,
     # render_scene,
+    # HPath,
+    # HPathCover,
+    # VPath,
+    # VPathCover,
+    # HorizontalPath,
+    # VerticalPath,
+    Path,
     KeyHandler,
-    # Path,
-    HPath,
-    HPathCover,
-    VPath,
-    VPathCover,
-    HorizontalPath,
-    VerticalPath,
 )
 
 
@@ -170,7 +170,7 @@ class BoardScene(Scene):
             return "{} ".format(x)
 
         color_1 = curses.color_pair(1)
-        color_2 = curses.color_pair(2)
+        # color_2 = curses.color_pair(2)
         # d1 = "   \n * \n   "
         # d2 = "*  \n   \n  *"
         # d3 = "*  \n * \n  *"
@@ -190,43 +190,43 @@ class BoardScene(Scene):
         # self.add_object(dice_5)
         # self.add_object(dice_6)
         # lista_1 = [0, 0, 0, 1, 1, 1, 2, 2, 2, 1, 1, 0, 0, -1, -1, -2, -2, -1, -1, 0]
-        lista_1 = [
-            0,
-            0,
-            0,
-            2,
-            2,
-            5,
-            5,
-            0,
-            0,
-            -2,
-            -2,
-            -5,
-            -5,
-            0,
-            0,
-            1,
-            2,
-            3,
-            4,
-            0,
-            1,
-            2,
-            3,
-            2,
-            1,
-            0,
-            9,
-            0,
-            0,
-            -5,
-            -2,
-            0,
-            1,
-            9,
-            0,
-        ]
+        # lista_1 = [
+        #     0,
+        #     0,
+        #     0,
+        #     2,
+        #     2,
+        #     5,
+        #     5,
+        #     0,
+        #     0,
+        #     -2,
+        #     -2,
+        #     -5,
+        #     -5,
+        #     0,
+        #     0,
+        #     1,
+        #     2,
+        #     3,
+        #     4,
+        #     0,
+        #     1,
+        #     2,
+        #     3,
+        #     2,
+        #     1,
+        #     0,
+        #     9,
+        #     0,
+        #     0,
+        #     -5,
+        #     -2,
+        #     0,
+        #     1,
+        #     9,
+        #     0,
+        # ]
         # self.add_object(String(21, 10, "".join([number(x)[0] for x in lista_1])))
         # self.add_object(String(22, 10, "".join([number(x)[1] for x in lista_1])))
         # self.add_object(HPath(20, 10, lista_1, color_1))
@@ -237,9 +237,50 @@ class BoardScene(Scene):
 
         # self.add_object(VPath(2, 10, lista_1, color_1))
         # self.add_object(VPathCover(2, 12, lista_1, color_1))
-        self.add_object(VerticalPath(2, 10, 5, lista_1, color_1))
-        for i, v in enumerate(lista_1):
-            self.add_object(String(2 + i, 11 + v, str(abs(v)), color_2))
+        # self.add_object(VerticalPath(2, 10, 5, lista_1, color_1))
+        # for i, v in enumerate(lista_1):
+        #     self.add_object(String(2 + i, 11 + v, str(abs(v)), color_2))
+
+        # self.add_object(
+        #     Path(
+        #         2,
+        #         10,
+        #         [
+        #             (0, 2),
+        #             (5, 0),
+        #             (0, 2),
+        #             (-2, 0),
+        #             (0, 10),
+        #             (-5, 0),
+        #             (0, -2),
+        #             (3, 0),
+        #             (0, -2),
+        #             (-2, 0),
+        #         ],
+        #         False,
+        #         color_1,
+        #     )
+        # )
+        self.add_object(
+            Path(
+                2,
+                10,
+                [
+                    (0, 2),
+                    (5, 0),
+                    (0, 2),
+                    (-2, 0),
+                    (0, 10),
+                    (-5, 0),
+                    (0, -2),
+                    (3, 0),
+                    (0, -2),
+                    (-2, 0),
+                ],
+                False,
+                color_1,
+            )
+        )
 
         # y: int = 20
         # x: int = 1

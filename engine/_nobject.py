@@ -1070,46 +1070,74 @@ class VerticalPath(NObject):
         return []
 
 
-class Figure(NObject):
-    """Figure class identifies a figure.
+class Path(NObject):
+    """Path class identifies a path.
     """
 
     def __init__(
         self, y: int, x: int, path: List, closed: bool = False, fmt=curses.A_NORMAL
     ):
-        super(Figure, self).__init__(self, y, x, -1, -1)
+        super(Path, self).__init__(y, x, -1, -1)
         self.path: List = path
         self.closed: bool = closed
         self.fmt = fmt
+        self.motion: str = "none"
 
     @render
     def render(self, screen) -> List[Event]:
         y = self.y
         x = self.x
-        for index, point in self.path[:-1]:
+        for index, point in enumerate(self.path):
             weight_y = point[0]
             weight_x = point[1]
-            if weight_x == x + 1:
-                prev_y = self.path[index - 1][0] if index > 0 else y
-                next_y = self.path[index + 1][0] if index < (len(self.path) - 1) else 0
-                if prev_y == weight_y:
-                    screen.addstr(weight_y, weight_x, chr(9473), self.fmt)
-                elif next_y > weight_y:
-                    if prev_y == weight_y:
-                        screen.addstr(weight_y, weight_x, chr(9473), self.fmt)
-                    else:
-                        screen.addstr(weight_y, weight_x, chr(9487), self.fmt)
-                        screen.addstr(weight_y + 1, weight_x, chr(9499), self.fmt)
-                    y = y - 1
-                elif next_y < weight_y:
-                    screen.addstr(weight_y, weight_x, chr(9491), self.fmt)
-                    screen.addstr(weight_y + 1, weight_x, chr(9495), self.fmt)
-                    y = y + 1
-                elif prev_y < weight_y:
-                    screen.addstr(weight_y, weight_x, chr(9487), self.fmt)
-                    screen.addstr(weight_y + 1, weight_x, chr(9499), self.fmt)
-                elif prev_y > weight_y:
-                    screen.addstr(weight_y, weight_x, chr(9473), self.fmt)
-            y = weight_y
-            x = weight_x
+            if weight_y > 0:
+                if self.motion == "x:plus":
+                    screen.addstr(y, x, chr(9491), self.fmt)
+                    weight_y -= 1
+                    y += 1
+                if self.motion == "x:minus":
+                    screen.addstr(y, x, chr(9487), self.fmt)
+                    weight_y -= 1
+                    y += 1
+                self.motion = "y:plus"
+                for dy in range(weight_y):
+                    screen.addstr(y + dy, x, chr(9475), self.fmt)
+            elif weight_y < 0:
+                if self.motion == "x:plus":
+                    screen.addstr(y, x, chr(9499), self.fmt)
+                    weight_y += 1
+                    y -= 1
+                if self.motion == "x:minus":
+                    screen.addstr(y, x, chr(9495), self.fmt)
+                    weight_y += 1
+                    y -= 1
+                self.motion = "y:minus"
+                for dy in range(abs(weight_y)):
+                    screen.addstr(y - dy, x, chr(9475), self.fmt)
+            y = y + weight_y
+            if weight_x > 0:
+                if self.motion == "y:plus":
+                    screen.addstr(y, x, chr(9495), self.fmt)
+                    weight_x -= 1
+                    x += 1
+                if self.motion == "y:minus":
+                    screen.addstr(y, x, chr(9487), self.fmt)
+                    weight_x -= 1
+                    x += 1
+                self.motion = "x:plus"
+                for dx in range(weight_x):
+                    screen.addstr(y, x + dx, chr(9473), self.fmt)
+            elif weight_x < 0:
+                if self.motion in "y:plus":
+                    screen.addstr(y, x, chr(9499), self.fmt)
+                    weight_x += 1
+                    x -= 1
+                if self.motion in "y:minus":
+                    screen.addstr(y, x, chr(9491), self.fmt)
+                    weight_x += 1
+                    x -= 1
+                self.motion = "x:minus"
+                for dx in range(abs(weight_x)):
+                    screen.addstr(y, x - dx, chr(9473), self.fmt)
+            x = x + weight_x
         return []

@@ -43,10 +43,9 @@ from ._nobject import (
     HPathCover,
     VPath,
     VPathCover,
-    SinglePath,
-    Path,
     HorizontalPath,
     VerticalPath,
+    Path,
 )
 from ._physic import Point, Move, BB, Shape, Arena
 from ._scene import update as update_scene
@@ -97,10 +96,9 @@ __all__ = [
     "HPathCover",
     "VPath",
     "VPathCover",
-    "SinglePath",
-    "Path",
     "HorizontalPath",
     "VerticalPath",
+    "Path",
     "update_scene",
     "render_scene",
     "Scene",
