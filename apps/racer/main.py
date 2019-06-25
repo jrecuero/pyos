@@ -8,14 +8,81 @@ from engine import (
     Event,
     # NObject,
     Char,
-    # String,
+    String,
     BoxText,
     # Caller,
+    # TimerText,
     # ArrowKeyHandler,
     update_scene,
     # render_scene,
     KeyHandler,
+    # Path,
+    # HPath,
+    # HPathCover,
+    # VPath,
+    HorizontalPath,
 )
+
+
+course: List[int] = [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    2,
+    2,
+    2,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    4,
+    3,
+    2,
+    1,
+    0,
+    -1,
+    -2,
+    -3,
+    -2,
+    -1,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    -1,
+    -1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+]
 
 
 class Dice(object):
@@ -40,7 +107,66 @@ class BoardScene(Scene):
         super(BoardScene, self).__init__("Racer")
         self.border = False
 
+    def draw_segment(
+        self, y: int, x: int, dy: int, _prev: int, _now: int, _next: int, fmt
+    ) -> int:
+        if _prev == _now == _next:
+            self.add_object(Char(y, x, chr(9473), fmt))
+            self.add_object(Char(y + dy, x, chr(9473), fmt))
+            return y
+        elif _next > _now:
+            self.add_object(Char(y - 1, x, chr(9487), fmt))
+            self.add_object(Char(y, x, chr(9499), fmt))
+            if _prev == _now:
+                self.add_object(Char(y + dy, x, chr(9473), fmt))
+            else:
+                self.add_object(Char(y + dy, x, chr(9487), fmt))
+                self.add_object(Char(y + dy + 1, x, chr(9499), fmt))
+            return y - 1
+        elif _next < _now:
+            if _prev == _now:
+                self.add_object(Char(y, x, chr(9473), fmt))
+            else:
+                self.add_object(Char(y - 1, x, chr(9491), fmt))
+                self.add_object(Char(y, x, chr(9495), fmt))
+            self.add_object(Char(y + dy, x, chr(9491), fmt))
+            self.add_object(Char(y + dy + 1, x, chr(9495), fmt))
+            return y + 1
+        elif _prev < _now:
+            self.add_object(Char(y, x, chr(9473), fmt))
+            self.add_object(Char(y + dy, x, chr(9487), fmt))
+            self.add_object(Char(y + dy + 1, x, chr(9499), fmt))
+            return y
+        elif _prev > _now:
+            self.add_object(Char(y - 1, x, chr(9491), fmt))
+            self.add_object(Char(y, x, chr(9495), fmt))
+            self.add_object(Char(y + dy, x, chr(9473), fmt))
+            return y
+        return y
+
     def setup(self, screen):
+        def updater(_course: List[int], start_y: int, start_x: int, limit: int):
+            _index: int = 0
+
+            def _updater(y: int, x: int, message: str, fmt) -> str:
+                nonlocal _index
+                _index += 1
+                if _index >= limit:
+                    _index = 0
+                    return (start_y, start_x, message, fmt)
+                else:
+                    delta = _course[_index] - _course[_index - 1]
+                    return (y - delta, x + 1, message, fmt)
+
+            return _updater
+
+        def number(x: int):
+            if x > 0:
+                return "+{}".format(x)
+            elif x < 0:
+                return "{}".format(x)
+            return "{} ".format(x)
+
         color_1 = curses.color_pair(1)
         color_2 = curses.color_pair(2)
         d1 = "   \n * \n   "
@@ -61,86 +187,61 @@ class BoardScene(Scene):
         self.add_object(dice_4)
         self.add_object(dice_5)
         self.add_object(dice_6)
-        mobile = "*"
-        for i in range(5):
-            self.add_object(Char(20, 10 + i, chr(9473), color_1))
-            self.add_object(Char(21, 10 + i, mobile))
-            self.add_object(Char(22, 10 + i, mobile))
-            self.add_object(Char(23, 10 + i, mobile))
-            self.add_object(Char(24, 10 + i, mobile))
-            self.add_object(Char(25, 10 + i, chr(9473), color_1))
+        # lista_1 = [0, 0, 0, 1, 1, 1, 2, 2, 2, 1, 1, 0, 0, -1, -1, -2, -2, -1, -1, 0]
+        lista_1 = [
+            0,
+            0,
+            0,
+            2,
+            2,
+            5,
+            5,
+            0,
+            0,
+            -2,
+            -2,
+            -5,
+            -5,
+            0,
+            0,
+            1,
+            2,
+            3,
+            4,
+            0,
+            0,
+            9,
+            0,
+            0,
+            -5,
+            -2,
+            0,
+            0,
+        ]
+        # self.add_object(HPathCover(15, 10, lista_1, color_1))
+        # self.add_object(VPath(10, 10, lista_1, color_1))
+        # self.add_object(String(21, 10, "".join([number(x)[0] for x in lista_1])))
+        # self.add_object(String(22, 10, "".join([number(x)[1] for x in lista_1])))
+        # self.add_object(HPath(20, 10, lista_1, color_1))
+        self.add_object(HorizontalPath(20, 10, 5, lista_1, color_1))
+        for i, v in enumerate(lista_1):
+            self.add_object(String(19 - v, 10 + i, str(abs(v))))
 
-        self.add_object(Char(19, 15, chr(9487), color_1))
-        self.add_object(Char(20, 15, chr(9499), color_1))
-        self.add_object(Char(21, 15, mobile))
-        self.add_object(Char(22, 15, mobile))
-        self.add_object(Char(23, 15, mobile))
-        self.add_object(Char(24, 15, mobile))
-        self.add_object(Char(25, 15, chr(9473), color_1))
+        # y: int = 20
+        # x: int = 1
+        # dy: int = 5
+        # self.add_object(Path(y, x, dy, course[:53], color_1))
+        # self.add_object(HPath(40, x, course[:53], color_1))
 
-        self.add_object(Char(19, 16, chr(9473), color_1))
-        self.add_object(Char(20, 16, mobile))
-        self.add_object(Char(21, 16, mobile))
-        self.add_object(Char(22, 16, mobile))
-        self.add_object(Char(23, 16, mobile))
-        self.add_object(Char(24, 16, chr(9487), color_1))
-        self.add_object(Char(25, 16, chr(9499), color_1))
-
-        for i in range(5):
-            self.add_object(Char(19, 17 + i, chr(9473), color_1))
-            self.add_object(Char(20, 17 + i, mobile))
-            self.add_object(Char(21, 17 + i, mobile))
-            self.add_object(Char(22, 17 + i, mobile))
-            self.add_object(Char(23, 17 + i, mobile))
-            self.add_object(Char(24, 17 + i, chr(9473), color_1))
-
-        self.add_object(Char(18, 22, chr(9487), color_1))
-        self.add_object(Char(19, 22, chr(9499), color_1))
-        self.add_object(Char(20, 22, mobile))
-        self.add_object(Char(21, 22, mobile))
-        self.add_object(Char(22, 22, mobile))
-        self.add_object(Char(23, 22, mobile))
-        self.add_object(Char(24, 22, chr(9473), color_1))
-
-        self.add_object(Char(18, 23, chr(9473), color_1))
-        self.add_object(Char(19, 23, mobile))
-        self.add_object(Char(20, 23, mobile))
-        self.add_object(Char(21, 23, mobile))
-        self.add_object(Char(22, 23, mobile))
-        self.add_object(Char(23, 23, chr(9487), color_1))
-        self.add_object(Char(24, 23, chr(9499), color_1))
-
-        for i in range(5):
-            self.add_object(Char(18, 24 + i, chr(9473), color_1))
-            self.add_object(Char(19, 24 + i, mobile))
-            self.add_object(Char(20, 24 + i, mobile))
-            self.add_object(Char(21, 24 + i, mobile))
-            self.add_object(Char(22, 24 + i, mobile))
-            self.add_object(Char(23, 24 + i, chr(9473), color_1))
-
-        self.add_object(Char(18, 29, chr(9473), color_1))
-        self.add_object(Char(19, 29, mobile))
-        self.add_object(Char(20, 29, mobile))
-        self.add_object(Char(21, 29, mobile))
-        self.add_object(Char(22, 29, mobile))
-        self.add_object(Char(23, 29, chr(9491), color_1))
-        self.add_object(Char(24, 29, chr(9495), color_1))
-
-        self.add_object(Char(18, 30, chr(9491), color_1))
-        self.add_object(Char(19, 30, chr(9495), color_1))
-        self.add_object(Char(20, 30, mobile))
-        self.add_object(Char(21, 30, mobile))
-        self.add_object(Char(22, 30, mobile))
-        self.add_object(Char(23, 30, mobile))
-        self.add_object(Char(24, 30, chr(9473), color_1))
-
-        for i in range(5):
-            self.add_object(Char(19, 31 + i, chr(9473), color_1))
-            self.add_object(Char(20, 31 + i, mobile))
-            self.add_object(Char(21, 31 + i, mobile))
-            self.add_object(Char(22, 31 + i, mobile))
-            self.add_object(Char(23, 31 + i, mobile))
-            self.add_object(Char(24, 31 + i, chr(9473), color_1))
+        # self.add_object(String(35, 1, "".join([number(x)[0] for x in course[:53]])))
+        # self.add_object(String(36, 1, "".join([number(x)[1] for x in course[:53]])))
+        # mobile = "A"
+        # self.add_object(
+        #     TimerText(24, 1, mobile, self.new_timer(50), updater(course, 24, 1, 52))
+        # )
+        # self.add_object(
+        #     TimerText(21, 1, mobile, self.new_timer(50), updater(course, 21, 1, 52))
+        # )
 
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
@@ -161,7 +262,7 @@ if __name__ == "__main__":
     board_scene = BoardScene()
     board_scene.colors(
         [
-            (curses.COLOR_RED, curses.COLOR_BLACK),
+            (curses.COLOR_RED, curses.COLOR_BLUE),
             (curses.COLOR_YELLOW, curses.COLOR_BLACK),
         ]
     )

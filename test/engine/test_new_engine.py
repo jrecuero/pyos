@@ -12,7 +12,7 @@ from engine import (
     BoxGrid,
     BoxText,
     FlashText,
-    TimeUpdater,
+    TimerText,
     Caller,
     Input,
     Selector,
@@ -36,16 +36,16 @@ class SceneMain(Scene):
         super(SceneMain, self).__init__("Main")
 
     def setup(self, screen):
-        def updater(message: str) -> str:
+        def updater(y: int, x: int, message: str, fmt) -> str:
             # log.Scene("SceneMain").Method("updater").call()
             if message == "@copyright":
-                return "by jose carlos"
+                return 15, 2, "by jose carlos", fmt
             elif message == "by jose carlos":
-                return "San Jose, 2018"
+                return 15, 2, "San Jose, 2018", fmt
             elif message == "San Jose, 2018":
-                return ""
+                return 15, 2, "", fmt
             else:
-                return "@copyright"
+                return 15, 2, "@copyright", fmt
 
         def caller():
             fname = self.fname[0] if self.fname else ""
@@ -68,7 +68,7 @@ class SceneMain(Scene):
         self.add_object(
             FlashText(14, 2, "press any key", self.new_timer(50), on=1, off=1)
         )
-        self.add_object(TimeUpdater(15, 2, "@copyright", self.new_timer(100), updater))
+        self.add_object(TimerText(15, 2, "@copyright", self.new_timer(100), updater))
         self.add_object(Caller(16, 2, caller))
         self.add_object(Selector(17, 2, ["Yes", "No", "Cancel"], selected=2))
         self.add_object(ScrollSelector(19, 2, ["Yes", "No", "Cancel"], selected=1))

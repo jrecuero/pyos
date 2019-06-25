@@ -10,7 +10,7 @@ from engine import (
     KeyHandler,
     Event,
     FlashText,
-    TimeUpdater,
+    TimerText,
     EventNextScene,
     update_scene,
     # Selector,
@@ -106,7 +106,7 @@ class SceneLast(Scene):
                 return "@copyright"
 
         self.add_object(FlashText(0, 0, "last page", self.new_timer(50), on=1, off=1))
-        self.add_object(TimeUpdater(1, 0, "@copyright", self.new_timer(100), updater))
+        self.add_object(TimerText(1, 0, "@copyright", self.new_timer(100), updater))
 
     @update_scene
     def update(self, *events: Event) -> List[Event]:

@@ -325,12 +325,14 @@ class FlashText(String):
         return []
 
 
-class TimeUpdater(String):
-    """TimeUpdater class identifies a timer nobject.
+class TimerText(String):
+    """TimerText class identifies a timer nobject.
     """
 
-    def __init__(self, y: int, x: int, msg: str, t: Timer, caller: Any):
-        super(TimeUpdater, self).__init__(y, x, msg)
+    def __init__(
+        self, y: int, x: int, msg: str, t: Timer, caller: Any, fmt=curses.A_NORMAL
+    ):
+        super(TimerText, self).__init__(y, x, msg, fmt)
         self.__timer = t
         self.__caller = caller
 
@@ -341,7 +343,9 @@ class TimeUpdater(String):
         for event in events:
             if event.evt == EVT.ENG.TIMER:
                 if event.get_timer() == self.__timer:
-                    self.text_data = self.__caller(self.text_data)
+                    self.y, self.x, self.text_data, self.fmt = self.__caller(
+                        self.y, self.x, self.text_data, self.fmt
+                    )
         return []
 
 
@@ -824,3 +828,302 @@ class Panel(NObject):
     def render(self, screen) -> List[Event]:
         if self._render_box:
             self.box(screen)
+        return []
+
+
+class HPath(NObject):
+    """HPath class identifies a horizontal path to draw in the screen.
+    """
+
+    def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
+        super(HPath, self).__init__(y, x, -1, -1)
+        self.path: List[int] = path
+        self.fmt = fmt
+
+    @render
+    def render(self, screen) -> List[Event]:
+        y = self.y
+        x = self.x
+        for index, weight in enumerate(self.path):
+            prev_w = self.path[index - 1] if index > 0 else 0
+            next_w = self.path[index + 1] if index < (len(self.path) - 1) else 0
+            if prev_w == weight == next_w:
+                screen.addstr(y, x, chr(9473), self.fmt)
+            elif weight > prev_w and weight > next_w:
+                screen.addstr(y, x, chr(9499), self.fmt)
+                delta_p = weight - prev_w
+                for dy in range(delta_p):
+                    screen.addstr(y - dy - 1, x, chr(9475), self.fmt)
+                y = y - delta_p
+                delta_n = weight - next_w
+                for dy in range(delta_n):
+                    screen.addstr(y + dy, x, chr(9475), self.fmt)
+                screen.addstr(y + delta_n, x, chr(9495), self.fmt)
+                y = y + delta_n
+            elif weight > prev_w:
+                delta = weight - prev_w
+                screen.addstr(y, x, chr(9499), self.fmt)
+                for dy in range(delta - 1):
+                    screen.addstr(y - dy - 1, x, chr(9475), self.fmt)
+                screen.addstr(y - delta, x, chr(9487), self.fmt)
+                y = y - delta
+            elif weight > next_w:
+                delta = weight - next_w
+                screen.addstr(y, x, chr(9491), self.fmt)
+                for dy in range(delta - 1):
+                    screen.addstr(y + dy + 1, x, chr(9475), self.fmt)
+                screen.addstr(y + delta, x, chr(9495), self.fmt)
+                y = y + delta
+            elif next_w > weight and prev_w == weight:
+                screen.addstr(y, x, chr(9473), self.fmt)
+            elif prev_w > weight and next_w == weight:
+                screen.addstr(y, x, chr(9473), self.fmt)
+            elif prev_w > weight and next_w > weight:
+                screen.addstr(y, x, chr(9473), self.fmt)
+            x = x + 1
+
+        return []
+
+
+class HPathCover(NObject):
+    """HPathCover class identifies a horizontal path to draw in the screen.
+    """
+
+    def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
+        super(HPathCover, self).__init__(y, x, -1, -1)
+        self.path: List[int] = path
+        self.fmt = fmt
+
+    @render
+    def render(self, screen) -> List[Event]:
+        y = self.y
+        x = self.x
+        for index, weight in enumerate(self.path):
+            prev_w = self.path[index - 1] if index > 0 else 0
+            next_w = self.path[index + 1] if index < (len(self.path) - 1) else 0
+            if prev_w == weight == next_w:
+                screen.addstr(y, x, chr(9473), self.fmt)
+            elif prev_w > weight and next_w > weight:
+                delta_p = prev_w - weight
+                screen.addstr(y, x, chr(9491), self.fmt)
+                for dy in range(delta_p):
+                    screen.addstr(y + dy + 1, x, chr(9475), self.fmt)
+                y = y + delta_p
+                delta_n = next_w - weight
+                y = y - delta_n
+            elif prev_w > weight:
+                delta = prev_w - weight
+                screen.addstr(y, x, chr(9491), self.fmt)
+                for dy in range(delta - 1):
+                    screen.addstr(y + dy + 1, x, chr(9475), self.fmt)
+                screen.addstr(y + delta, x, chr(9495), self.fmt)
+                y = y + delta
+            elif next_w > weight:
+                delta = next_w - weight
+                screen.addstr(y, x, chr(9499), self.fmt)
+                for dy in range(delta - 1):
+                    screen.addstr(y - dy - 1, x, chr(9475), self.fmt)
+                screen.addstr(y - delta, x, chr(9487), self.fmt)
+                y = y - delta
+            elif prev_w == weight:
+                screen.addstr(y, x, chr(9473), self.fmt)
+            elif next_w == weight:
+                screen.addstr(y, x, chr(9473), self.fmt)
+            elif prev_w < weight and next_w < weight:
+                screen.addstr(y, x, chr(9473), self.fmt)
+            x = x + 1
+
+        return []
+
+
+class VPath(NObject):
+    """VPath class identifies a vertical path to draw in the screen.
+    """
+
+    def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
+        super(VPath, self).__init__(y, x, -1, -1)
+        self.path: List[int] = path
+        self.fmt = fmt
+
+    @render
+    def render(self, screen) -> List[Event]:
+        y = self.y
+        x = self.x
+        for index, weight in enumerate(self.path):
+            prev_w = self.path[index - 1] if index > 0 else 0
+            next_w = self.path[index + 1] if index < (len(self.path) - 1) else 0
+            if prev_w == weight == next_w:
+                screen.addstr(y, x, chr(9475), self.fmt)
+            elif next_w > weight:
+                delta = next_w - weight
+                screen.addstr(y, x, chr(9495), self.fmt)
+                for dx in range(delta - 1):
+                    screen.addstr(y, x + dx + 1, chr(9473), self.fmt)
+                screen.addstr(y, x + delta, chr(9491), self.fmt)
+                x = x + delta
+            elif next_w < weight:
+                delta = weight - next_w
+                screen.addstr(y, x, chr(9499), self.fmt)
+                for dx in range(delta - 1):
+                    screen.addstr(y, x - dx - 1, chr(9473), self.fmt)
+                screen.addstr(y, x - delta, chr(9487), self.fmt)
+                x = x - delta
+            # elif prev_w < weight:
+            #     screen.addstr(y, x - 1, chr(9495), self.fmt)
+            #     screen.addstr(y, x, chr(9491), self.fmt)
+            # elif prev_w > weight:
+            #     screen.addstr(y, x, chr(9475), self.fmt)
+            elif next_w == weight:
+                screen.addstr(y, x, chr(9475), self.fmt)
+            y = y + 1
+
+        return []
+
+
+class VPathCover(NObject):
+    """VPathCover class identifies a vertical path to draw in the screen.
+    """
+
+    def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
+        super(VPathCover, self).__init__(y, x, -1, -1)
+        self.path: List[int] = path
+        self.fmt = fmt
+
+
+class SinglePath(NObject):
+    """SinglePath class identifies a path to draw in the screen.
+    """
+
+    def __init__(
+        self,
+        y: int,
+        x: int,
+        dy: int,
+        path: List[int],
+        upper: bool = True,
+        lower: bool = True,
+        upper_fmt=curses.A_NORMAL,
+        lower_fmt=curses.A_NORMAL,
+    ):
+        super(SinglePath, self).__init__(y, x, dy, -1)
+        self.path: List[int] = path
+        self.upper: bool = upper
+        self.lower: bool = lower
+        self.upper_fmt = upper_fmt
+        self.lower_fmt = lower_fmt
+
+    @render
+    def render(self, screen) -> List[Event]:
+        y = self.y
+        x = self.x
+        for index, weight in enumerate(self.path):
+            prev_w = self.path[index - 1] if index > 0 else 0
+            next_w = self.path[index + 1] if index < (len(self.path) - 1) else 0
+            if prev_w == weight == next_w:
+                if self.upper:
+                    screen.addstr(y, x, chr(9473), self.upper_fmt)
+                if self.lower:
+                    screen.addstr(y + self.dy, x, chr(9473), self.lower_fmt)
+            elif next_w > weight:
+                if self.upper:
+                    screen.addstr(y - 1, x, chr(9487), self.upper_fmt)
+                    screen.addstr(y, x, chr(9499), self.upper_fmt)
+                if self.lower:
+                    if prev_w == weight:
+                        screen.addstr(y + self.dy, x, chr(9473), self.lower_fmt)
+                    else:
+                        screen.addstr(y + self.dy, x, chr(9487), self.lower_fmt)
+                        screen.addstr(y + self.dy + 1, x, chr(9499), self.lower_fmt)
+                y = y - 1
+            elif next_w < weight:
+                if self.upper:
+                    if prev_w == weight:
+                        screen.addstr(y, x, chr(9473), self.upper_fmt)
+                    else:
+                        screen.addstr(y - 1, x, chr(9491), self.upper_fmt)
+                        screen.addstr(y, x, chr(9495), self.upper_fmt)
+                if self.lower:
+                    screen.addstr(y + self.dy, x, chr(9491), self.lower_fmt)
+                    screen.addstr(y + self.dy + 1, x, chr(9495), self.lower_fmt)
+                y = y + 1
+            elif prev_w < weight:
+                if self.upper:
+                    screen.addstr(y, x, chr(9473), self.upper_fmt)
+                if self.lower:
+                    screen.addstr(y + self.dy, x, chr(9487), self.lower_fmt)
+                    screen.addstr(y + self.dy + 1, x, chr(9499), self.lower_fmt)
+            elif prev_w > weight:
+                if self.upper:
+                    screen.addstr(y - 1, x, chr(9491), self.upper_fmt)
+                    screen.addstr(y, x, chr(9495), self.upper_fmt)
+                if self.lower:
+                    screen.addstr(y + self.dy, x, chr(9473), self.lower_fmt)
+            x = x + 1
+
+        return []
+
+
+class Path(SinglePath):
+    """Path class identifies a path, lower and upper, to draw in the screen.
+    """
+
+    def __init__(self, y: int, x: int, dy: int, path: List[int], fmt=curses.A_NORMAL):
+        super(Path, self).__init__(y, x, dy, path, True, True, fmt, fmt)
+
+
+class HorizontalPath(NObject):
+    def __init__(self, y: int, x: int, dy: int, path: List[int], fmt=curses.A_NORMAL):
+        super(HorizontalPath, self).__init__(y, x, dy, -1)
+        self.lower_path = HPath(y, x, path, fmt)
+        self.upper_path = HPathCover(y - dy, x, path, fmt)
+
+    @render
+    def render(self, screen) -> List[Event]:
+        self.lower_path.render(screen)
+        self.upper_path.render(screen)
+        return []
+
+
+class Figure(NObject):
+    """Figure class identifies a figure.
+    """
+
+    def __init__(
+        self, y: int, x: int, path: List, closed: bool = False, fmt=curses.A_NORMAL
+    ):
+        super(Figure, self).__init__(self, y, x, -1, -1)
+        self.path: List = path
+        self.closed: bool = closed
+        self.fmt = fmt
+
+    @render
+    def render(self, screen) -> List[Event]:
+        y = self.y
+        x = self.x
+        for index, point in self.path[:-1]:
+            weight_y = point[0]
+            weight_x = point[1]
+            if weight_x == x + 1:
+                prev_y = self.path[index - 1][0] if index > 0 else y
+                next_y = self.path[index + 1][0] if index < (len(self.path) - 1) else 0
+                if prev_y == weight_y:
+                    screen.addstr(weight_y, weight_x, chr(9473), self.fmt)
+                elif next_y > weight_y:
+                    if prev_y == weight_y:
+                        screen.addstr(weight_y, weight_x, chr(9473), self.fmt)
+                    else:
+                        screen.addstr(weight_y, weight_x, chr(9487), self.fmt)
+                        screen.addstr(weight_y + 1, weight_x, chr(9499), self.fmt)
+                    y = y - 1
+                elif next_y < weight_y:
+                    screen.addstr(weight_y, weight_x, chr(9491), self.fmt)
+                    screen.addstr(weight_y + 1, weight_x, chr(9495), self.fmt)
+                    y = y + 1
+                elif prev_y < weight_y:
+                    screen.addstr(weight_y, weight_x, chr(9487), self.fmt)
+                    screen.addstr(weight_y + 1, weight_x, chr(9499), self.fmt)
+                elif prev_y > weight_y:
+                    screen.addstr(weight_y, weight_x, chr(9473), self.fmt)
+            y = weight_y
+            x = weight_x
+        return []
