@@ -74,7 +74,7 @@ class NObject:
     """NObject class represents any object to be rendered.
     """
 
-    def __init__(self, y: int, x: int, height: int, width: int):
+    def __init__(self, y: int, x: int, height: int, width: int, fmt=curses.A_NORMAL):
         self.y: int = y
         self.x: int = x
         self.dy: int = height
@@ -82,6 +82,7 @@ class NObject:
         self.enable: bool = True
         self.visible: bool = True
         self.text_data: str = ""
+        self.fmt = fmt
 
     def activate(self):
         """activate sets the nobject as enabled and visible.
@@ -100,7 +101,8 @@ class NObject:
         """
         pass
 
-    def box(self, screen: Any, fmt=curses.A_NORMAL):
+    def box(self, screen: Any, fmt=None):
+        fmt = fmt if fmt else self.fmt
         screen.attron(fmt)
         draw_box(screen, self.y, self.x, self.dy, self.dx)
         screen.attroff(fmt)
@@ -134,8 +136,10 @@ class TextData(NObject):
     """TextData class identifies all object that have to render some string.
     """
 
-    def __init__(self, y: int, x: int, dy: int, dx: int, text_data: str):
-        super(TextData, self).__init__(y, x, dy, dx)
+    def __init__(
+        self, y: int, x: int, dy: int, dx: int, text_data: str, fmt=curses.A_NORMAL
+    ):
+        super(TextData, self).__init__(y, x, dy, dx, fmt)
         self.text_data = text_data
 
     def set_text(self, text_data: str):
@@ -149,8 +153,7 @@ class Char(TextData):
     """
 
     def __init__(self, y: int, x: int, text_data: str, fmt=curses.A_NORMAL):
-        super(Char, self).__init__(y, x, 1, 1, text_data)
-        self.fmt: Any = fmt
+        super(Char, self).__init__(y, x, 1, 1, text_data, fmt)
 
     @render
     def render(self, screen) -> List[Event]:
@@ -165,8 +168,7 @@ class String(TextData):
     """
 
     def __init__(self, y: int, x: int, text_data: str, fmt=curses.A_NORMAL):
-        super(String, self).__init__(y, x, 1, len(text_data), text_data)
-        self.fmt: Any = fmt
+        super(String, self).__init__(y, x, 1, len(text_data), text_data, fmt)
 
     @render
     def render(self, screen) -> List[Event]:
@@ -180,8 +182,8 @@ class Formatted(NObject):
     """Formatted class identifies a formatted nobject.
     """
 
-    def __init__(self, y: int, x: int, data: List[List[Any]]):
-        super(Formatted, self).__init__(y, x, 1, -1)
+    def __init__(self, y: int, x: int, data: List[List[Any]], fmt=curses.A_NORMAL):
+        super(Formatted, self).__init__(y, x, 1, -1, fmt)
         self.data = data
 
     @render
@@ -190,7 +192,7 @@ class Formatted(NObject):
         """
         x = self.x
         for entry in self.data:
-            st, fmt = entry if len(entry) == 2 else (entry[0], curses.A_NORMAL)
+            st, fmt = entry if len(entry) == 2 else (entry[0], self.fmt)
             screen.addstr(self.y, x, st, fmt)
             x += len(st)
         return []
@@ -201,8 +203,7 @@ class Block(TextData):
     """
 
     def __init__(self, y: int, x: int, text_data: str, fmt=curses.A_NORMAL):
-        super(Block, self).__init__(y, x, 0, 0, text_data)
-        self.fmt = fmt
+        super(Block, self).__init__(y, x, 0, 0, text_data, fmt)
 
     @render
     def render(self, screen) -> List[Event]:
@@ -219,8 +220,7 @@ class Box(NObject):
     """
 
     def __init__(self, y: int, x: int, dy: int, dx: int, fmt=curses.A_NORMAL):
-        super(Box, self).__init__(y, x, dy, dx)
-        self.fmt = fmt
+        super(Box, self).__init__(y, x, dy, dx, fmt)
 
     @render
     def render(self, screen) -> List[Event]:
@@ -234,8 +234,17 @@ class BoxGrid(NObject):
     """BoxGrid identifies a grid of bordered objects.
     """
 
-    def __init__(self, y: int, x: int, dy: int, dx: int, ynbr: int, xnbr: int):
-        super(BoxGrid, self).__init__(y, x, dy, dx)
+    def __init__(
+        self,
+        y: int,
+        x: int,
+        dy: int,
+        dx: int,
+        ynbr: int,
+        xnbr: int,
+        fmt=curses.A_NORMAL,
+    ):
+        super(BoxGrid, self).__init__(y, x, dy, dx, fmt)
         self.ynbr: int = ynbr
         self.xnbr: int = xnbr
 
@@ -247,7 +256,7 @@ class BoxGrid(NObject):
         x: int = self.x
         for ynbr in range(1, self.ynbr + 1):
             for xnbr in range(1, self.xnbr + 1):
-                draw_box(screen, y, x, self.dy, self.dx)
+                draw_box(screen, y, x, self.dy, self.dx, self.fmt)
                 x += self.dx + 1
             x = self.x
             y += self.dy + 1
@@ -268,7 +277,7 @@ class BoxText(TextData):
         fmt=curses.A_NORMAL,
         cfmt=curses.A_NORMAL,
     ):
-        super(BoxText, self).__init__(y, x, dy, dx, text_data)
+        super(BoxText, self).__init__(y, x, dy, dx, text_data, fmt)
         tokens = self.text_data.split("\n")
         if self.dy == -1:
             self.dy = len(tokens) + 1
@@ -277,7 +286,6 @@ class BoxText(TextData):
                 if len(t) > self.dx:
                     self.dx = len(t)
             self.dx += 2
-        self.fmt = fmt
         self.cfmt = cfmt
 
     @render
@@ -296,8 +304,17 @@ class FlashText(String):
     """FlasText class identifies a flashing block of strings nobject.
     """
 
-    def __init__(self, y: int, x: int, msg: str, t: Timer, on: int = 1, off: int = 1):
-        super(FlashText, self).__init__(y, x, msg)
+    def __init__(
+        self,
+        y: int,
+        x: int,
+        msg: str,
+        t: Timer,
+        on: int = 1,
+        off: int = 1,
+        fmt=curses.A_NORMAL,
+    ):
+        super(FlashText, self).__init__(y, x, msg, fmt)
         self.__timer = t
         self.__shadow = msg
         self.__on = on
@@ -354,9 +371,17 @@ class Gauge(String):
     """
 
     def __init__(
-        self, y: int, x: int, dy: int, dx: int, t: Timer, total: int, sections: int
+        self,
+        y: int,
+        x: int,
+        dy: int,
+        dx: int,
+        t: Timer,
+        total: int,
+        sections: int,
+        fmt=curses.A_NORMAL,
     ):
-        super(Gauge, self).__init__(y, x, "[{}]".format(" " * sections))
+        super(Gauge, self).__init__(y, x, "[{}]".format(" " * sections), fmt)
         self.timer: Timer = t
         self.total: int = total
         self.total_sections: int = sections
@@ -406,7 +431,14 @@ class Spinner(String, Capture):
     """
 
     def __init__(
-        self, y: int, x: int, mini: int, maxi: int, defaulti: int, delta: int = 1
+        self,
+        y: int,
+        x: int,
+        mini: int,
+        maxi: int,
+        defaulti: int,
+        delta: int = 1,
+        fmt=curses.A_NORMAL,
     ):
         self.pattern = "{0}{1}{2}"
         String.__init__(
@@ -414,6 +446,7 @@ class Spinner(String, Capture):
             y,
             x,
             ("{}".format(self.pattern)).format(chr(9664), defaulti, chr(9654)),
+            fmt,
         )
         Capture.__init__(self)
         self.min: int = mini
@@ -470,9 +503,16 @@ class SpinnerScroll(Spinner):
     """
 
     def __init__(
-        self, y: int, x: int, mini: int, maxi: int, defaulti: int, delta: int = 1
+        self,
+        y: int,
+        x: int,
+        mini: int,
+        maxi: int,
+        defaulti: int,
+        delta: int = 1,
+        fmt=curses.A_NORMAL,
     ):
-        super(SpinnerScroll, self).__init__(y, x, mini, maxi, defaulti, delta)
+        super(SpinnerScroll, self).__init__(y, x, mini, maxi, defaulti, delta, fmt)
         self.patron = "{0}{1}{2}"
         self.pattern = "[     {}     ]".format(self.patron)
 
@@ -511,8 +551,15 @@ class Input(TextData, Capture):
     """Input class identifies an input string nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str, text_output: List[str]):
-        TextData.__init__(self, y, x, 1, len(text_data), text_data)
+    def __init__(
+        self,
+        y: int,
+        x: int,
+        text_data: str,
+        text_output: List[str],
+        fmt=curses.A_NORMAL,
+    ):
+        TextData.__init__(self, y, x, 1, len(text_data), text_data, fmt)
         Capture.__init__(self)
         self.input_str: str = ""
         self.text_output: List[str] = text_output
@@ -552,8 +599,8 @@ class TextInput(TextData, Capture):
     """TextInput class identifies a text input string nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str, in_cb):
-        TextData.__init__(self, y, x, 1, len(text_data), text_data)
+    def __init__(self, y: int, x: int, text_data: str, in_cb, fmt=curses.A_NORMAL):
+        TextData.__init__(self, y, x, 1, len(text_data), text_data, fmt)
         Capture.__init__(self)
         self.text_data: str = text_data
         self.input_str: str = ""
@@ -603,10 +650,11 @@ class Selector(NObject, Capture):
         dy: int = -1,
         dx: int = -1,
         horizontal: bool = True,
+        fmt=curses.A_NORMAL,
     ):
         dy = 1 if dy == -1 else dy
         dx = sum([len(t) for t in tokens]) if dx == -1 else dx
-        NObject.__init__(self, y, x, dy, dx)
+        NObject.__init__(self, y, x, dy, dx, fmt)
         Capture.__init__(self)
         self.tokens: List[str] = tokens
         self.selected: int = selected
@@ -669,9 +717,10 @@ class ScrollSelector(Selector):
         selected: int = 0,
         dy: int = -1,
         dx: int = -1,
+        fmt=curses.A_NORMAL,
     ):
         super(ScrollSelector, self).__init__(
-            y, x, tokens, selected=selected, dy=dy, dx=dx, horizontal=False
+            y, x, tokens, selected=selected, dy=dy, dx=dx, horizontal=False, fmt=fmt
         )
         self.expanded: bool = False
         self.box_height: int = len(self.tokens) + 1
@@ -727,9 +776,17 @@ class Menu(NObject, Capture):
     """Menu class identifies a menu object.
     """
 
-    def __init__(self, y: int, x: int, tokens: List, dy: int = 2, dx: int = -1):
+    def __init__(
+        self,
+        y: int,
+        x: int,
+        tokens: List,
+        dy: int = 2,
+        dx: int = -1,
+        fmt=curses.A_NORMAL,
+    ):
         _dx: int = dx if dx != -1 else sum([len(t[0]) for t in tokens]) + 1
-        NObject.__init__(self, y, x, dy, _dx)
+        NObject.__init__(self, y, x, dy, _dx, fmt)
         Capture.__init__(self)
         self.tokens: List = tokens
         self.menu_items: List = self.tokens
@@ -802,8 +859,8 @@ class Panel(NObject):
     """Panel class identifies all object grouped in a panel.
     """
 
-    def __init__(self, y: int, x: int, dy: int, dx: int):
-        super(Panel, self).__init__(y, x, dy, dx)
+    def __init__(self, y: int, x: int, dy: int, dx: int, fmt=curses.A_NORMAL):
+        super(Panel, self).__init__(y, x, dy, dx, fmt)
         self.children: List[NObject] = []
         self._render_box: bool = True
 
@@ -836,9 +893,8 @@ class HPath(NObject):
     """
 
     def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
-        super(HPath, self).__init__(y, x, -1, -1)
+        super(HPath, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
-        self.fmt = fmt
 
     @render
     def render(self, screen) -> List[Event]:
@@ -890,9 +946,8 @@ class HPathCover(NObject):
     """
 
     def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
-        super(HPathCover, self).__init__(y, x, -1, -1)
+        super(HPathCover, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
-        self.fmt = fmt
 
     @render
     def render(self, screen) -> List[Event]:
@@ -941,7 +996,7 @@ class HPathCover(NObject):
 
 class HorizontalPath(NObject):
     def __init__(self, y: int, x: int, dy: int, path: List[int], fmt=curses.A_NORMAL):
-        super(HorizontalPath, self).__init__(y, x, dy, -1)
+        super(HorizontalPath, self).__init__(y, x, dy, -1, fmt)
         self.lower_path = HPath(y, x, path, fmt)
         self.upper_path = HPathCover(y - dy, x, path, fmt)
 
@@ -957,9 +1012,8 @@ class VPath(NObject):
     """
 
     def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
-        super(VPath, self).__init__(y, x, -1, -1)
+        super(VPath, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
-        self.fmt = fmt
 
     @render
     def render(self, screen) -> List[Event]:
@@ -1011,9 +1065,8 @@ class VPathCover(NObject):
     """
 
     def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
-        super(VPathCover, self).__init__(y, x, -1, -1)
+        super(VPathCover, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
-        self.fmt = fmt
 
     @render
     def render(self, screen) -> List[Event]:
@@ -1059,7 +1112,7 @@ class VPathCover(NObject):
 
 class VerticalPath(NObject):
     def __init__(self, y: int, x: int, dx: int, path: List[int], fmt=curses.A_NORMAL):
-        super(VerticalPath, self).__init__(y, x, -1, dx)
+        super(VerticalPath, self).__init__(y, x, -1, dx, fmt)
         self.lower_path = VPath(y, x, path, fmt)
         self.upper_path = VPathCover(y, x + dx, path, fmt)
 
@@ -1077,10 +1130,9 @@ class Path(NObject):
     def __init__(
         self, y: int, x: int, path: List, closed: bool = False, fmt=curses.A_NORMAL
     ):
-        super(Path, self).__init__(y, x, -1, -1)
+        super(Path, self).__init__(y, x, -1, -1, fmt)
         self.path: List = path
         self.closed: bool = closed
-        self.fmt = fmt
         self.motion: str = "none"
 
     @render
