@@ -7,7 +7,7 @@ from engine import (
     Scene,
     Event,
     # NObject,
-    Char,
+    # Char,
     # String,
     # BoxText,
     # Caller,
@@ -21,9 +21,10 @@ from engine import (
     # VPathCover,
     # HorizontalPath,
     # VerticalPath,
-    Path,
+    # Path,
     KeyHandler,
 )
+from engine.nobject import Char, Path
 
 
 course: List[int] = [
