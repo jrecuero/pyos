@@ -21,6 +21,8 @@ from ._path import (
     HorizontalPath,
     VerticalPath,
     Path,
+    TrackPath,
+    Shape,
 )
 
 
@@ -50,4 +52,6 @@ __all__ = [
     "HorizontalPath",
     "VerticalPath",
     "Path",
+    "TrackPath",
+    "Shape",
 ]

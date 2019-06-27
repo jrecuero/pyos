@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Any
 import curses
-from .._nobject import NObject, render
-from .._event import Event
+from .._nobject import NObject, update, render
+from .._event import Event, Timer, EVT
+from ._string import String
 
 
 class HPath(NObject):
@@ -255,6 +256,7 @@ class Path(NObject):
     def render(self, screen) -> List[Event]:
         y = self.y
         x = self.x
+        self.motion: str = "none"
         for index, point in enumerate(self.path):
             weight_y = point[0]
             weight_x = point[1]
@@ -308,4 +310,98 @@ class Path(NObject):
                 for dx in range(abs(weight_x)):
                     screen.addstr(y, x - dx, chr(9473), self.fmt)
             x = x + weight_x
+        return []
+
+
+class TrackPath(String):
+    def __init__(
+        self, y: int, x: int, path: List, t: Timer, text_data: str, fmt=curses.A_NORMAL
+    ):
+        super(TrackPath, self).__init__(y, x, text_data, fmt)
+        self.path: List = []
+        self.timer: Timer = t
+        self.tindex: int = 0
+        y_pos = self.y
+        x_pos = self.x
+        self.path.append([y_pos, x_pos, self.fmt])
+        for p in path:
+            if len(p) == 2:
+                y_val, x_val = p
+                fmt = self.fmt
+            elif len(p) == 3:
+                y_val, x_val, fmt = p
+            else:
+                raise Exception("Improper path entry: {}".format(p))
+            max_val = max(abs(y_val), abs(x_val))
+            for i in range(max_val):
+                if y_val != 0:
+                    if y_val > 0:
+                        y_val -= 1
+                        y_pos += 1
+                    else:
+                        y_val += 1
+                        y_pos -= 1
+                if x_val != 0:
+                    if x_val > 0:
+                        x_val -= 1
+                        x_pos += 1
+                    else:
+                        x_val += 1
+                        x_pos -= 1
+                self.path.append([y_pos, x_pos, fmt])
+
+    @update
+    def update(self, screen: Any, *events: Event) -> List[Event]:
+        """update updates a flashing block of strings nobject.
+        """
+        for event in events:
+            if event.evt == EVT.ENG.TIMER:
+                if event.get_timer() == self.timer:
+                    if self.tindex < len(self.path):
+                        self.y = self.path[self.tindex][0]
+                        self.x = self.path[self.tindex][1]
+                        self.fmt = self.path[self.tindex][2]
+                        self.tindex += 1
+                    else:
+                        self.tindex = 0
+        return []
+
+
+class Shape(String):
+    def __init__(self, y: int, x: int, path: List, text_data: str, fmt=curses.A_NORMAL):
+        super(Shape, self).__init__(y, x, text_data, fmt)
+        self.path: List = []
+        y_pos = self.y
+        x_pos = self.x
+        self.path.append([y_pos, x_pos, self.fmt])
+        for p in path:
+            if len(p) == 2:
+                y_val, x_val = p
+                fmt = self.fmt
+            elif len(p) == 3:
+                y_val, x_val, fmt = p
+            else:
+                raise Exception("Improper path entry: {}".format(p))
+            max_val = max(abs(y_val), abs(x_val))
+            for i in range(max_val):
+                if y_val != 0:
+                    if y_val > 0:
+                        y_val -= 1
+                        y_pos += 1
+                    else:
+                        y_val += 1
+                        y_pos -= 1
+                if x_val != 0:
+                    if x_val > 0:
+                        x_val -= 1
+                        x_pos += 1
+                    else:
+                        x_val += 1
+                        x_pos -= 1
+                self.path.append([y_pos, x_pos, fmt])
+
+    @render
+    def render(self, screen) -> List[Event]:
+        for y, x, fmt in self.path:
+            screen.addstr(y, x, self.text_data, fmt)
         return []

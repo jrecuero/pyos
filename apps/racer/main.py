@@ -24,7 +24,7 @@ from engine import (
     # Path,
     KeyHandler,
 )
-from engine.nobject import Char, Path
+from engine.nobject import Char, Path, TrackPath, Shape
 
 
 course: List[int] = [
@@ -171,7 +171,7 @@ class BoardScene(Scene):
             return "{} ".format(x)
 
         color_1 = curses.color_pair(1)
-        # color_2 = curses.color_pair(2)
+        color_2 = curses.color_pair(2)
         # d1 = "   \n * \n   "
         # d2 = "*  \n   \n  *"
         # d3 = "*  \n * \n  *"
@@ -280,6 +280,45 @@ class BoardScene(Scene):
                 ],
                 False,
                 color_1,
+            )
+        )
+        # self.add_object(
+        #     TrackPath(
+        #         20, 5, [(5, 5), (-5, 5), (-5, -5), (5, -5)], self.new_timer(5), "X"
+        #     )
+        # )
+        self.add_object(
+            TrackPath(
+                2,
+                10,
+                [
+                    (0, 2),
+                    (5, 0, color_1),
+                    (0, 2, color_1),
+                    (-2, 0, color_2),
+                    (0, 10, color_2),
+                    (-5, 0, color_2),
+                    (0, -2),
+                    (3, 0),
+                    (0, -2),
+                    (-1, 0),
+                ],
+                self.new_timer(25),
+                "X",
+            )
+        )
+
+        self.add_object(
+            Shape(
+                20,
+                5,
+                [
+                    (5, 5, color_1),
+                    (-5, 5, color_2),
+                    (-5, -5, color_1),
+                    (5, -5, color_2),
+                ],
+                "*",
             )
         )
 
