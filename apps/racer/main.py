@@ -1,30 +1,17 @@
 from typing import List, Any
 import curses
+import random
 from engine import (
     # log,
     EVT,
     Handler,
     Scene,
     Event,
-    # NObject,
-    # Char,
-    # String,
-    # BoxText,
-    # Caller,
-    # TimerText,
-    # ArrowKeyHandler,
     update_scene,
-    # render_scene,
-    # HPath,
-    # HPathCover,
-    # VPath,
-    # VPathCover,
-    # HorizontalPath,
-    # VerticalPath,
-    # Path,
+    update_nobj,
     KeyHandler,
 )
-from engine.nobject import Char, Path, TrackPath, Shape
+from engine.nobject import String, HorizontalPath, TimerText, BoxText
 
 
 course: List[int] = [
@@ -88,8 +75,11 @@ course: List[int] = [
 ]
 
 
-class Dice(object):
-    def __init__(self, y: int, x: int, value: int):
+class Dice(BoxText):
+    def __init__(
+        self, y: int, x: int, value: int, fmt=curses.A_NORMAL, cfmt=curses.A_NORMAL
+    ):
+        super(Dice, self).__init__(y, x, "", dy=4, dx=4, fmt=fmt, cfmt=cfmt)
         self.__dice = [
             "   \n   \n   ",
             "   \n * \n   ",
@@ -98,11 +88,44 @@ class Dice(object):
             "* *\n   \n* *",
             "* *\n * \n* *",
             "* *\n* *\n* *",
+            "* *\n***\n* *",
+            "***\n* *\n***",
+            "***\n***\n***",
         ]
-        self.dice = self.__dices[value]
+        self.__value: int = 0
+        self.set(value)
+        self.__rolling: bool = False
+        self.__counter: int = 0
+        self.__speed: int = 10
 
-    def nobject(self):
-        pass
+    def set(self, value: int):
+        assert 0 <= value <= 9, "Invalid Value: 0 <= x <= 9"
+        self.__value = value
+        self.text_data = self.__dice[self.__value]
+
+    def start(self, speed: int = None):
+        self.__rolling = True
+        self.__counter = 0
+        self.__speed = speed if speed else self.__speed
+        return []
+
+    def stop(self):
+        self.__rolling = False
+        return []
+
+    def get(self) -> int:
+        return self.__value
+
+    def roll(self):
+        self.set(random.randint(0, 9))
+
+    @update_nobj
+    def update(self, screen: Any, *events: Event) -> List[Event]:
+        if self.__rolling and self.__counter == self.__speed:
+            self.__counter = 0
+            self.roll()
+        self.__counter += 1
+        return super(Dice, self).update(screen, *events)
 
 
 class BoardScene(Scene):
@@ -110,56 +133,33 @@ class BoardScene(Scene):
         super(BoardScene, self).__init__("Racer")
         self.border = False
 
-    def draw_segment(
-        self, y: int, x: int, dy: int, _prev: int, _now: int, _next: int, fmt
-    ) -> int:
-        if _prev == _now == _next:
-            self.add_object(Char(y, x, chr(9473), fmt))
-            self.add_object(Char(y + dy, x, chr(9473), fmt))
-            return y
-        elif _next > _now:
-            self.add_object(Char(y - 1, x, chr(9487), fmt))
-            self.add_object(Char(y, x, chr(9499), fmt))
-            if _prev == _now:
-                self.add_object(Char(y + dy, x, chr(9473), fmt))
-            else:
-                self.add_object(Char(y + dy, x, chr(9487), fmt))
-                self.add_object(Char(y + dy + 1, x, chr(9499), fmt))
-            return y - 1
-        elif _next < _now:
-            if _prev == _now:
-                self.add_object(Char(y, x, chr(9473), fmt))
-            else:
-                self.add_object(Char(y - 1, x, chr(9491), fmt))
-                self.add_object(Char(y, x, chr(9495), fmt))
-            self.add_object(Char(y + dy, x, chr(9491), fmt))
-            self.add_object(Char(y + dy + 1, x, chr(9495), fmt))
-            return y + 1
-        elif _prev < _now:
-            self.add_object(Char(y, x, chr(9473), fmt))
-            self.add_object(Char(y + dy, x, chr(9487), fmt))
-            self.add_object(Char(y + dy + 1, x, chr(9499), fmt))
-            return y
-        elif _prev > _now:
-            self.add_object(Char(y - 1, x, chr(9491), fmt))
-            self.add_object(Char(y, x, chr(9495), fmt))
-            self.add_object(Char(y + dy, x, chr(9473), fmt))
-            return y
-        return y
-
     def setup(self, screen):
+        color_1 = curses.color_pair(1)
+        color_2 = curses.color_pair(2)
+        dice = Dice(1, 5, 0, fmt=color_2)
+
         def updater(_course: List[int], start_y: int, start_x: int, limit: int):
             _index: int = 0
+            _pindex: int = 0
+            _rolling: bool = False
 
             def _updater(y: int, x: int, message: str, fmt) -> str:
-                nonlocal _index
-                _index += 1
-                if _index >= limit:
-                    _index = 0
-                    return (start_y, start_x, message, fmt)
+                nonlocal _index, _pindex, _rolling
+                if _rolling:
+                    _rolling = False
+                    _pindex = _index
+                    _index += dice.get()
+                    if _index >= limit:
+                        _index = 0
+                        _pindex = 0
+                        return (start_y, start_x, message, fmt)
+                    delta = _course[_index] - _course[_pindex]
+                    dice.stop()
+                    return (y - delta, x + dice.get(), message, fmt)
                 else:
-                    delta = _course[_index] - _course[_index - 1]
-                    return (y - delta, x + 1, message, fmt)
+                    _rolling = True
+                    dice.start()
+                    return (y, x, message, fmt)
 
             return _updater
 
@@ -170,176 +170,27 @@ class BoardScene(Scene):
                 return "{}".format(x)
             return "{} ".format(x)
 
-        color_1 = curses.color_pair(1)
-        color_2 = curses.color_pair(2)
-        # d1 = "   \n * \n   "
-        # d2 = "*  \n   \n  *"
-        # d3 = "*  \n * \n  *"
-        # d4 = "* *\n   \n* *"
-        # d5 = "* *\n * \n* *"
-        # d6 = "* *\n* *\n* *"
-        # dice_1 = BoxText(1, 0, d1, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        # dice_2 = BoxText(1, 5, d2, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        # dice_3 = BoxText(1, 10, d3, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        # dice_4 = BoxText(1, 15, d4, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        # dice_5 = BoxText(1, 20, d5, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        # dice_6 = BoxText(1, 25, d6, dy=4, dx=4, fmt=color_2, cfmt=color_1)
-        # self.add_object(dice_1)
-        # self.add_object(dice_2)
-        # self.add_object(dice_3)
-        # self.add_object(dice_4)
-        # self.add_object(dice_5)
-        # self.add_object(dice_6)
-        # lista_1 = [0, 0, 0, 1, 1, 1, 2, 2, 2, 1, 1, 0, 0, -1, -1, -2, -2, -1, -1, 0]
-        # lista_1 = [
-        #     0,
-        #     0,
-        #     0,
-        #     2,
-        #     2,
-        #     5,
-        #     5,
-        #     0,
-        #     0,
-        #     -2,
-        #     -2,
-        #     -5,
-        #     -5,
-        #     0,
-        #     0,
-        #     1,
-        #     2,
-        #     3,
-        #     4,
-        #     0,
-        #     1,
-        #     2,
-        #     3,
-        #     2,
-        #     1,
-        #     0,
-        #     9,
-        #     0,
-        #     0,
-        #     -5,
-        #     -2,
-        #     0,
-        #     1,
-        #     9,
-        #     0,
-        # ]
-        # self.add_object(String(21, 10, "".join([number(x)[0] for x in lista_1])))
-        # self.add_object(String(22, 10, "".join([number(x)[1] for x in lista_1])))
-        # self.add_object(HPath(20, 10, lista_1, color_1))
-        # self.add_object(HPathCover(18, 10, lista_1, color_1))
-        # self.add_object(HorizontalPath(20, 10, 5, lista_1, color_1))
-        # for i, v in enumerate(lista_1):
-        #     self.add_object(String(19 - v, 10 + i, str(abs(v)), color_2))
+        self.add_object(dice)
 
-        # self.add_object(VPath(2, 10, lista_1, color_1))
-        # self.add_object(VPathCover(2, 12, lista_1, color_1))
-        # self.add_object(VerticalPath(2, 10, 5, lista_1, color_1))
-        # for i, v in enumerate(lista_1):
-        #     self.add_object(String(2 + i, 11 + v, str(abs(v)), color_2))
+        y: int = 25
+        x: int = 1
+        dy: int = 5
+        self.add_object(HorizontalPath(y, x, dy, course[:53], color_1))
 
+        self.add_object(String(30, 1, "".join([number(x)[0] for x in course[:53]])))
+        self.add_object(String(31, 1, "".join([number(x)[1] for x in course[:53]])))
+        mobile = "A"
         # self.add_object(
-        #     Path(
-        #         2,
-        #         10,
-        #         [
-        #             (0, 2),
-        #             (5, 0),
-        #             (0, 2),
-        #             (-2, 0),
-        #             (0, 10),
-        #             (-5, 0),
-        #             (0, -2),
-        #             (3, 0),
-        #             (0, -2),
-        #             (-2, 0),
-        #         ],
-        #         False,
-        #         color_1,
-        #     )
+        #     TimerText(24, 1, mobile, self.new_timer(100), updater(course, 24, 1, 52))
         # )
         self.add_object(
-            Path(
-                2,
-                10,
-                [
-                    (0, 2),
-                    (5, 0),
-                    (0, 2),
-                    (-2, 0),
-                    (0, 10),
-                    (-5, 0),
-                    (0, -2),
-                    (3, 0),
-                    (0, -2),
-                    (-2, 0),
-                ],
-                False,
-                color_1,
-            )
+            TimerText(21, 1, mobile, self.new_timer(100), updater(course, 21, 1, 52))
         )
-        # self.add_object(
-        #     TrackPath(
-        #         20, 5, [(5, 5), (-5, 5), (-5, -5), (5, -5)], self.new_timer(5), "X"
-        #     )
-        # )
-        self.add_object(
-            TrackPath(
-                2,
-                10,
-                [
-                    (0, 2),
-                    (5, 0, color_1),
-                    (0, 2, color_1),
-                    (-2, 0, color_2),
-                    (0, 10, color_2),
-                    (-5, 0, color_2),
-                    (0, -2),
-                    (3, 0),
-                    (0, -2),
-                    (-1, 0),
-                ],
-                self.new_timer(25),
-                "X",
-            )
-        )
-
-        self.add_object(
-            Shape(
-                20,
-                5,
-                [
-                    (5, 5, color_1),
-                    (-5, 5, color_2),
-                    (-5, -5, color_1),
-                    (5, -5, color_2),
-                ],
-                "*",
-            )
-        )
-
-        # y: int = 20
-        # x: int = 1
-        # dy: int = 5
-        # self.add_object(Path(y, x, dy, course[:53], color_1))
-        # self.add_object(HPath(40, x, course[:53], color_1))
-
-        # self.add_object(String(35, 1, "".join([number(x)[0] for x in course[:53]])))
-        # self.add_object(String(36, 1, "".join([number(x)[1] for x in course[:53]])))
-        # mobile = "A"
-        # self.add_object(
-        #     TimerText(24, 1, mobile, self.new_timer(50), updater(course, 24, 1, 52))
-        # )
-        # self.add_object(
-        #     TimerText(21, 1, mobile, self.new_timer(50), updater(course, 21, 1, 52))
-        # )
 
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
+        self.kh.register("r", lambda: dice.start())
+        self.kh.register("s", lambda: dice.stop())
 
     @update_scene
     def update(self, screen: Any, *events: Event) -> List[Event]:
