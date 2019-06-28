@@ -405,3 +405,13 @@ class Shape(String):
         for y, x, fmt in self.path:
             screen.addstr(y, x, self.text_data, fmt)
         return []
+
+
+class ShapeFromPath(Shape):
+    def __init__(self, y: int, x: int, path: List, text_data: str, fmt=curses.A_NORMAL):
+        shape_path: List = []
+        init: int = 0
+        for i, p in enumerate(path):
+            shape_path.append(((init - p), 1))
+            init = p
+        super(ShapeFromPath, self).__init__(y, x, shape_path, text_data, fmt)

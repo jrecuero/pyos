@@ -11,7 +11,7 @@ from engine import (
     update_nobj,
     KeyHandler,
 )
-from engine.nobject import String, HorizontalPath, TimerText, BoxText
+from engine.nobject import String, HorizontalPath, TimerText, BoxText, ShapeFromPath
 
 
 course: List[int] = [
@@ -24,15 +24,22 @@ course: List[int] = [
     1,
     1,
     1,
+    1,
+    2,
     2,
     2,
     2,
     3,
     3,
     3,
+    3,
+    3,
     2,
     2,
     2,
+    2,
+    2,
+    1,
     1,
     1,
     1,
@@ -41,30 +48,39 @@ course: List[int] = [
     0,
     0,
     0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    4,
-    3,
-    2,
-    1,
     0,
     -1,
+    -1,
+    -1,
+    -1,
+    -2,
+    -2,
+    -2,
     -2,
     -3,
+    -3,
+    -3,
+    -3,
+    -3,
+    -2,
+    -2,
+    -2,
+    -2,
     -2,
     -1,
+    -1,
+    -1,
+    -1,
+    -1,
     0,
     0,
     0,
     1,
     1,
-    0,
-    0,
-    -1,
-    -1,
+    1,
+    1,
+    1,
+    1,
     0,
     0,
     0,
@@ -77,7 +93,15 @@ course: List[int] = [
 
 class Dice(BoxText):
     def __init__(
-        self, y: int, x: int, value: int, fmt=curses.A_NORMAL, cfmt=curses.A_NORMAL
+        self,
+        y: int,
+        x: int,
+        value: int = 0,
+        _min: int = 1,
+        _max: int = 2,
+        _speed: int = 5,
+        fmt=curses.A_NORMAL,
+        cfmt=curses.A_NORMAL,
     ):
         super(Dice, self).__init__(y, x, "", dy=4, dx=4, fmt=fmt, cfmt=cfmt)
         self.__dice = [
@@ -92,14 +116,18 @@ class Dice(BoxText):
             "***\n* *\n***",
             "***\n***\n***",
         ]
-        self.__value: int = 0
-        self.set(value)
+        self.__value: int = value if _min <= value <= _max else _min
+        self.__min: int = _min
+        self.__max: int = _max
         self.__rolling: bool = False
         self.__counter: int = 0
-        self.__speed: int = 10
+        self.__speed: int = _speed
+        self.set(self.__value)
 
     def set(self, value: int):
-        assert 0 <= value <= 9, "Invalid Value: 0 <= x <= 9"
+        assert (
+            self.__min <= value <= self.__max
+        ), "Invalid Value: {} <= {} <= {}".format(self.__min, value, self.__max)
         self.__value = value
         self.text_data = self.__dice[self.__value]
 
@@ -117,7 +145,7 @@ class Dice(BoxText):
         return self.__value
 
     def roll(self):
-        self.set(random.randint(0, 9))
+        self.set(random.randint(self.__min, self.__max))
 
     @update_nobj
     def update(self, screen: Any, *events: Event) -> List[Event]:
@@ -134,31 +162,41 @@ class BoardScene(Scene):
         self.border = False
 
     def setup(self, screen):
+        self.play: bool = True
         color_1 = curses.color_pair(1)
-        color_2 = curses.color_pair(2)
-        dice = Dice(1, 5, 0, fmt=color_2)
+        # color_2 = curses.color_pair(2)
+        dices = [Dice(1, 5), Dice(6, 5), Dice(1, 15), Dice(6, 15)]
 
-        def updater(_course: List[int], start_y: int, start_x: int, limit: int):
+        def play(flag: bool):
+            self.play = flag
+            return []
+
+        def updater(_course: List[int], start_y: int, start_x: int, limit: int, dice):
             _index: int = 0
             _pindex: int = 0
             _rolling: bool = False
 
             def _updater(y: int, x: int, message: str, fmt) -> str:
                 nonlocal _index, _pindex, _rolling
-                if _rolling:
-                    _rolling = False
-                    _pindex = _index
-                    _index += dice.get()
-                    if _index >= limit:
-                        _index = 0
-                        _pindex = 0
-                        return (start_y, start_x, message, fmt)
-                    delta = _course[_index] - _course[_pindex]
-                    dice.stop()
-                    return (y - delta, x + dice.get(), message, fmt)
+                if self.play:
+                    if _rolling:
+                        _rolling = False
+                        _pindex = _index
+                        _index += dice.get()
+                        if _index >= limit:
+                            _index = 0
+                            _pindex = 0
+                            return (start_y, start_x, message, fmt)
+                        delta = _course[_index] - _course[_pindex]
+                        dice.stop()
+                        return (y - delta, x + dice.get(), message, fmt)
+                    else:
+                        _rolling = True
+                        dice.start()
+                        return (y, x, message, fmt)
                 else:
-                    _rolling = True
-                    dice.start()
+                    dice.stop()
+                    _rolling = False
                     return (y, x, message, fmt)
 
             return _updater
@@ -170,27 +208,31 @@ class BoardScene(Scene):
                 return "{}".format(x)
             return "{} ".format(x)
 
-        self.add_object(dice)
-
-        y: int = 25
-        x: int = 1
+        y: int = 10
+        x: int = 30
         dy: int = 5
-        self.add_object(HorizontalPath(y, x, dy, course[:53], color_1))
+        self.add_object(HorizontalPath(y, x, dy, course[:-1], color_1))
 
-        self.add_object(String(30, 1, "".join([number(x)[0] for x in course[:53]])))
-        self.add_object(String(31, 1, "".join([number(x)[1] for x in course[:53]])))
+        # self.add_object(String(30, 1, "".join([number(x)[0] for x in course[:53]])))
+        # self.add_object(String(31, 1, "".join([number(x)[1] for x in course[:53]])))
         mobile = "A"
-        # self.add_object(
-        #     TimerText(24, 1, mobile, self.new_timer(100), updater(course, 24, 1, 52))
-        # )
-        self.add_object(
-            TimerText(21, 1, mobile, self.new_timer(100), updater(course, 21, 1, 52))
-        )
+        for i, dice in enumerate(dices):
+            self.add_object(ShapeFromPath(6 + i, x, course[1:-1], "."))
+            self.add_object(dice)
+            self.add_object(
+                TimerText(
+                    6 + i,
+                    30,
+                    mobile,
+                    self.new_timer(100),
+                    updater(course, 6 + i, 30, len(course) - 1, dice),
+                )
+            )
 
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
-        self.kh.register("r", lambda: dice.start())
-        self.kh.register("s", lambda: dice.stop())
+        self.kh.register("p", lambda: play(True))
+        self.kh.register("s", lambda: play(False))
 
     @update_scene
     def update(self, screen: Any, *events: Event) -> List[Event]:

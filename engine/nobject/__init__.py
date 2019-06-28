@@ -23,6 +23,7 @@ from ._path import (
     Path,
     TrackPath,
     Shape,
+    ShapeFromPath,
 )
 
 
@@ -54,4 +55,5 @@ __all__ = [
     "Path",
     "TrackPath",
     "Shape",
+    "ShapeFromPath",
 ]
