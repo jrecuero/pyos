@@ -8,18 +8,12 @@ from engine import (
     Handler,
     Scene,
     Event,
-    TextInput,
-    String,
-    Box,
-    BoxText,
-    # Caller,
     KeyHandler,
     Panel,
-    # update_nobj,
-    # render_nobj,
     update_scene,
     render_scene,
 )
+from engine.nobject import TextInput, String, Box, BoxText
 
 
 class RollerScene(Scene):
@@ -52,6 +46,13 @@ class RollerScene(Scene):
         }
         self.status_screen = {"y": self.max_y - 2, "x": 0, "dy": 2, "dx": self.max_x}
         self.stage: str = "CONFIG"
+        from grafo.cli import Builder
+        import os
+
+        subdir = "commands"
+        path = os.path.join(os.path.dirname(__file__), subdir)
+        self.builder = Builder()
+        self.builder.create_grafo(path)
         self.actions_conf: List[str] = ["first:<str>", "last:<str>", "done"]
         self.actions_work: List[str] = ["talk", "move", "look", "exit"]
 
@@ -65,17 +66,19 @@ class RollerScene(Scene):
             else:
                 self.user_input.set_text("Action not available")
         elif self.stage == "CONFIG":
-            if inputa and inputa == "done":
-                self.status_textbox.set_text("\t".join(self.actions_work))
-                self.stage = "WORK"
-            else:
-                user_input = inputa.split(":")
-                if inputa and user_input[0] == "first":
-                    self.first_name.set_text(user_input[1])
-                elif inputa and user_input[0] == "last":
-                    self.last_name.set_text(user_input[1])
-                else:
-                    self.user_input.set_text("Action not available")
+            result = self.builder.handler.run(inputa)
+            self.user_input.set_text("{}".format(result))
+            # if inputa and inputa == "done":
+            #     self.status_textbox.set_text("\t".join(self.actions_work))
+            #     self.stage = "WORK"
+            # else:
+            #     user_input = inputa.split(":")
+            #     if inputa and user_input[0] == "first":
+            #         self.first_name.set_text(user_input[1])
+            #     elif inputa and user_input[0] == "last":
+            #         self.last_name.set_text(user_input[1])
+            #     else:
+            #         self.user_input.set_text("Action not available")
         self.prompt.clear()
         self.prompt.set_capture()
 
