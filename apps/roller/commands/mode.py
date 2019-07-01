@@ -7,7 +7,7 @@ def setup(**kwargs):
         STREAM.out("exiting setup")
 
     STREAM.out("setup roller")
-    return None, _exit
+    return "setup roller", _exit
 
 
 @mode("play")
@@ -16,4 +16,4 @@ def profile(**kwargs):
         STREAM.out("exiting play")
 
     STREAM.out("play roller")
-    return None, _exit
+    return "play roller", _exit

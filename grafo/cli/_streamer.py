@@ -20,10 +20,13 @@ class _Streamer(object):
         self.__input = new_input
 
     def out(self, message: str):
-        self.__output(message)
+        if self.__output:
+            self.__output(message)
 
     def inp(self, message: str) -> str:
-        return self.__input(message)
+        if self.__input:
+            return self.__input(message)
+        return None
 
 
 STREAM = _Streamer()

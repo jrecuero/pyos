@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Any
 from grafo import Grafo, Edge, Link
 from ._node import Node
 from ._content import END_TOKEN
@@ -6,11 +6,12 @@ from ._context import Context
 
 
 class Handler(object):
-    __slots__ = ["grafo", "context"]
+    __slots__ = ["grafo", "context", "user_data"]
 
     def __init__(self, **kwargs):
         self.grafo: Grafo = kwargs.get("grafo", Grafo("cli", root="cli"))
         self.context: Context = Context()
+        self.user_data: Any = None
 
     def add_node(
         self, parent: Node, child: Node, loop: bool = False, first: bool = False
@@ -77,6 +78,8 @@ class Handler(object):
                 cargs = self.context.last_command_matched_args()
                 if command.content.builtin:
                     cargs["__handler__"] = self
+                if self.user_data:
+                    cargs["__user_data__"] = self.user_data
                 ret_value = command.content.the_call(**cargs)
             if command.content.is_mode():
                 self.context.push_mode()

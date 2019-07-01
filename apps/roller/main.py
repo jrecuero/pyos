@@ -1,4 +1,5 @@
 from typing import Any, List
+import os
 
 # import random
 import curses
@@ -14,6 +15,7 @@ from engine import (
     render_scene,
 )
 from engine.nobject import TextInput, String, Box, BoxText
+from grafo.cli import Builder, STREAM
 
 
 class RollerScene(Scene):
@@ -45,40 +47,36 @@ class RollerScene(Scene):
             "dx": self.max_x,
         }
         self.status_screen = {"y": self.max_y - 2, "x": 0, "dy": 2, "dx": self.max_x}
-        self.stage: str = "CONFIG"
-        from grafo.cli import Builder
-        import os
-
-        subdir = "commands"
-        path = os.path.join(os.path.dirname(__file__), subdir)
-        self.builder = Builder()
-        self.builder.create_grafo(path)
-        self.actions_conf: List[str] = ["first:<str>", "last:<str>", "done"]
-        self.actions_work: List[str] = ["talk", "move", "look", "exit"]
+        self.stage: str = "SETUP"
+        # self.actions_setup: List[str] = ["first:<str>", "last:<str>", "done"]
+        # self.actions_play: List[str] = ["talk", "move", "look", "exit"]
 
     def user_input(self, inputa):
-        if self.stage == "WORK":
-            if inputa and inputa == "exit":
-                self.del_object(self.prompt)
-                exit(0)
-            elif inputa and inputa in self.actions_work:
-                self.user_input.set_text("Action:  '{}'".format(inputa))
-            else:
-                self.user_input.set_text("Action not available")
-        elif self.stage == "CONFIG":
-            result = self.builder.handler.run(inputa)
-            self.user_input.set_text("{}".format(result))
-            # if inputa and inputa == "done":
-            #     self.status_textbox.set_text("\t".join(self.actions_work))
-            #     self.stage = "WORK"
-            # else:
-            #     user_input = inputa.split(":")
-            #     if inputa and user_input[0] == "first":
-            #         self.first_name.set_text(user_input[1])
-            #     elif inputa and user_input[0] == "last":
-            #         self.last_name.set_text(user_input[1])
-            #     else:
-            #         self.user_input.set_text("Action not available")
+        result = self.builder.handler.run(inputa)
+        self.user_input.set_text("{}".format(result))
+        result = self.builder.handler.run("help")
+        if result:
+            self.status_textbox.set_text("\t".join(result))
+        # if self.stage == "PLAY":
+        #     if inputa and inputa == "exit":
+        #         self.del_object(self.prompt)
+        #         exit(0)
+        #     elif inputa and inputa in self.actions_play:
+        #         self.user_input.set_text("Action:  '{}'".format(inputa))
+        #     else:
+        #         self.user_input.set_text("Action not available")
+        # elif self.stage == "SETUP":
+        #     if inputa and inputa == "done":
+        #         self.status_textbox.set_text("\t".join(self.actions_play))
+        #         self.stage = "PLAY"
+        #     else:
+        #         user_input = inputa.split(":")
+        #         if inputa and user_input[0] == "first":
+        #             self.first_name.set_text(user_input[1])
+        #         elif inputa and user_input[0] == "last":
+        #             self.last_name.set_text(user_input[1])
+        #         else:
+        #             self.user_input.set_text("Action not available")
         self.prompt.clear()
         self.prompt.set_capture()
 
@@ -86,7 +84,8 @@ class RollerScene(Scene):
         self.status_textbox = BoxText(
             self.status_screen["y"],
             self.status_screen["x"],
-            "\t".join(self.actions_conf),
+            # "\t".join(self.actions_setup),
+            "\t",
             self.status_screen["dy"],
             self.status_screen["dx"],
         )
@@ -122,6 +121,19 @@ class RollerScene(Scene):
         self.last_name = String(2, 1, "Last Name")
         self.add_to_panel(self.infoma_panel, self.first_name)
         self.add_to_panel(self.infoma_panel, self.last_name)
+
+        subdir = "commands"
+        path = os.path.join(os.path.dirname(__file__), subdir)
+        self.builder = Builder()
+        self.builder.create_grafo(path)
+        STREAM.output = None
+        result = self.builder.handler.run("help")
+        self.status_textbox.set_text("\t".join(result))
+        self.builder.handler.user_data = {
+            "fname": self.first_name,
+            "lname": self.last_name,
+        }
+
         self.kh = KeyHandler({})
         self.kh.register("x", lambda: exit(0))
 
