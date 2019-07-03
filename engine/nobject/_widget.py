@@ -13,6 +13,16 @@ class Gauge(String):
     """Gauge class identifies a gauge that grows with time.
     """
 
+    __slots__ = [
+        "timer",
+        "total",
+        "tatal_sections",
+        "counter_per_section",
+        "counter",
+        "sections",
+        "active",
+    ]
+
     def __init__(
         self,
         y: int,
@@ -60,6 +70,8 @@ class Spinner(String, Capture):
     """Spinner class identifies a spinner that changes with left and right
     clicks.
     """
+
+    __slots__ = ["min", "max", "default", "value", "delta"]
 
     def __init__(
         self,
@@ -133,6 +145,8 @@ class SpinnerScroll(Spinner):
     clicks.
     """
 
+    __slots__ = ["patron", "pattern"]
+
     def __init__(
         self,
         y: int,
@@ -163,6 +177,8 @@ class Selector(NObject, Capture):
     """Selector class identifies a list of tokens that are highlighted and
     can be selected using cursor movement.
     """
+
+    __slots__ = ["tokens", "selected" "horizonta"]
 
     def __init__(
         self,
@@ -232,6 +248,8 @@ class ScrollSelector(Selector):
     to be selected.
     """
 
+    __slots__ = ["expanded", "box_height", "box_width"]
+
     def __init__(
         self,
         y: int,
@@ -298,6 +316,8 @@ class ScrollSelector(Selector):
 class Menu(NObject, Capture):
     """Menu class identifies a menu object.
     """
+
+    __slots__ = ["tokens" "menu_items", "selected_items", "menu_pos", "shortcuts"]
 
     def __init__(
         self,

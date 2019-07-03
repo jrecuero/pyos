@@ -26,9 +26,11 @@ class EVT:
         LAST_SCENE: int = 1004
 
 
-class Timer:
+class Timer(object):
     """Timer class identify an timer counter.
     """
+
+    __slot__ = ["timeout", "__counter", "enable"]
 
     def __init__(self, timeout: int, enable: bool = True):
         self.timeout: int = timeout
@@ -46,9 +48,11 @@ class Timer:
         return False
 
 
-class Event:
+class Event(object):
     """Event class identifies any engine event to be used.
     """
+
+    __slots__ = ["evt", "params"]
 
     def __init__(self, evt: int, **kwargs):
         self.evt = evt
@@ -183,10 +187,12 @@ class EventLastScene(Event):
         super(EventLastScene, self).__init__(EVT.SCN.LAST_SCENE)
 
 
-class KeyHandler:
+class KeyHandler(object):
     """KeyHandler class allows to handle any Key Event in a common and
     abstract way.
     """
+
+    __slots__ = ["keyreg"]
 
     def __init__(self, keyreg: Dict[str, Callable[[], List[Event]]] = None):
         self.keyreg = keyreg if keyreg is not None else {}

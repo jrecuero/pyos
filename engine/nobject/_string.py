@@ -55,6 +55,8 @@ class Formatted(NObject):
     """Formatted class identifies a formatted nobject.
     """
 
+    __slots__ = ["data"]
+
     def __init__(self, y: int, x: int, data: List[List[Any]], fmt=curses.A_NORMAL):
         super(Formatted, self).__init__(y, x, 1, -1, fmt)
         self.data = data
@@ -107,6 +109,8 @@ class BoxGrid(NObject):
     """BoxGrid identifies a grid of bordered objects.
     """
 
+    __slots__ = ["ynbr", "xnbr"]
+
     def __init__(
         self,
         y: int,
@@ -139,6 +143,8 @@ class BoxText(TextData):
     """BoxText class identifies a bordered box containing a block of strings
     nobject.
     """
+
+    __slots__ = ["cfmt"]
 
     def __init__(
         self,
@@ -176,6 +182,15 @@ class BoxText(TextData):
 class FlashText(String):
     """FlasText class identifies a flashing block of strings nobject.
     """
+
+    __slots__ = [
+        "__timer",
+        "__shadow",
+        "__on",
+        "__on_counter",
+        "__off",
+        "__off_counter",
+    ]
 
     def __init__(
         self,
@@ -219,6 +234,8 @@ class TimerText(String):
     """TimerText class identifies a timer nobject.
     """
 
+    __slots__ = ["__timer", "__calleer"]
+
     def __init__(
         self, y: int, x: int, msg: str, t: Timer, caller: Any, fmt=curses.A_NORMAL
     ):
@@ -243,6 +260,8 @@ class Caller(NObject):
     """Caller class identifies a callback nobject.
     """
 
+    __slots__ = ["caller"]
+
     def __init__(self, y: int, x: int, caller: Any):
         super(Caller, self).__init__(y, x, -1, -1)
         self.caller = caller
@@ -263,6 +282,8 @@ class Capture(object):
     user.
     """
 
+    __slots__ = ["capture_input"]
+
     def __init__(self):
         self.capture_input = True
 
@@ -273,6 +294,8 @@ class Capture(object):
 class Input(TextData, Capture):
     """Input class identifies an input string nobject.
     """
+
+    __slots__ = ["input_str", "text_output"]
 
     def __init__(
         self,
@@ -321,6 +344,8 @@ class Input(TextData, Capture):
 class TextInput(TextData, Capture):
     """TextInput class identifies a text input string nobject.
     """
+
+    __slots__ = ["in_cb"]
 
     def __init__(self, y: int, x: int, text_data: str, in_cb, fmt=curses.A_NORMAL):
         TextData.__init__(self, y, x, 1, len(text_data), text_data, fmt)

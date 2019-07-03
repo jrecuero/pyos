@@ -37,9 +37,21 @@ def curses_exc(exit: bool = False):
     return _curses_exc
 
 
-class Handler:
+class Handler(object):
     """Handler class handles a full scene scenario.
     """
+
+    __slots__ = [
+        "screen",
+        "scenes",
+        "iscene",
+        "key",
+        "tick",
+        "timers",
+        "render_events",
+        "pinput_events",
+        "keys",
+    ]
 
     def __init__(self, tick: float = 10):
         self.screen: Any = curses.initscr()

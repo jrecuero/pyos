@@ -64,9 +64,11 @@ def draw_box(screen: Any, y: int, x: int, dy: int, dx: int):
     screen.addch(y + dy, x + dx, chr(9499))
 
 
-class NObject:
+class NObject(object):
     """NObject class represents any object to be rendered.
     """
+
+    __slots__ = ["y", "x", "dx", "dy", "enable", "visible", "text_data", "ftm"]
 
     def __init__(self, y: int, x: int, height: int, width: int, fmt=curses.A_NORMAL):
         self.y: int = y
@@ -129,6 +131,8 @@ class NObject:
 class Panel(NObject):
     """Panel class identifies all object grouped in a panel.
     """
+
+    __slots__ = ["children", "_render_box"]
 
     def __init__(self, y: int, x: int, dy: int, dx: int, fmt=curses.A_NORMAL):
         super(Panel, self).__init__(y, x, dy, dx, fmt)

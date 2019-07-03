@@ -62,9 +62,11 @@ def render(f):
     return _render
 
 
-class Scene:
+class Scene(object):
     """Scene class identifies any scene.
     """
+
+    __slots__ = ["name", "nobjects", "enable", "visable", "timers", "boarder", "screen"]
 
     def __init__(self, name: str = ""):
         self.name: str = name

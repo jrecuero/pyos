@@ -9,6 +9,8 @@ class HPath(NObject):
     """HPath class identifies a horizontal path to draw in the screen.
     """
 
+    __slots__ = ["path"]
+
     def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
         super(HPath, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
@@ -62,6 +64,8 @@ class HPathCover(NObject):
     """HPathCover class identifies a horizontal path to draw in the screen.
     """
 
+    __slots__ = ["path"]
+
     def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
         super(HPathCover, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
@@ -112,6 +116,9 @@ class HPathCover(NObject):
 
 
 class HorizontalPath(NObject):
+
+    __slots__ = ["lower_path", "upper_path"]
+
     def __init__(self, y: int, x: int, dy: int, path: List[int], fmt=curses.A_NORMAL):
         super(HorizontalPath, self).__init__(y, x, dy, -1, fmt)
         self.lower_path = HPath(y, x, path, fmt)
@@ -127,6 +134,8 @@ class HorizontalPath(NObject):
 class VPath(NObject):
     """VPath class identifies a vertical path to draw in the screen.
     """
+
+    __slots__ = ["path"]
 
     def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
         super(VPath, self).__init__(y, x, -1, -1, fmt)
@@ -181,6 +190,8 @@ class VPathCover(NObject):
     """VPathCover class identifies a vertical path to draw in the screen.
     """
 
+    __slots__ = ["path"]
+
     def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
         super(VPathCover, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
@@ -228,6 +239,9 @@ class VPathCover(NObject):
 
 
 class VerticalPath(NObject):
+
+    __slots__ = ["lower_path", "upper_path"]
+
     def __init__(self, y: int, x: int, dx: int, path: List[int], fmt=curses.A_NORMAL):
         super(VerticalPath, self).__init__(y, x, -1, dx, fmt)
         self.lower_path = VPath(y, x, path, fmt)
@@ -243,6 +257,8 @@ class VerticalPath(NObject):
 class Path(NObject):
     """Path class identifies a path.
     """
+
+    __slot__ = ["path", "closed", "motion"]
 
     def __init__(
         self, y: int, x: int, path: List, closed: bool = False, fmt=curses.A_NORMAL
@@ -314,6 +330,9 @@ class Path(NObject):
 
 
 class TrackPath(String):
+
+    __slots = ["path", "timer", "tindex"]
+
     def __init__(
         self, y: int, x: int, path: List, t: Timer, text_data: str, fmt=curses.A_NORMAL
     ):
@@ -368,6 +387,9 @@ class TrackPath(String):
 
 
 class Shape(String):
+
+    __slots__ = ["path"]
+
     def __init__(self, y: int, x: int, path: List, text_data: str, fmt=curses.A_NORMAL):
         super(Shape, self).__init__(y, x, text_data, fmt)
         self.path: List = []

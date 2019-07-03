@@ -2,7 +2,6 @@ from typing import List, Any
 import random
 import curses
 from engine import (
-    log,
     EVT,
     Handler,
     Scene,
@@ -61,9 +60,6 @@ class MoveShape(Shape):
             new_pos.x = bb.x - 1
         else:
             pass
-        # log.Actor("{}:{}:{}".format(self.name, self.head.pos, self.head.move)).NextPos(
-        #     "{}:{}".format(new_pos, bb.move)
-        # ).call()
         return new_pos
 
 
@@ -119,7 +115,6 @@ class ActorShape(MoveShape):
         return _shoot
 
     def out_of_bounds(self, y: int, x: int, max_y: int, max_x: int) -> bool:
-        # log.Head("{}:{}".format(self.head.move, self.head.pos)).call()
         super(ActorShape, self).out_of_bounds(y, x, max_y, max_x)
 
 
@@ -144,7 +139,6 @@ class BulletShape(MoveShape):
             if other.collision_callable:
                 other.collisioned(self)
             self.eventor("delete", actor=self)
-            log.Delete("").CollisionWith("{}".format(other.name)).call()
         return False
 
 
