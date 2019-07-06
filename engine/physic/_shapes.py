@@ -2,6 +2,12 @@ from typing import Any, List
 from engine import Event, Point, BB, Move, Shape
 
 
+class StaticShape(Shape):
+    def __init__(self, **kwargs):
+        super(StaticShape, self).__init__(**kwargs)
+        self.movable = False
+
+
 class MoveShape(Shape):
     def __init__(self, **kwargs):
         super(MoveShape, self).__init__(**kwargs)

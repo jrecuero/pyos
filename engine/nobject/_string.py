@@ -282,7 +282,8 @@ class Capture(object):
     user.
     """
 
-    __slots__ = ["capture_input"]
+    # TODO: To be included in all derived classes.
+    # __slots__ = ["capture_input"]
 
     def __init__(self):
         self.capture_input = True
@@ -295,7 +296,7 @@ class Input(TextData, Capture):
     """Input class identifies an input string nobject.
     """
 
-    __slots__ = ["input_str", "text_output"]
+    __slots__ = ["input_str", "text_output", "capture_input"]
 
     def __init__(
         self,
@@ -345,7 +346,7 @@ class TextInput(TextData, Capture):
     """TextInput class identifies a text input string nobject.
     """
 
-    __slots__ = ["in_cb"]
+    __slots__ = ["in_cb", "capture_input"]
 
     def __init__(self, y: int, x: int, text_data: str, in_cb, fmt=curses.A_NORMAL):
         TextData.__init__(self, y, x, 1, len(text_data), text_data, fmt)

@@ -314,6 +314,10 @@ class Shape(object):
 
 
 class Arena(NObject):
+    """Arena class represents the behavior for all physical object added
+    to the app.
+    """
+
     def __init__(self, y: int, x: int, max_y: int, max_x: int, **kwargs):
         super(Arena, self).__init__(x, y, max_y, max_x)
         self.shapes: List[Shape] = []
@@ -329,6 +333,10 @@ class Arena(NObject):
                 bb.x += self.x
         shape.eventor = self.eventor
         self.shapes.append(shape)
+
+    def add_shapes(self, shapes: List[Shape], relative=True):
+        for shape in shapes:
+            self.add_shape(shape, relative)
 
     def out_of_bounds(self):
         for shape in self.shapes:

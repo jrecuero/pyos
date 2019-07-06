@@ -1,3 +1,17 @@
-from ._shapes import MoveShape, ActorShape, ShooterShape, SnakeShape, BulletShape
+from ._shapes import (
+    StaticShape,
+    MoveShape,
+    ActorShape,
+    ShooterShape,
+    SnakeShape,
+    BulletShape,
+)
 
-__all__ = ["MoveShape", "ActorShape", "ShooterShape", "SnakeShape", "BulletShape"]
+__all__ = [
+    "StaticShape",
+    "MoveShape",
+    "ActorShape",
+    "ShooterShape",
+    "SnakeShape",
+    "BulletShape",
+]

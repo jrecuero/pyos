@@ -13,7 +13,8 @@ from engine import (
     Move,
     Arena,
 )
-from engine.physic import ShooterShape, BulletShape
+from engine.nobject import String
+from engine.physic import StaticShape, ShooterShape, BulletShape
 
 
 class GameHandler(Arena):
@@ -42,25 +43,39 @@ class RupperScene(Scene):
         self.ghandler = GameHandler(2, 2, self.max_y - 4, self.max_x - 4)
         # self.board_panel = Panel(1, 10, 10, 80)
         # self.add_object(self.board_panel)
-        actor = ShooterShape(timeout=1)
+        self.actor = ShooterShape(timeout=1)
         phead = Point(1, 5)
-        # actor.append(BB("#", pos=phead, move=Move.RIGHT, fmt=curses.color_pair(1)))
-        actor.append(
-            BB(chr(9819), pos=phead, move=Move.RIGHT, fmt=curses.color_pair(1))
+        # self.actor.append(BB("#", pos=phead, move=Move.RIGHT, fmt=curses.color_pair(1)))
+        self.actor.append(
+            # BB(chr(9819), pos=phead, move=Move.RIGHT, fmt=curses.color_pair(1))
+            BB("x", pos=phead, move=Move.RIGHT, fmt=curses.color_pair(1))
         )
-        self.ghandler.add_shape(actor)
+        trees: List[StaticShape] = []
+        mounts: List[StaticShape] = []
+        for y, x in [(_y, _x) for _y in range(3) for _x in range(6)]:
+            trees.append(StaticShape().append(BB("Y", pos=Point(5 + y, 25 + y + x))))
+        for y, x in [(_y, _x) for _y in range(5) for _x in range(5)]:
+            mounts.append(StaticShape().append(BB("A", pos=Point(10 + y, 10 + y + x))))
+        self.ghandler.add_shape(self.actor)
+        self.ghandler.add_shapes(trees)
+        self.ghandler.add_shapes(mounts)
         self.add_object(self.ghandler)
+        self.actor_pos = String(
+            self.max_y + 1, self.max_x - 15, "[ {} ]".format(self.actor.head.pos)
+        )
+        self.add_object(self.actor_pos)
 
         self.kh = ArrowKeyHandler(
-            left=actor.move(Move.LEFT),
-            right=actor.move(Move.RIGHT),
-            up=actor.move(Move.UP),
-            down=actor.move(Move.DOWN),
-            space=actor.shoot(),
+            left=self.actor.move(Move.LEFT),
+            right=self.actor.move(Move.RIGHT),
+            up=self.actor.move(Move.UP),
+            down=self.actor.move(Move.DOWN),
+            space=self.actor.shoot(),
         )
 
     @update_scene
     def update(self, screen: Any, *events: Event) -> List[Event]:
+        self.actor_pos.set_text("[ {} ]".format(self.actor.head.pos))
         event_to_return: List[Event] = []
         for event in events:
             if event.evt == EVT.ENG.KEY:
