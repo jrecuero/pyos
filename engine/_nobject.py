@@ -49,26 +49,26 @@ def render(f):
     return _render
 
 
-def draw_box(screen: Any, y: int, x: int, dy: int, dx: int):
+def draw_box(screen: Any, y: int, x: int, dy: int, dx: int, fmt=curses.A_NORMAL):
     for _x in range(1, dx):
-        screen.addch(y, x + _x, chr(9473))
+        screen.addnstr(y, x + _x, chr(9473), 1, fmt)
     for _x in range(1, dx):
-        screen.addch(y + dy, x + _x, chr(9473))
+        screen.addnstr(y + dy, x + _x, chr(9473), 1, fmt)
     for _y in range(1, dy):
-        screen.addch(y + _y, x, chr(9475))
+        screen.addnstr(y + _y, x, chr(9475), 1, fmt)
     for _y in range(1, dy):
-        screen.addch(y + _y, x + dx, chr(9475))
-    screen.addch(y, x, chr(9487))
-    screen.addch(y + dy, x, chr(9495))
-    screen.addch(y, x + dx, chr(9491))
-    screen.addch(y + dy, x + dx, chr(9499))
+        screen.addnstr(y + _y, x + dx, chr(9475), 1, fmt)
+    screen.addnstr(y, x, chr(9487), 1, fmt)
+    screen.addnstr(y + dy, x, chr(9495), 1, fmt)
+    screen.addnstr(y, x + dx, chr(9491), 1, fmt)
+    screen.addnstr(y + dy, x + dx, chr(9499), 1, fmt)
 
 
 class NObject(object):
     """NObject class represents any object to be rendered.
     """
 
-    __slots__ = ["y", "x", "dx", "dy", "enable", "visible", "text_data", "ftm"]
+    __slots__ = ["y", "x", "dx", "dy", "enable", "visible", "text_data", "fmt"]
 
     def __init__(self, y: int, x: int, height: int, width: int, fmt=curses.A_NORMAL):
         self.y: int = y

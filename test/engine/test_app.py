@@ -5,37 +5,19 @@ from engine import (
     EVT,
     Handler,
     Scene,
-    String,
-    # Formatted,
-    # Block,
-    # Box,
-    # BoxGrid,
-    # BoxText,
-    # FlashText,
-    Gauge,
-    Spinner,
-    SpinnerScroll,
-    # Caller,
-    Input,
-    # Selector,
-    # ScrollSelector,
-    # Menu,
     KeyHandler,
     Event,
-    # EventNextScene,
-    # EventPrevScene,
-    # EventFirstScene,
-    # EventLastScene,
     update_scene,
 )
+from engine.nobject import String, Gauge, Spinner, SpinnerScroll, Input
 
 c_marked = curses.A_BOLD | curses.A_UNDERLINE
 c_normal = curses.A_NORMAL
 
 
-class SceneMain(Scene):
+class SceneTwo(Scene):
     def __init__(self):
-        super(SceneMain, self).__init__("Main")
+        super(SceneTwo, self).__init__("Main")
 
     def setup(self, screen: Any):
         self.name: List[str] = []
@@ -70,12 +52,12 @@ class SceneMain(Scene):
 
 if __name__ == "__main__":
     h = Handler()
-    main_scene = SceneMain()
-    main_scene.colors(
+    scene_two = SceneTwo()
+    scene_two.colors(
         [
             (curses.COLOR_RED, curses.COLOR_BLACK),
             (curses.COLOR_YELLOW, curses.COLOR_BLACK),
         ]
     )
-    h.add_scene(main_scene)
+    h.add_scene(scene_two)
     h.run()

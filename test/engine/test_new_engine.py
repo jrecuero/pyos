@@ -5,6 +5,15 @@ from engine import (
     EVT,
     Handler,
     Scene,
+    KeyHandler,
+    Event,
+    EventNextScene,
+    EventPrevScene,
+    EventFirstScene,
+    EventLastScene,
+    update_scene,
+)
+from engine.nobject import (
     String,
     Formatted,
     Block,
@@ -18,13 +27,6 @@ from engine import (
     Selector,
     ScrollSelector,
     Menu,
-    KeyHandler,
-    Event,
-    EventNextScene,
-    EventPrevScene,
-    EventFirstScene,
-    EventLastScene,
-    update_scene,
 )
 
 c_marked = curses.A_BOLD | curses.A_UNDERLINE
