@@ -5,6 +5,7 @@ from ._shapes import (
     ShooterShape,
     SnakeShape,
     BulletShape,
+    BreakableShape,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "ShooterShape",
     "SnakeShape",
     "BulletShape",
+    "BreakableShape",
 ]

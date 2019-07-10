@@ -119,6 +119,7 @@ class BulletShape(MoveShape):
         super(BulletShape, self).__init__(**kwargs)
         self.name = "Bullet"
         self.priority = 10
+        self.bulleter = True
         self.parent: Shape = kwargs.get("parent", None)
         self.timeout: int = self.parent.timeout / 2
         parent_head = self.parent.head
@@ -130,9 +131,25 @@ class BulletShape(MoveShape):
         if super(BulletShape, self).out_of_bounds(y, x, max_y, max_x):
             self.eventor("delete", actor=self)
 
+    def collisioned(self, other: "Shape"):
+        self.eventor("delete", actor=self)
+        return True
+
     def collision_with(self, other: "Shape") -> bool:
         if (other != self.parent) and self._collision_with(other):
-            if other.collision_callable:
-                other.collisioned(self)
-            self.eventor("delete", actor=self)
+            # if other.collision_callable:
+            #     other.collisioned(self)
+            # self.eventor("delete", actor=self)
+            return True
         return False
+
+
+class BreakableShape(StaticShape):
+    def __init__(self, **kwargs):
+        super(BreakableShape, self).__init__(**kwargs)
+        self.breakable = True
+
+    def collisioned(self, other: "Shape"):
+        if other.bulleter:
+            self.eventor("delete", actor=self)
+        return True

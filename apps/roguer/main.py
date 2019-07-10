@@ -14,7 +14,7 @@ from engine import (
     Arena,
 )
 from engine.nobject import String
-from engine.physic import StaticShape, ShooterShape, BulletShape
+from engine.physic import StaticShape, ShooterShape, BulletShape, BreakableShape
 
 
 class GameHandler(Arena):
@@ -52,13 +52,25 @@ class RupperScene(Scene):
         )
         trees: List[StaticShape] = []
         mounts: List[StaticShape] = []
+        dummies: List[StaticShape] = []
+        targets: List[BreakableShape] = []
         for y, x in [(_y, _x) for _y in range(3) for _x in range(6)]:
             trees.append(StaticShape().append(BB("Y", pos=Point(5 + y, 25 + y + x))))
         for y, x in [(_y, _x) for _y in range(5) for _x in range(5)]:
             mounts.append(StaticShape().append(BB("A", pos=Point(10 + y, 10 + y + x))))
+        for y, x in [(_y, _x) for _y in range(2) for _x in range(2)]:
+            targets.append(BreakableShape().append(BB("T", pos=Point(15 + y, 75 + x))))
+        dummies.append(
+            StaticShape().append(BB("D", pos=Point(15, 50), fmt=curses.color_pair(2)))
+        )
+        dummies.append(
+            StaticShape().append(BB("D", pos=Point(10, 100), fmt=curses.color_pair(2)))
+        )
         self.ghandler.add_shape(self.actor)
         self.ghandler.add_shapes(trees)
         self.ghandler.add_shapes(mounts)
+        self.ghandler.add_shapes(targets)
+        self.ghandler.add_shapes(dummies)
         self.add_object(self.ghandler)
         self.actor_pos = String(
             self.max_y + 1, self.max_x - 15, "[ {} ]".format(self.actor.head.pos)

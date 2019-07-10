@@ -2,7 +2,7 @@ from typing import List, Any, Set
 import random
 import curses
 
-from ._loggar import log
+# from ._loggar import log
 from ._event import Event
 from ._nobject import NObject, pinput, update, render
 
@@ -179,8 +179,9 @@ class BB(object):
         self.prev_pos = Point(self.pos.y, self.pos.x)
         self.pos = pos
 
-    def back(self):
+    def back(self) -> bool:
         self.pos = self.prev_pos
+        return True
 
     def draw(self):
         return [self.y, self.x, self.sprite]
@@ -200,6 +201,8 @@ class Shape(object):
         self.timeout: int = kwargs.get("timeout", 0)
         self.visible: bool = kwargs.get("visible", True)
         self.solid: bool = kwargs.get("solid", True)
+        self.breakable: bool = kwargs.get("breakable", False)
+        self.bulleter: bool = kwargs.get("bulleter", False)
         self.movable: bool = kwargs.get("movable", True)
         self.layer: int = kwargs.get("layer", 0)
         self.priority: int = kwargs.get("priority", 0)
@@ -239,7 +242,7 @@ class Shape(object):
     def head(self) -> BB:
         return self[0]
 
-    def back(self):
+    def back(self) -> bool:
         for bb in self.shape:
             bb.back()
         self.head.move = Move.reverse(self.head.move)
@@ -247,6 +250,7 @@ class Shape(object):
         # log.Actor("{}:{}:{}".format(self.name, self.head.pos, self.head.move)).Back(
         #     ["{}:{}".format(s.pos, s.move) for s in self]
         # ).call()
+        return True
 
     def out_of_bounds(self, y: int, x: int, max_y: int, max_x: int) -> bool:
         for i, bb in enumerate(self.shape):
@@ -259,28 +263,30 @@ class Shape(object):
         return False
 
     def collisioned(self, other: "Shape"):
-        return True
+        return self.back()
 
     def _collision_with(self, other: "Shape") -> bool:
-        collision: Set = set()
-        other_collision: Set = set()
-        for bb in self.shape:
-            collision.add(bb.pos.hash())
-        len_self_collision = len(collision)
-        for bb in other:
-            other_collision.add(bb.pos.hash())
-        len_other_collision = len(other_collision)
-        collision.update(other_collision)
-        return len(collision) < (len_self_collision + len_other_collision)
+        collision: Set = set([bb.pos.hash() for bb in self.shape])
+        other_collision: Set = set([bb.pos.hash() for bb in other])
+        # for bb in self.shape:
+        #     collision.add(bb.pos.hash())
+        # len_self_collision = len(collision)
+        # for bb in other:
+        #     other_collision.add(bb.pos.hash())
+        # len_other_collision = len(other_collision)
+        # collision.update(other_collision)
+        # return len(collision) < (len_self_collision + len_other_collision)
+        return collision.intersection(other_collision)
 
     def collision_with(self, other: "Shape") -> bool:
         if getattr(other, "parent", None) == self:
             return False
-        if self._collision_with(other):
-            if other.collision_callable:
-                return other.collisioned(self)
-            return True
-        return False
+        # if self._collision_with(other):
+        #     if other.collision_callable:
+        #         return other.collisioned(self)
+        #     return True
+        # return False
+        return self._collision_with(other)
 
     def _update(self) -> bool:
         self._counter += 1
@@ -343,14 +349,17 @@ class Arena(NObject):
             shape.out_of_bounds(self.y, self.x, self.dy, self.dx)
 
     def collision(self):
-        shapes = [s for s in self.shapes if s.movable]
-        for shape in sorted(shapes, key=lambda x: x.priority):
-            others = list(self.shapes)
+        moved_shapes = [s for s in self.shapes if s.movable]
+        others = list(self.shapes)
+        for shape in sorted(moved_shapes, key=lambda x: x.priority):
             for other in [o for o in others if o != shape]:
                 if shape.collision_with(other):
-                    log.Actor(shape.name).CollisionWith(other.name).call()
-                    shape.back()
-                    break
+                    # log.Actor(shape.name).CollisionWith(other.name).call()
+                    # shape.back()
+                    shape.collisioned(other)
+                    other.collisioned(shape)
+                    return True
+        return False
 
     @pinput
     def pinput(self, screen: Any, keys) -> List[Event]:
