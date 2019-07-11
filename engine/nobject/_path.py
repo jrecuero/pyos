@@ -16,7 +16,7 @@ class HPath(NObject):
         self.path: List[int] = path
 
     @render
-    def render(self, screen) -> List[Event]:
+    def render(self, screen: Any) -> List[Event]:
         y = self.y
         x = self.x
         for index, weight in enumerate(self.path):
@@ -71,7 +71,7 @@ class HPathCover(NObject):
         self.path: List[int] = path
 
     @render
-    def render(self, screen) -> List[Event]:
+    def render(self, screen: Any) -> List[Event]:
         y = self.y
         x = self.x
         for index, weight in enumerate(self.path):
@@ -125,7 +125,7 @@ class HorizontalPath(NObject):
         self.upper_path = HPathCover(y - dy, x, path, fmt)
 
     @render
-    def render(self, screen) -> List[Event]:
+    def render(self, screen: Any) -> List[Event]:
         self.lower_path.render(screen)
         self.upper_path.render(screen)
         return []
@@ -142,7 +142,7 @@ class VPath(NObject):
         self.path: List[int] = path
 
     @render
-    def render(self, screen) -> List[Event]:
+    def render(self, screen: Any) -> List[Event]:
         y = self.y
         x = self.x
         for index, weight in enumerate(self.path):
@@ -197,7 +197,7 @@ class VPathCover(NObject):
         self.path: List[int] = path
 
     @render
-    def render(self, screen) -> List[Event]:
+    def render(self, screen: Any) -> List[Event]:
         y = self.y
         x = self.x
         for index, weight in enumerate(self.path):
@@ -248,7 +248,7 @@ class VerticalPath(NObject):
         self.upper_path = VPathCover(y, x + dx, path, fmt)
 
     @render
-    def render(self, screen) -> List[Event]:
+    def render(self, screen: Any) -> List[Event]:
         self.lower_path.render(screen)
         self.upper_path.render(screen)
         return []
@@ -269,7 +269,7 @@ class Path(NObject):
         self.motion: str = "none"
 
     @render
-    def render(self, screen) -> List[Event]:
+    def render(self, screen: Any) -> List[Event]:
         y = self.y
         x = self.x
         self.motion: str = "none"
@@ -423,7 +423,7 @@ class Shape(String):
                 self.path.append([y_pos, x_pos, fmt])
 
     @render
-    def render(self, screen) -> List[Event]:
+    def render(self, screen: Any) -> List[Event]:
         for y, x, fmt in self.path:
             screen.addstr(y, x, self.text_data, fmt)
         return []

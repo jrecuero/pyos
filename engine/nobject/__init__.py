@@ -25,6 +25,7 @@ from ._path import (
     Shape,
     ShapeFromPath,
 )
+from ._diagram import Diagram, Histogram, HistoBar
 
 
 __all__ = [
@@ -56,4 +57,7 @@ __all__ = [
     "TrackPath",
     "Shape",
     "ShapeFromPath",
+    "Diagram",
+    "Histogram",
+    "HistoBar",
 ]

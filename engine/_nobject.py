@@ -99,9 +99,9 @@ class NObject(object):
 
     def box(self, screen: Any, fmt=None):
         fmt = fmt if fmt else self.fmt
-        screen.attron(fmt)
-        draw_box(screen, self.y, self.x, self.dy, self.dx)
-        screen.attroff(fmt)
+        # screen.attron(fmt)
+        draw_box(screen, self.y, self.x, self.dy, self.dx, fmt)
+        # screen.attroff(fmt)
 
     @pinput
     def pinput(self, screen, keys) -> List[Event]:
