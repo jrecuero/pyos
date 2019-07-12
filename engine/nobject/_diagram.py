@@ -17,6 +17,7 @@ class Diagram(NObject):
         "y_scale",
         "x_scale",
         "x_width",
+        "style",
     ]
 
     def __init__(self, y: int, x: int, dy: int, dx: int, data: List, **kwargs):
@@ -29,6 +30,7 @@ class Diagram(NObject):
         self.y_scale: int = kwargs.get("y_scale", 1)
         self.x_scale: int = kwargs.get("x_scale", 1)
         self.x_width: int = kwargs.get("x_width", 1)
+        self.style: str = kwargs.get("style", "bar")
 
 
 class HistoBar(Diagram):
@@ -41,14 +43,20 @@ class HistoBar(Diagram):
     @render
     def render(self, screen: Any) -> List[Event]:
         self.box(screen)
-        x_entries: int = 0
-        for ypos, xpos in self.data:
-            x: int = self.x + xpos + (self.x_width - 1) * x_entries
-            for _y in range(ypos):
-                y: int = self.y + self.dy - _y - 1
-                for _x in range(self.x_width):
-                    screen.addstr(y, x + _x, chr(9608), self.fmt)
-            x_entries += 1
+        y: int = 0
+        x: int = 0
+        for index, (ypos, xpos) in enumerate(self.data):
+            if self.style == "bar":
+                x = self.x + xpos + (self.x_width - 1) * index
+                for _y in range(ypos):
+                    y = self.y + self.dy - _y - 1
+                    for _x in range(self.x_width):
+                        screen.addstr(y, x + _x, chr(9608), self.fmt)
+            else:
+                x = self.x + xpos
+                y = self.y + self.dy - ypos
+                char = chr(9608) if self.style == "plot" else self.style
+                screen.addstr(y, x, char, self.fmt)
         return []
 
 

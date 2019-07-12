@@ -23,7 +23,9 @@ class SceneOne(Scene):
     def histobar(self, screen: Any):
         data = [(y, 3 * y) for y in range(10)]
         data.extend([(18 - y, 30 + 3 * y) for y in range(10)])
-        self.add_object(HistoBar(1, 1, 20, 200, data, x_width=2))
+        # self.add_object(HistoBar(1, 1, 20, 200, data, x_width=2))
+        # self.add_object(HistoBar(1, 1, 20, 200, data, style="plot"))
+        self.add_object(HistoBar(1, 1, 20, 200, data, style="x"))
 
     def histogram(self, screen: Any):
         data = [5, 15, 10, 17, 11]
@@ -34,9 +36,9 @@ class SceneOne(Scene):
                 1,
                 1,
                 20,
-                200,
+                100,
                 data,
-                x_width=10,
+                x_width=5,
                 bar_titles=bar_titles,
                 bar_colors=bar_colors,
             )
