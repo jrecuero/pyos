@@ -289,10 +289,11 @@ class Shape(object):
         return self._collision_with(other)
 
     def _update(self) -> bool:
-        self._counter += 1
-        if self.timeout > self._counter:
-            return False
-        self._counter = 0
+        if self.timeout != 0:
+            self._counter += 1
+            if self.timeout > self._counter:
+                return False
+            self._counter = 0
         return True
 
     def next_position(self, bb: BB):
@@ -330,7 +331,7 @@ class Arena(NObject):
         self._border_fmt = kwargs.get("border_fmt", curses.A_NORMAL)
 
     def eventor(self, event, **kwargs):
-        pass
+        raise Exception("Eventor to be defined in derived class")
 
     def add_shape(self, shape: Shape, relative=True):
         if relative:

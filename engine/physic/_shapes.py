@@ -31,14 +31,16 @@ class ActorShape(MoveShape):
     def __init__(self, **kwargs):
         super(ActorShape, self).__init__(**kwargs)
         self.name = "Actor"
-        self.moved: bool = False
+        # If timeout is zero, it means actor does not move until movemeent is
+        # called again.
+        self.moved: bool = bool(self.timeout)
 
     def update(self, screen: Any) -> List[Event]:
         result: List[Event] = []
         if self.movable and self.moved and self._update():
             for bb in self.shape:
                 bb.next(self.next_position(bb))
-            self.moved = False
+            self.moved = bool(self.timeout)
         return result
 
     def move(self, move_to: int):
@@ -57,8 +59,7 @@ class ActorShape(MoveShape):
 class ShooterShape(ActorShape):
     def __init__(self, **kwargs):
         super(ShooterShape, self).__init__(**kwargs)
-        self.name = "Actor"
-        self.moved: bool = False
+        self.name = "Shooter"
 
     def shoot(self):
         def _shoot():
@@ -123,9 +124,8 @@ class BulletShape(MoveShape):
         self.parent: Shape = kwargs.get("parent", None)
         self.timeout: int = self.parent.timeout / 2
         parent_head = self.parent.head
-        self.append(
-            BB("*", pos=Point(parent_head.y, parent_head.x), move=parent_head.move)
-        )
+        move = kwargs.get("move", parent_head.move)
+        self.append(BB("*", pos=Point(parent_head.y, parent_head.x), move=move))
 
     def out_of_bounds(self, y: int, x: int, max_y: int, max_x: int) -> bool:
         if super(BulletShape, self).out_of_bounds(y, x, max_y, max_x):

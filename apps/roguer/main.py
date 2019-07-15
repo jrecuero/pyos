@@ -25,11 +25,9 @@ class GameHandler(Arena):
         if event == "shoot":
             actor = kwargs.get("actor", None)
             self.add_shape(BulletShape(parent=actor), relative=False)
-            pass
         elif event == "delete":
             actor = kwargs.get("actor", None)
             self.shapes.remove(actor)
-            pass
 
 
 class RupperScene(Scene):

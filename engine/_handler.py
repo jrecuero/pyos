@@ -96,10 +96,12 @@ class Handler(object):
         else:
             return self.__get_input()
 
-    def restore_screen(self, screen):
+    def restore_screen(self, screen: Any = None):
         """restore_screen restores the terminal screen to the original
         configuration.
         """
+        if screen is None:
+            screen = self.screen
         curses.nocbreak()
         screen.keypad(False)
         curses.echo()
