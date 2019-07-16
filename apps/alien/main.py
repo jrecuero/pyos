@@ -15,35 +15,11 @@ from engine import (
     Shape,
     # log,
 )
-from engine.physic import ActorShape, ShooterShape, BulletShape
+from engine.physic import ShooterShape, BulletShape, PathShape
 
 
-class Alien(ActorShape):
-    def __init__(self, **kwargs):
-        super(Alien, self).__init__(**kwargs)
-        self.path = [(Move.RIGHT, 10), (Move.LEFT, 10)]
-        self.next_move_index: int = 0
-        self.next_move: List = list(self.path[self.next_move_index])
-
-    def next_position(self, bb: BB) -> Point:
-        new_pos: Point = Point(bb.y, bb.x)
-        if self.next_move[0] == Move.UP:
-            new_pos.y = bb.y - 1
-        elif self.next_move[0] == Move.DOWN:
-            new_pos.y = bb.y + 1
-        elif self.next_move[0] == Move.RIGHT:
-            new_pos.x = bb.x + 1
-        elif self.next_move[0] == Move.LEFT:
-            new_pos.x = bb.x - 1
-        else:
-            pass
-        self.next_move[1] = self.next_move[1] - 1
-        if self.next_move[1] == 0:
-            self.next_move_index += 1
-            self.next_move_index %= 2
-            self.next_move = list(self.path[self.next_move_index])
-            new_pos.y = bb.y + 1
-        return new_pos
+class Alien(PathShape):
+    pass
 
 
 class Bullet(BulletShape):
@@ -87,7 +63,13 @@ class AlienScene(Scene):
                 fmt=curses.color_pair(2),
             )
         )
-        self.alien = Alien(timeout=25)
+        alien_path = [{"move": Move.RIGHT, "cycle": 10}, {"move": Move.LEFT, "cycle": 10}, {"move": Move.DOWN, "cycle": 1}]
+        # alien_path = [{"move": Move.RIGHT, "cycle": 10}, {"move": Move.NONE, "cycle": 10}, {"move": Move.DOWN, "cycle": 1}]
+        self.alien = Alien(path=alien_path, loop=True, timeout=25)
+        # self.alien = Alien(path=alien_path, bounce=True, timeout=25)
+        # self.alien = Alien(path=alien_path, single=True, timeout=25)
+        # self.alien = Alien(path=alien_path, bounce=True, single=True, timeout=25)
+        # self.alien = Alien(path=alien_path, repeated=5, timeout=25)
         self.alien.append(BB("#", pos=Point(self.ghandler.dy - 15, 5), move=Move.RIGHT))
         self.ghandler.add_shape(self.ship)
         self.ghandler.add_shape(self.alien)

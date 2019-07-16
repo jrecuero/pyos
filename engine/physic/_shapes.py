@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Dict
 from engine import Event, Point, BB, Move, Shape
 
 
@@ -25,6 +25,13 @@ class MoveShape(Shape):
         else:
             pass
         return new_pos
+
+    def update(self, screen: Any) -> List[Event]:
+        result: List[Event] = []
+        if self.movable and self._update():
+            for bb in self.shape:
+                bb.next(self.next_position(bb))
+        return result
 
 
 class ActorShape(MoveShape):
@@ -113,6 +120,41 @@ class SnakeShape(ShooterShape):
             return []
 
         return _move
+
+
+class PathShape(MoveShape):
+    def __init__(self, **kwargs):
+        super(PathShape, self).__init__(**kwargs)
+        self.path: List = kwargs.get("path", [])
+        self.loop: bool = kwargs.get("loop", False)
+        self.bounce: bool = kwargs.get("bounce", False)
+        self.single: bool = kwargs.get("single", False)
+        self.repeated: int = kwargs.get("repeated", 0)
+        self.path_index: int = 0
+        self.path_next: Dict = {}
+        self.path_step: int = 1
+        if len(self.path):
+            self.path_next = dict(self.path[self.path_index])
+        if self.bounce:
+            for p in reversed(self.path):
+                new_segment = {"move": Move.reverse(p["move"]), "cycle": p["cycle"]}
+                self.path.append(new_segment)
+
+    def next_position(self, bb: BB) -> Point:
+        bb.move = self.path_next["move"]
+        new_pos = super(PathShape, self).next_position(bb)
+        self.path_next["cycle"] = self.path_next["cycle"] - 1
+        if self.path_next["cycle"] == 0:
+            self.path_index += self.path_step
+            self.path_index %= len(self.path)
+            if self.single and self.path_index == 0:
+                self.movable = False
+            elif self.repeated and self.path_index == 0:
+                self.repeated -= 1
+                if self.repeated == 0:
+                    self.movable = False
+            self.path_next = dict(self.path[self.path_index])
+        return new_pos
 
 
 class BulletShape(MoveShape):
