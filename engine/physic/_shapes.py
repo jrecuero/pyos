@@ -12,7 +12,7 @@ class MoveShape(Shape):
     def __init__(self, **kwargs):
         super(MoveShape, self).__init__(**kwargs)
 
-    def next_position(self, bb: BB):
+    def next_position(self, bb: BB) -> Point:
         new_pos: Point = Point(bb.y, bb.x)
         if bb.move == Move.UP:
             new_pos.y = bb.y - 1
@@ -131,7 +131,7 @@ class BulletShape(MoveShape):
         if super(BulletShape, self).out_of_bounds(y, x, max_y, max_x):
             self.eventor("delete", actor=self)
 
-    def collisioned(self, other: "Shape"):
+    def collisioned(self, other: "Shape") -> bool:
         self.eventor("delete", actor=self)
         return True
 

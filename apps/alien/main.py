@@ -12,8 +12,45 @@ from engine import (
     Point,
     BB,
     Move,
+    Shape,
+    # log,
 )
-from engine.physic import ShooterShape, BulletShape
+from engine.physic import ActorShape, ShooterShape, BulletShape
+
+
+class Alien(ActorShape):
+    def __init__(self, **kwargs):
+        super(Alien, self).__init__(**kwargs)
+        self.path = [(Move.RIGHT, 10), (Move.LEFT, 10)]
+        self.next_move_index: int = 0
+        self.next_move: List = list(self.path[self.next_move_index])
+
+    def next_position(self, bb: BB) -> Point:
+        new_pos: Point = Point(bb.y, bb.x)
+        if self.next_move[0] == Move.UP:
+            new_pos.y = bb.y - 1
+        elif self.next_move[0] == Move.DOWN:
+            new_pos.y = bb.y + 1
+        elif self.next_move[0] == Move.RIGHT:
+            new_pos.x = bb.x + 1
+        elif self.next_move[0] == Move.LEFT:
+            new_pos.x = bb.x - 1
+        else:
+            pass
+        self.next_move[1] = self.next_move[1] - 1
+        if self.next_move[1] == 0:
+            self.next_move_index += 1
+            self.next_move_index %= 2
+            self.next_move = list(self.path[self.next_move_index])
+            new_pos.y = bb.y + 1
+        return new_pos
+
+
+class Bullet(BulletShape):
+    def collisioned(self, other: "Shape") -> bool:
+        if isinstance(other, Alien):
+            self.eventor("delete", actor=other)
+        return super(Bullet, self).collisioned(other)
 
 
 class GameHandler(Arena):
@@ -23,7 +60,7 @@ class GameHandler(Arena):
     def eventor(self, event, **kwargs):
         if event == "shoot":
             actor = kwargs.get("actor", None)
-            self.add_shape(BulletShape(parent=actor, move=Move.UP), relative=False)
+            self.add_shape(Bullet(parent=actor, move=Move.UP), relative=False)
         elif event == "delete":
             actor = kwargs.get("actor", None)
             self.shapes.remove(actor)
@@ -41,7 +78,7 @@ class AlienScene(Scene):
 
     def setup(self, screen: Any):
         self.ghandler = GameHandler(2, 2, self.max_y - 4, self.max_x - 4)
-        self.ship = ShooterShape(timeout=3)
+        self.ship = ShooterShape(timeout=5)
         self.ship.append(
             BB(
                 "A",
@@ -50,7 +87,10 @@ class AlienScene(Scene):
                 fmt=curses.color_pair(2),
             )
         )
+        self.alien = Alien(timeout=25)
+        self.alien.append(BB("#", pos=Point(self.ghandler.dy - 15, 5), move=Move.RIGHT))
         self.ghandler.add_shape(self.ship)
+        self.ghandler.add_shape(self.alien)
         self.add_object(self.ghandler)
         self.kh = ArrowKeyHandler(
             left=self.ship.move(Move.LEFT),
