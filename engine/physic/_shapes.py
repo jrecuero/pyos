@@ -1,5 +1,5 @@
 from typing import Any, List, Dict
-from engine import Event, Point, BB, Move, Shape
+from engine import Event, Point, BB, Move, Shape, log
 
 
 class StaticShape(Shape):
@@ -122,9 +122,9 @@ class SnakeShape(ShooterShape):
         return _move
 
 
-class PathShape(MoveShape):
+class PathMoveShape(MoveShape):
     def __init__(self, **kwargs):
-        super(PathShape, self).__init__(**kwargs)
+        super(PathMoveShape, self).__init__(**kwargs)
         self.path: List = kwargs.get("path", [])
         self.loop: bool = kwargs.get("loop", False)
         self.bounce: bool = kwargs.get("bounce", False)
@@ -142,7 +142,7 @@ class PathShape(MoveShape):
 
     def next_position(self, bb: BB) -> Point:
         bb.move = self.path_next["move"]
-        new_pos = super(PathShape, self).next_position(bb)
+        new_pos = super(PathMoveShape, self).next_position(bb)
         self.path_next["cycle"] = self.path_next["cycle"] - 1
         if self.path_next["cycle"] == 0:
             self.path_index += self.path_step
@@ -189,9 +189,39 @@ class BulletShape(MoveShape):
 class BreakableShape(StaticShape):
     def __init__(self, **kwargs):
         super(BreakableShape, self).__init__(**kwargs)
-        self.breakable = True
+        # self.breakable = True
 
-    def collisioned(self, other: "Shape"):
-        if other.bulleter:
-            self.eventor("delete", actor=self)
-        return True
+    # def collisioned(self, other: "Shape"):
+    #     if other.bulleter:
+    #         self.eventor("delete", actor=self)
+    #     return True
+
+
+class ShapedStaticShape(StaticShape):
+    def __init__(self, **kwargs):
+        super(ShapedStaticShape, self).__init__(**kwargs)
+        self.pshape: List = kwargs.get("shape", [])
+        assert self.pshape
+        log.Shape(self.pshape[0]).call()
+        y_pos, x_pos, sprite, fmt = self.pshape[0]
+        self.append(BB(sprite, pos=Point(y_pos, x_pos), fmt=fmt))
+        for p in self.pshape[1:]:
+            log.Shape(p).call()
+            y_val, x_val, sprite, fmt = p
+            max_val = max(abs(y_val), abs(x_val))
+            for i in range(max_val):
+                if y_val != 0:
+                    if y_val > 0:
+                        y_val -= 1
+                        y_pos += 1
+                    else:
+                        y_val += 1
+                        y_pos -= 1
+                if x_val != 0:
+                    if x_val > 0:
+                        x_val -= 1
+                        x_pos += 1
+                    else:
+                        x_val += 1
+                        x_pos -= 1
+                self.append(BB(sprite, pos=Point(y_pos, x_pos), fmt=fmt))

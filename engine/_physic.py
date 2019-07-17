@@ -201,7 +201,7 @@ class Shape(object):
         self.timeout: int = kwargs.get("timeout", 0)
         self.visible: bool = kwargs.get("visible", True)
         self.solid: bool = kwargs.get("solid", True)
-        self.breakable: bool = kwargs.get("breakable", False)
+        self.breakable: List = kwargs.get("breakable", [])
         self.bulleter: bool = kwargs.get("bulleter", False)
         self.movable: bool = kwargs.get("movable", True)
         self.layer: int = kwargs.get("layer", 0)
@@ -243,49 +243,36 @@ class Shape(object):
         return self[0]
 
     def back(self) -> bool:
-        for bb in self.shape:
-            bb.back()
-        self.head.move = Move.reverse(self.head.move)
-        self.head.pushed = True
-        # log.Actor("{}:{}:{}".format(self.name, self.head.pos, self.head.move)).Back(
-        #     ["{}:{}".format(s.pos, s.move) for s in self]
-        # ).call()
+        if self.movable:
+            for bb in self.shape:
+                bb.back()
+            self.head.move = Move.reverse(self.head.move)
+            self.head.pushed = True
         return True
 
     def out_of_bounds(self, y: int, x: int, max_y: int, max_x: int) -> bool:
         for i, bb in enumerate(self.shape):
             if not bb.pos.inside(y, x, max_y, max_x):
-                # log.Actor(
-                #     "{}{}::{}".format(self.name, self.head.pos, self.head.move)
-                # ).OutOfBounds(["{}:{}".format(s.pos, s.move) for s in self]).call()
                 self.back()
                 return True
         return False
 
     def collisioned(self, other: "Shape"):
-        return self.back()
+        if any([isinstance(other, klass) for klass in self.breakable]):
+            self.eventor("delete", actor=self)
+            return True
+        elif self.solid and other.solid:
+            return self.back()
+        return True
 
     def _collision_with(self, other: "Shape") -> bool:
         collision: Set = set([bb.pos.hash() for bb in self.shape])
         other_collision: Set = set([bb.pos.hash() for bb in other])
-        # for bb in self.shape:
-        #     collision.add(bb.pos.hash())
-        # len_self_collision = len(collision)
-        # for bb in other:
-        #     other_collision.add(bb.pos.hash())
-        # len_other_collision = len(other_collision)
-        # collision.update(other_collision)
-        # return len(collision) < (len_self_collision + len_other_collision)
         return collision.intersection(other_collision)
 
     def collision_with(self, other: "Shape") -> bool:
         if getattr(other, "parent", None) == self:
             return False
-        # if self._collision_with(other):
-        #     if other.collision_callable:
-        #         return other.collisioned(self)
-        #     return True
-        # return False
         return self._collision_with(other)
 
     def _update(self) -> bool:

@@ -12,21 +12,20 @@ from engine import (
     Point,
     BB,
     Move,
-    Shape,
-    # log,
 )
-from engine.physic import ShooterShape, BulletShape, PathShape
+from engine.physic import ShooterShape, BulletShape, PathMoveShape, StaticShape
 
 
-class Alien(PathShape):
+class Alien(PathMoveShape):
     pass
 
 
 class Bullet(BulletShape):
-    def collisioned(self, other: "Shape") -> bool:
-        if isinstance(other, Alien):
-            self.eventor("delete", actor=other)
-        return super(Bullet, self).collisioned(other)
+    pass
+    # def collisioned(self, other: "Shape") -> bool:
+    #     if isinstance(other, Alien):
+    #         self.eventor("delete", actor=other)
+    #     return super(Bullet, self).collisioned(other)
 
 
 class GameHandler(Arena):
@@ -63,9 +62,15 @@ class AlienScene(Scene):
                 fmt=curses.color_pair(2),
             )
         )
-        alien_path = [{"move": Move.RIGHT, "cycle": 10}, {"move": Move.LEFT, "cycle": 10}, {"move": Move.DOWN, "cycle": 1}]
+        alien_path = [
+            {"move": Move.RIGHT, "cycle": 10},
+            {"move": Move.LEFT, "cycle": 10},
+            {"move": Move.DOWN, "cycle": 1},
+        ]
         # alien_path = [{"move": Move.RIGHT, "cycle": 10}, {"move": Move.NONE, "cycle": 10}, {"move": Move.DOWN, "cycle": 1}]
-        self.alien = Alien(path=alien_path, loop=True, timeout=25)
+        self.alien = Alien(
+            path=alien_path, loop=True, timeout=50, breakable=[BulletShape]
+        )
         # self.alien = Alien(path=alien_path, bounce=True, timeout=25)
         # self.alien = Alien(path=alien_path, single=True, timeout=25)
         # self.alien = Alien(path=alien_path, bounce=True, single=True, timeout=25)
@@ -73,6 +78,31 @@ class AlienScene(Scene):
         self.alien.append(BB("#", pos=Point(self.ghandler.dy - 15, 5), move=Move.RIGHT))
         self.ghandler.add_shape(self.ship)
         self.ghandler.add_shape(self.alien)
+        self.ghandler.add_shape(
+            StaticShape().append(BB("I", pos=Point(self.ghandler.dy - 2, 2)))
+        )
+        self.ghandler.add_shape(
+            StaticShape().append(BB("I", pos=Point(self.ghandler.dy - 2, 20)))
+        )
+        for x in range(20):
+            s = StaticShape(breakable=[BulletShape])
+            s.append(
+                BB(
+                    "#",
+                    pos=Point(self.ghandler.dy - 10, x + 5),
+                    fmt=curses.color_pair(2),
+                )
+            )
+            self.ghandler.add_shape(s)
+
+        # shapedShape = ShapedStaticShape(shape=[[1, 1, "*", curses.color_pair(3)],
+        #                                        [3, 0, "*", curses.color_pair(3)],
+        #                                        [0, 2, "*", curses.color_pair(3)],
+        #                                        [3, 3, "*", curses.color_pair(3)],
+        #                                        [0, 5, "*", curses.color_pair(3)],
+        #                                        [-3, 0, "*", curses.color_pair(3)]],
+        #                                 breakable=[BulletShape, ])
+        # self.ghandler.add_shape(shapedShape)
         self.add_object(self.ghandler)
         self.kh = ArrowKeyHandler(
             left=self.ship.move(Move.LEFT),

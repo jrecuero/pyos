@@ -330,6 +330,9 @@ class Path(NObject):
 
 
 class TrackPath(String):
+    """TrackPath class identifies the path follow for an object.
+    The object will move from one path etnry to the next using the given timer.
+    """
 
     __slots = ["path", "timer", "tindex"]
 
