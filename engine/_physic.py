@@ -209,6 +209,9 @@ class Shape(object):
         self.eventor = kwargs.get("eventor", None)
         self.garbage: bool = False
         self.collision_callable: bool = False
+        self.pshape: List = kwargs.get("shape", [])
+        if self.pshape:
+            self.build_from_shape()
 
     def __getitem__(self, i):
         if len(self.shape) > i:
@@ -240,7 +243,33 @@ class Shape(object):
 
     @property
     def head(self) -> BB:
-        return self[0]
+        if len(self):
+            return self[0]
+        else:
+            None
+
+    def build_from_shape(self):
+        y_pos, x_pos, sprite, fmt = self.pshape[0]
+        self.append(BB(sprite, pos=Point(y_pos, x_pos), fmt=fmt))
+        for p in self.pshape[1:]:
+            y_val, x_val, sprite, fmt = p
+            max_val = max(abs(y_val), abs(x_val))
+            for i in range(max_val):
+                if y_val != 0:
+                    if y_val > 0:
+                        y_val -= 1
+                        y_pos += 1
+                    else:
+                        y_val += 1
+                        y_pos -= 1
+                if x_val != 0:
+                    if x_val > 0:
+                        x_val -= 1
+                        x_pos += 1
+                    else:
+                        x_val += 1
+                        x_pos -= 1
+                self.append(BB(sprite, pos=Point(y_pos, x_pos), fmt=fmt))
 
     def back(self) -> bool:
         if self.movable:
@@ -268,7 +297,8 @@ class Shape(object):
     def _collision_with(self, other: "Shape") -> bool:
         collision: Set = set([bb.pos.hash() for bb in self.shape])
         other_collision: Set = set([bb.pos.hash() for bb in other])
-        return collision.intersection(other_collision)
+        result = collision.intersection(other_collision)
+        return result
 
     def collision_with(self, other: "Shape") -> bool:
         if getattr(other, "parent", None) == self:

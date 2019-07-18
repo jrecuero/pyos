@@ -12,8 +12,15 @@ from engine import (
     Point,
     BB,
     Move,
+    Shape,
 )
-from engine.physic import ShooterShape, BulletShape, PathMoveShape, StaticShape
+from engine.physic import (
+    MoveShape,
+    ShooterShape,
+    BulletShape,
+    PathMoveShape,
+    StaticShape,
+)
 
 
 class Alien(PathMoveShape):
@@ -63,8 +70,8 @@ class AlienScene(Scene):
             )
         )
         alien_path = [
-            {"move": Move.RIGHT, "cycle": 10},
-            {"move": Move.LEFT, "cycle": 10},
+            {"move": Move.RIGHT, "cycle": 5},
+            {"move": Move.LEFT, "cycle": 5},
             {"move": Move.DOWN, "cycle": 1},
         ]
         # alien_path = [{"move": Move.RIGHT, "cycle": 10}, {"move": Move.NONE, "cycle": 10}, {"move": Move.DOWN, "cycle": 1}]
@@ -77,7 +84,7 @@ class AlienScene(Scene):
         # self.alien = Alien(path=alien_path, repeated=5, timeout=25)
         self.alien.append(BB("#", pos=Point(self.ghandler.dy - 15, 5), move=Move.RIGHT))
         self.ghandler.add_shape(self.ship)
-        self.ghandler.add_shape(self.alien)
+        # self.ghandler.add_shape(self.alien)
         self.ghandler.add_shape(
             StaticShape().append(BB("I", pos=Point(self.ghandler.dy - 2, 2)))
         )
@@ -95,14 +102,34 @@ class AlienScene(Scene):
             )
             self.ghandler.add_shape(s)
 
-        # shapedShape = ShapedStaticShape(shape=[[1, 1, "*", curses.color_pair(3)],
-        #                                        [3, 0, "*", curses.color_pair(3)],
-        #                                        [0, 2, "*", curses.color_pair(3)],
-        #                                        [3, 3, "*", curses.color_pair(3)],
-        #                                        [0, 5, "*", curses.color_pair(3)],
-        #                                        [-3, 0, "*", curses.color_pair(3)]],
-        #                                 breakable=[BulletShape, ])
-        # self.ghandler.add_shape(shapedShape)
+        # shaped_shape = Shape(
+        #     shape=[
+        #         [1, 1, "*", curses.color_pair(3)],
+        #         [2, 0, "*", curses.color_pair(3)],
+        #         [0, 4, "*", curses.color_pair(3)],
+        #         [-2, 0, "*", curses.color_pair(3)],
+        #         [0, -4, "*", curses.color_pair(3)],
+        #     ],
+        #     breakable=[BulletShape],
+        #     movable=False,
+        # )
+        # self.ghandler.add_shape(shaped_shape)
+
+        shaped_shape = PathMoveShape(
+            shape=[
+                [1, 1, "*", curses.color_pair(3)],
+                [2, 0, "*", curses.color_pair(3)],
+                [0, 4, "*", curses.color_pair(3)],
+                [-2, 0, "*", curses.color_pair(3)],
+                [0, -4, "*", curses.color_pair(3)],
+            ],
+            path=alien_path,
+            timeout=10,
+            breakable=[BulletShape],
+        )
+        # shaped_shape.move_to(Move.RIGHT)
+        self.ghandler.add_shape(shaped_shape)
+
         self.add_object(self.ghandler)
         self.kh = ArrowKeyHandler(
             left=self.ship.move(Move.LEFT),

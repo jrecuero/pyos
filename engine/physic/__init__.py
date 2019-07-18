@@ -4,10 +4,8 @@ from ._shapes import (
     ActorShape,
     ShooterShape,
     PathMoveShape,
-    ShapedStaticShape,
     SnakeShape,
     BulletShape,
-    BreakableShape,
 )
 
 __all__ = [
@@ -16,8 +14,6 @@ __all__ = [
     "ActorShape",
     "ShooterShape",
     "PathMoveShape",
-    "ShapedStaticShape",
     "SnakeShape",
     "BulletShape",
-    "BreakableShape",
 ]

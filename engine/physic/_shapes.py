@@ -1,5 +1,5 @@
 from typing import Any, List, Dict
-from engine import Event, Point, BB, Move, Shape, log
+from engine import Event, Point, BB, Move, Shape
 
 
 class StaticShape(Shape):
@@ -11,6 +11,10 @@ class StaticShape(Shape):
 class MoveShape(Shape):
     def __init__(self, **kwargs):
         super(MoveShape, self).__init__(**kwargs)
+
+    def move_to(self, move_to: str):
+        for bb in self.shape:
+            bb.move = move_to
 
     def next_position(self, bb: BB) -> Point:
         new_pos: Point = Point(bb.y, bb.x)
@@ -26,12 +30,12 @@ class MoveShape(Shape):
             pass
         return new_pos
 
-    def update(self, screen: Any) -> List[Event]:
-        result: List[Event] = []
-        if self.movable and self._update():
-            for bb in self.shape:
-                bb.next(self.next_position(bb))
-        return result
+    # def update(self, screen: Any) -> List[Event]:
+    #     result: List[Event] = []
+    #     if self.movable and self._update():
+    #         for bb in self.shape:
+    #             bb.next(self.next_position(bb))
+    #     return result
 
 
 class ActorShape(MoveShape):
@@ -143,18 +147,25 @@ class PathMoveShape(MoveShape):
     def next_position(self, bb: BB) -> Point:
         bb.move = self.path_next["move"]
         new_pos = super(PathMoveShape, self).next_position(bb)
-        self.path_next["cycle"] = self.path_next["cycle"] - 1
-        if self.path_next["cycle"] == 0:
-            self.path_index += self.path_step
-            self.path_index %= len(self.path)
-            if self.single and self.path_index == 0:
-                self.movable = False
-            elif self.repeated and self.path_index == 0:
-                self.repeated -= 1
-                if self.repeated == 0:
-                    self.movable = False
-            self.path_next = dict(self.path[self.path_index])
         return new_pos
+
+    def update(self, screen: Any) -> List[Event]:
+        result: List[Event] = []
+        if self.movable and self._update():
+            for bb in self.shape:
+                bb.next(self.next_position(bb))
+            self.path_next["cycle"] = self.path_next["cycle"] - 1
+            if self.path_next["cycle"] == 0:
+                self.path_index += self.path_step
+                self.path_index %= len(self.path)
+                if self.single and self.path_index == 0:
+                    self.movable = False
+                elif self.repeated and self.path_index == 0:
+                    self.repeated -= 1
+                    if self.repeated == 0:
+                        self.movable = False
+                self.path_next = dict(self.path[self.path_index])
+        return result
 
 
 class BulletShape(MoveShape):
@@ -184,44 +195,3 @@ class BulletShape(MoveShape):
             # self.eventor("delete", actor=self)
             return True
         return False
-
-
-class BreakableShape(StaticShape):
-    def __init__(self, **kwargs):
-        super(BreakableShape, self).__init__(**kwargs)
-        # self.breakable = True
-
-    # def collisioned(self, other: "Shape"):
-    #     if other.bulleter:
-    #         self.eventor("delete", actor=self)
-    #     return True
-
-
-class ShapedStaticShape(StaticShape):
-    def __init__(self, **kwargs):
-        super(ShapedStaticShape, self).__init__(**kwargs)
-        self.pshape: List = kwargs.get("shape", [])
-        assert self.pshape
-        log.Shape(self.pshape[0]).call()
-        y_pos, x_pos, sprite, fmt = self.pshape[0]
-        self.append(BB(sprite, pos=Point(y_pos, x_pos), fmt=fmt))
-        for p in self.pshape[1:]:
-            log.Shape(p).call()
-            y_val, x_val, sprite, fmt = p
-            max_val = max(abs(y_val), abs(x_val))
-            for i in range(max_val):
-                if y_val != 0:
-                    if y_val > 0:
-                        y_val -= 1
-                        y_pos += 1
-                    else:
-                        y_val += 1
-                        y_pos -= 1
-                if x_val != 0:
-                    if x_val > 0:
-                        x_val -= 1
-                        x_pos += 1
-                    else:
-                        x_val += 1
-                        x_pos -= 1
-                self.append(BB(sprite, pos=Point(y_pos, x_pos), fmt=fmt))
