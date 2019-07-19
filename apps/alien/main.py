@@ -13,7 +13,9 @@ from engine import (
     BB,
     Move,
     Shape,
+    set_plugin,
 )
+from engine.dplugs import CursesPlugin
 from engine.physic import (
     MoveShape,
     ShooterShape,
@@ -151,6 +153,7 @@ class AlienScene(Scene):
 
 
 if __name__ == "__main__":
+    set_plugin(CursesPlugin())
     h = Handler()
     try:
         alien_scene = AlienScene()

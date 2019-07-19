@@ -1,7 +1,7 @@
 from typing import Optional, Any, List
 
-import curses
 from ._event import Event
+from ._dplug import get_plugin
 
 
 def pinput(f):
@@ -49,19 +49,8 @@ def render(f):
     return _render
 
 
-def draw_box(screen: Any, y: int, x: int, dy: int, dx: int, fmt=curses.A_NORMAL):
-    for _x in range(1, dx):
-        screen.addnstr(y, x + _x, chr(9473), 1, fmt)
-    for _x in range(1, dx):
-        screen.addnstr(y + dy, x + _x, chr(9473), 1, fmt)
-    for _y in range(1, dy):
-        screen.addnstr(y + _y, x, chr(9475), 1, fmt)
-    for _y in range(1, dy):
-        screen.addnstr(y + _y, x + dx, chr(9475), 1, fmt)
-    screen.addnstr(y, x, chr(9487), 1, fmt)
-    screen.addnstr(y + dy, x, chr(9495), 1, fmt)
-    screen.addnstr(y, x + dx, chr(9491), 1, fmt)
-    screen.addnstr(y + dy, x + dx, chr(9499), 1, fmt)
+def draw_box(screen: Any, y: int, x: int, dy: int, dx: int, fmt):
+    get_plugin().draw_rectangle(screen, y, x, dy, dx, fmt)
 
 
 class NObject(object):
@@ -70,7 +59,7 @@ class NObject(object):
 
     __slots__ = ["y", "x", "dx", "dy", "enable", "visible", "text_data", "fmt"]
 
-    def __init__(self, y: int, x: int, height: int, width: int, fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, height: int, width: int, fmt=None):
         self.y: int = y
         self.x: int = x
         self.dy: int = height
@@ -78,7 +67,7 @@ class NObject(object):
         self.enable: bool = True
         self.visible: bool = True
         self.text_data: str = ""
-        self.fmt = fmt
+        self.fmt = fmt if fmt is not None else get_plugin().default_fmt()
 
     def activate(self):
         """activate sets the nobject as enabled and visible.
@@ -99,9 +88,7 @@ class NObject(object):
 
     def box(self, screen: Any, fmt=None):
         fmt = fmt if fmt else self.fmt
-        # screen.attron(fmt)
         draw_box(screen, self.y, self.x, self.dy, self.dx, fmt)
-        # screen.attroff(fmt)
 
     @pinput
     def pinput(self, screen, keys) -> List[Event]:
@@ -134,7 +121,7 @@ class Panel(NObject):
 
     __slots__ = ["children", "_render_box"]
 
-    def __init__(self, y: int, x: int, dy: int, dx: int, fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, dy: int, dx: int, fmt):
         super(Panel, self).__init__(y, x, dy, dx, fmt)
         self.children: List[NObject] = []
         self._render_box: bool = True

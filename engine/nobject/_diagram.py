@@ -1,7 +1,7 @@
 from typing import List, Any
-import curses
 from .._nobject import NObject, render
 from .._event import Event
+from .._dplug import get_plugin
 
 
 class Diagram(NObject):
@@ -21,7 +21,9 @@ class Diagram(NObject):
     ]
 
     def __init__(self, y: int, x: int, dy: int, dx: int, data: List, **kwargs):
-        super(Diagram, self).__init__(y, x, dy, dx, kwargs.get("fmt", curses.A_NORMAL))
+        super(Diagram, self).__init__(
+            y, x, dy, dx, kwargs.get("fmt", get_plugin().default_fmt())
+        )
         self.data: List = data
         self.title: str = kwargs.get("title", "")
         self.subtitle: str = kwargs.get("subtitle", "")
@@ -51,12 +53,14 @@ class HistoBar(Diagram):
                 for _y in range(ypos):
                     y = self.y + self.dy - _y - 1
                     for _x in range(self.x_width):
-                        screen.addstr(y, x + _x, chr(9608), self.fmt)
+                        get_plugin().draw_sprite(
+                            screen, chr(9608), y, x + _x, None, 1, self.fmt
+                        )
             else:
                 x = self.x + xpos
                 y = self.y + self.dy - ypos
                 char = chr(9608) if self.style == "plot" else self.style
-                screen.addstr(y, x, char, self.fmt)
+                get_plugin().draw_sprite(screen, char, y, x, None, 1, self.fmt)
         return []
 
 
@@ -74,13 +78,12 @@ class Histogram(Diagram):
             for _ in range(len(self.bar_colors), len(self.data)):
                 self.bar_colors.append(self.fmt)
 
-    def draw_bar(
-        self, screen: Any, y: int, x: int, width: int, char: str, fmt=curses.A_NORMAL
-    ):
+    def draw_bar(self, screen: Any, y: int, x: int, width: int, char: str, fmt=None):
+        fmt = fmt if fmt is not None else get_plugin().default_fmt()
         for _y in range(y):
             __y: int = self.y + self.dy - _y - 1
             for _x in range(width):
-                screen.addstr(__y, x + _x, char, fmt)
+                get_plugin().draw_sprite(screen, char, __y, x + _x, None, 1, fmt)
 
     @render
     def render(self, screen: Any) -> List[Event]:
@@ -88,4 +91,6 @@ class Histogram(Diagram):
         for index, y in enumerate(self.data):
             x: int = self.x + self.x_width * (1 + index)
             self.draw_bar(screen, y, x, self.x_width, chr(9608), self.bar_colors[index])
-            screen.addstr(self.y + self.dy + 1, x + 1, self.bar_titles[index])
+            get_plugin().draw_sprite(
+                screen, self.bar_titles[index], self.y + self.dy + 1, x + 1, None, 1
+            )

@@ -1,5 +1,4 @@
 from typing import List, Any
-import curses
 from .._nobject import NObject, update, render
 from .._event import Event, Timer, EVT
 from ._string import String
@@ -11,7 +10,7 @@ class HPath(NObject):
 
     __slots__ = ["path"]
 
-    def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, path: List[int], fmt=None):
         super(HPath, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
 
@@ -66,7 +65,7 @@ class HPathCover(NObject):
 
     __slots__ = ["path"]
 
-    def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, path: List[int], fmt=None):
         super(HPathCover, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
 
@@ -119,7 +118,7 @@ class HorizontalPath(NObject):
 
     __slots__ = ["lower_path", "upper_path"]
 
-    def __init__(self, y: int, x: int, dy: int, path: List[int], fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, dy: int, path: List[int], fmt=None):
         super(HorizontalPath, self).__init__(y, x, dy, -1, fmt)
         self.lower_path = HPath(y, x, path, fmt)
         self.upper_path = HPathCover(y - dy, x, path, fmt)
@@ -137,7 +136,7 @@ class VPath(NObject):
 
     __slots__ = ["path"]
 
-    def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, path: List[int], fmt=None):
         super(VPath, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
 
@@ -192,7 +191,7 @@ class VPathCover(NObject):
 
     __slots__ = ["path"]
 
-    def __init__(self, y: int, x: int, path: List[int], fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, path: List[int], fmt=None):
         super(VPathCover, self).__init__(y, x, -1, -1, fmt)
         self.path: List[int] = path
 
@@ -242,7 +241,7 @@ class VerticalPath(NObject):
 
     __slots__ = ["lower_path", "upper_path"]
 
-    def __init__(self, y: int, x: int, dx: int, path: List[int], fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, dx: int, path: List[int], fmt=None):
         super(VerticalPath, self).__init__(y, x, -1, dx, fmt)
         self.lower_path = VPath(y, x, path, fmt)
         self.upper_path = VPathCover(y, x + dx, path, fmt)
@@ -260,9 +259,7 @@ class Path(NObject):
 
     __slot__ = ["path", "closed", "motion"]
 
-    def __init__(
-        self, y: int, x: int, path: List, closed: bool = False, fmt=curses.A_NORMAL
-    ):
+    def __init__(self, y: int, x: int, path: List, closed: bool = False, fmt=None):
         super(Path, self).__init__(y, x, -1, -1, fmt)
         self.path: List = path
         self.closed: bool = closed
@@ -336,9 +333,7 @@ class TrackPath(String):
 
     __slots = ["path", "timer", "tindex"]
 
-    def __init__(
-        self, y: int, x: int, path: List, t: Timer, text_data: str, fmt=curses.A_NORMAL
-    ):
+    def __init__(self, y: int, x: int, path: List, t: Timer, text_data: str, fmt=None):
         super(TrackPath, self).__init__(y, x, text_data, fmt)
         self.path: List = []
         self.timer: Timer = t
@@ -393,7 +388,7 @@ class Shape(String):
 
     __slots__ = ["path"]
 
-    def __init__(self, y: int, x: int, path: List, text_data: str, fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, path: List, text_data: str, fmt=None):
         super(Shape, self).__init__(y, x, text_data, fmt)
         self.path: List = []
         y_pos = self.y
@@ -433,7 +428,7 @@ class Shape(String):
 
 
 class ShapeFromPath(Shape):
-    def __init__(self, y: int, x: int, path: List, text_data: str, fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, path: List, text_data: str, fmt=None):
         shape_path: List = []
         init: int = 0
         for i, p in enumerate(path):

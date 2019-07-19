@@ -1,7 +1,7 @@
 from typing import List, Any, Optional
-import curses
 from .._nobject import draw_box, NObject, pinput, update, render
 from .._event import Event, EventInput, Timer, EVT
+from .._dplug import get_plugin()
 from .._loggar import log
 
 
@@ -10,7 +10,7 @@ class TextData(NObject):
     """
 
     def __init__(
-        self, y: int, x: int, dy: int, dx: int, text_data: str, fmt=curses.A_NORMAL
+        self, y: int, x: int, dy: int, dx: int, text_data: str, fmt=None
     ):
         super(TextData, self).__init__(y, x, dy, dx, fmt)
         self.text_data = text_data
@@ -25,7 +25,7 @@ class Char(TextData):
     """Char class identifies a formatted character nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str, fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, text_data: str, fmt=None):
         super(Char, self).__init__(y, x, 1, 1, text_data, fmt)
 
     @render
@@ -40,7 +40,7 @@ class String(TextData):
     """String class identifies a formatted string nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str, fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, text_data: str, fmt=None):
         super(String, self).__init__(y, x, 1, len(text_data), text_data, fmt)
 
     @render
@@ -57,7 +57,7 @@ class Formatted(NObject):
 
     __slots__ = ["data"]
 
-    def __init__(self, y: int, x: int, data: List[List[Any]], fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, data: List[List[Any]], fmt=None):
         super(Formatted, self).__init__(y, x, 1, -1, fmt)
         self.data = data
 
@@ -77,7 +77,7 @@ class Block(TextData):
     """Block class identifies a block of strings nobject.
     """
 
-    def __init__(self, y: int, x: int, text_data: str, fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, text_data: str, fmt=None):
         super(Block, self).__init__(y, x, 0, 0, text_data, fmt)
 
     @render
@@ -94,7 +94,7 @@ class Box(NObject):
     """Box class identifies a bordered box nobject.
     """
 
-    def __init__(self, y: int, x: int, dy: int, dx: int, fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, dy: int, dx: int, fmt=None):
         super(Box, self).__init__(y, x, dy, dx, fmt)
 
     @render
@@ -119,7 +119,7 @@ class BoxGrid(NObject):
         dx: int,
         ynbr: int,
         xnbr: int,
-        fmt=curses.A_NORMAL,
+        fmt=get_plugin().A_NORMAL,
     ):
         super(BoxGrid, self).__init__(y, x, dy, dx, fmt)
         self.ynbr: int = ynbr
@@ -153,8 +153,8 @@ class BoxText(TextData):
         text_data: str,
         dy: int = -1,
         dx: int = -1,
-        fmt=curses.A_NORMAL,
-        cfmt=curses.A_NORMAL,
+        fmt=get_plugin().A_NORMAL,
+        cfmt=get_plugin().A_NORMAL,
     ):
         super(BoxText, self).__init__(y, x, dy, dx, text_data, fmt)
         tokens = self.text_data.split("\n")
@@ -200,7 +200,7 @@ class FlashText(String):
         t: Timer,
         on: int = 1,
         off: int = 1,
-        fmt=curses.A_NORMAL,
+        fmt=get_plugin().A_NORMAL,
     ):
         super(FlashText, self).__init__(y, x, msg, fmt)
         self.__timer = t
@@ -237,7 +237,7 @@ class TimerText(String):
     __slots__ = ["__timer", "__calleer"]
 
     def __init__(
-        self, y: int, x: int, msg: str, t: Timer, caller: Any, fmt=curses.A_NORMAL
+        self, y: int, x: int, msg: str, t: Timer, caller: Any, fmt=None
     ):
         super(TimerText, self).__init__(y, x, msg, fmt)
         self.__timer = t
@@ -304,7 +304,7 @@ class Input(TextData, Capture):
         x: int,
         text_data: str,
         text_output: List[str],
-        fmt=curses.A_NORMAL,
+        fmt=get_plugin().A_NORMAL,
     ):
         TextData.__init__(self, y, x, 1, len(text_data), text_data, fmt)
         Capture.__init__(self)
@@ -348,7 +348,7 @@ class TextInput(TextData, Capture):
 
     __slots__ = ["in_cb", "capture_input"]
 
-    def __init__(self, y: int, x: int, text_data: str, in_cb, fmt=curses.A_NORMAL):
+    def __init__(self, y: int, x: int, text_data: str, in_cb, fmt=None):
         TextData.__init__(self, y, x, 1, len(text_data), text_data, fmt)
         Capture.__init__(self)
         self.text_data: str = text_data

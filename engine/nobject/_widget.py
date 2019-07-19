@@ -1,12 +1,12 @@
 from typing import List, Any, Dict
-import curses
 from .._nobject import draw_box, NObject, pinput, update, render
 from .._event import Event, EventSelected, Timer, EVT
+from .._dplug import get_plugin
 from .._loggar import log
 from ._string import String, Capture
 
 
-c_marked = curses.A_BOLD | curses.A_UNDERLINE
+c_marked = get_plugin().fmt_bold() | get_plugin.fmt_underline()
 
 
 class Gauge(String):
@@ -32,7 +32,7 @@ class Gauge(String):
         t: Timer,
         total: int,
         sections: int,
-        fmt=curses.A_NORMAL,
+        fmt=None,
     ):
         super(Gauge, self).__init__(y, x, "[{}]".format(" " * sections), fmt)
         self.timer: Timer = t
@@ -81,7 +81,7 @@ class Spinner(String, Capture):
         maxi: int,
         defaulti: int,
         delta: int = 1,
-        fmt=curses.A_NORMAL,
+        fmt=None,
     ):
         self.pattern = "{0}{1}{2}"
         String.__init__(
@@ -121,12 +121,12 @@ class Spinner(String, Capture):
     def pinput(self, screen: Any, keys: List) -> List[Event]:
         if self.capture_input and len(keys):
             key = keys.pop()
-            if curses.KEY_LEFT == key:
+            if get_plugin().key_left() == key:
                 self._update(-self.delta)
                 # self.value = (
                 #     (self.value - self.delta) if self.value > self.min else self.value
                 # )
-            elif curses.KEY_RIGHT == key:
+            elif get_plugin().key_right() == key:
                 self._update(self.delta)
                 # self.value = (
                 #     (self.value + self.delta) if self.value < self.max else self.value
@@ -155,7 +155,7 @@ class SpinnerScroll(Spinner):
         maxi: int,
         defaulti: int,
         delta: int = 1,
-        fmt=curses.A_NORMAL,
+        fmt=None,
     ):
         super(SpinnerScroll, self).__init__(y, x, mini, maxi, defaulti, delta, fmt)
         self.patron = "{0}{1}{2}"
@@ -189,7 +189,7 @@ class Selector(NObject, Capture):
         dy: int = -1,
         dx: int = -1,
         horizontal: bool = True,
-        fmt=curses.A_NORMAL,
+        fmt=None,
     ):
         dy = 1 if dy == -1 else dy
         dx = sum([len(t) for t in tokens]) if dx == -1 else dx
@@ -203,13 +203,13 @@ class Selector(NObject, Capture):
     def pinput(self, screen, keys) -> List[Event]:
         if self.capture_input and len(keys):
             key = keys.pop()
-            if curses.KEY_LEFT == key and self.horizontal:
+            if get_plugin().key_left() == key and self.horizontal:
                 selected = self.selected - 1
-            elif curses.KEY_RIGHT == key and self.horizontal:
+            elif get_plugin().key_right() == key and self.horizontal:
                 selected = self.selected + 1
-            if curses.KEY_UP == key and not self.horizontal:
+            if get_plugin().key_up() == key and not self.horizontal:
                 selected = self.selected - 1
-            elif curses.KEY_DOWN == key and not self.horizontal:
+            elif get_plugin().key_down() == key and not self.horizontal:
                 selected = self.selected + 1
             elif "\n" == chr(key):
                 self.capture_input = False
@@ -234,7 +234,7 @@ class Selector(NObject, Capture):
                 ypos,
                 xpos,
                 token,
-                curses.A_REVERSE if self.selected == index else len(token),
+                get_plugin().fmt_reverse() if self.selected == index else len(token),
             )
             if self.horizontal:
                 xpos += len(token) + 1
@@ -258,7 +258,7 @@ class ScrollSelector(Selector):
         selected: int = 0,
         dy: int = -1,
         dx: int = -1,
-        fmt=curses.A_NORMAL,
+        fmt=None,
     ):
         super(ScrollSelector, self).__init__(
             y, x, tokens, selected=selected, dy=dy, dx=dx, horizontal=False, fmt=fmt
@@ -277,9 +277,9 @@ class ScrollSelector(Selector):
         selected = self.selected
         if self.capture_input and len(keys):
             key = keys.pop()
-            if self.expanded and curses.KEY_UP == key:
+            if self.expanded and get_plugin().key_up() == key:
                 selected = self.selected - 1
-            elif self.expanded and curses.KEY_DOWN == key:
+            elif self.expanded and get_plugin().key_down() == key:
                 selected = self.selected + 1
             elif self.expanded and "\n" == chr(key):
                 self.expanded = False
@@ -305,11 +305,15 @@ class ScrollSelector(Selector):
                     ypos,
                     xpos,
                     token,
-                    curses.A_REVERSE if self.selected == index else len(token),
+                    get_plugin().fmt_reverse()
+                    if self.selected == index
+                    else len(token),
                 )
                 ypos += 1
         else:
-            screen.addstr(self.y, self.x, self.tokens[self.selected], curses.A_REVERSE)
+            screen.addstr(
+                self.y, self.x, self.tokens[self.selected], get_plugin().fmt_reverse()
+            )
         return []
 
 
@@ -320,13 +324,7 @@ class Menu(NObject, Capture):
     __slots__ = ["tokens" "menu_items", "selected_items", "menu_pos", "shortcuts"]
 
     def __init__(
-        self,
-        y: int,
-        x: int,
-        tokens: List,
-        dy: int = 2,
-        dx: int = -1,
-        fmt=curses.A_NORMAL,
+        self, y: int, x: int, tokens: List, dy: int = 2, dx: int = -1, fmt=None
     ):
         _dx: int = dx if dx != -1 else sum([len(t[0]) for t in tokens]) + 1
         NObject.__init__(self, y, x, dy, _dx, fmt)

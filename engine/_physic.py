@@ -1,10 +1,10 @@
 from typing import List, Any, Set
 import random
-import curses
 
 # from ._loggar import log
 from ._event import Event
 from ._nobject import NObject, pinput, update, render
+from ._dplug import get_plugin
 
 
 class Point(object):
@@ -154,7 +154,7 @@ class BB(object):
         self.pos: Point = kwargs.get("pos", Point(0, 0))
         self.pushed: bool = kwargs.get("pushed", False)
         self.move: int = kwargs.get("move", Move.NONE)
-        self.fmt = kwargs.get("fmt", curses.A_NORMAL)
+        self.fmt = kwargs.get("fmt", get_plugin().default_fmt())
         self.solid: bool = kwargs.get("solid", True)
         self.visible: bool = kwargs.get("visible", True)
         self.prev_pos: Point = self.pos
@@ -187,7 +187,7 @@ class BB(object):
         return [self.y, self.x, self.sprite]
 
     def render(self, screen: Any) -> List[Event]:
-        screen.addnstr(self.y, self.x, self.sprite, 1, self.fmt)
+        get_plugin().draw_sprite(screen, self.sprite, self.y, self.x, None, 1, self.fmt)
         return []
 
 
@@ -345,7 +345,7 @@ class Arena(NObject):
     def __init__(self, y: int, x: int, max_y: int, max_x: int, **kwargs):
         super(Arena, self).__init__(x, y, max_y, max_x)
         self.shapes: List[Shape] = []
-        self._border_fmt = kwargs.get("border_fmt", curses.A_NORMAL)
+        self._border_fmt = kwargs.get("border_fmt", get_plugin().default_fmt())
 
     def eventor(self, event, **kwargs):
         raise Exception("Eventor to be defined in derived class")

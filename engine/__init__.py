@@ -19,6 +19,7 @@ from ._key_handler import ArrowKeyHandler
 from ._nobject import update as update_nobj
 from ._nobject import render as render_nobj
 from ._nobject import NObject, Panel
+from ._dplug import set_plugin, get_plugin
 
 # from ._nobject import (
 #     NObject,
@@ -111,4 +112,6 @@ __all__ = [
     "BB",
     "Shape",
     "Arena",
+    "set_plugin",
+    "get_plugin",
 ]

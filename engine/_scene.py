@@ -1,9 +1,9 @@
 from typing import List, Any
-import curses
 
 # from ._loggar import log
 from ._event import Event, Timer, EventTimer
 from ._nobject import NObject, Panel
+from ._dplug import get_plugin
 
 
 def pinput(f):
@@ -81,9 +81,7 @@ class Scene(object):
         """__get_input is an internal method that loops for any user input key
         being entered.
         """
-        key: int = screen.getch()
-        curses.flushinp()
-        return key
+        return get_plugin().get_ch(screen)
 
     def get_input(self, screen: Any) -> int:
         screen = self.screen_to_use(screen)
@@ -144,7 +142,7 @@ class Scene(object):
         """render_objects renders all nobjects in a scene.
         """
         if self.border:
-            screen.border(0)
+            get_plugin().border(screen, 0)
         events: List[Event] = []
         for obj in self.nobjects:
             events.extend(obj.render(screen))
@@ -157,25 +155,23 @@ class Scene(object):
         for obj in self.nobjects:
             cursor_pos = obj.set_cursor()
             if cursor_pos:
-                curses.curs_set(True)
-                screen.addstr(cursor_pos[0], cursor_pos[1], "")
+                get_plugin().cursor(True)
+                get_plugin().draw_sprite(
+                    screen, "", cursor_pos[0], cursor_pos[1], "", None, None
+                )
                 return
-        curses.curs_set(False)
+        get_plugin().cursor(False)
 
     def colors(self, color_pairs):
-        """colors setups ncurses for using given list of color pairs.
+        """colors setups for using given list of color pairs.
         """
-        for index, (fg, bg) in enumerate(color_pairs):
-            curses.init_pair(index + 1, fg, bg)
+        get_plugin().colors(color_pairs)
 
     def screen_erase(self, screen: Any):
         """screen_erase proceeds to erase scene screen.
         """
         screen = self.screen_to_use(screen)
-        # log.Erase("Scene {}".format(self.name)).Screen(
-        #     "{}".format(self.screen_to_use(screen))
-        # ).call()
-        screen.erase()
+        get_plugin().erase(screen)
 
     @pinput
     def pinput(self, screen: Any, keys: List[int]) -> List[int]:
@@ -193,8 +189,7 @@ class Scene(object):
         """render calls all events renders methods and return a list with new
         events to be added to the scene.
         """
-        # curses.doupdate()
-        self.screen_to_use(screen).noutrefresh()
+        get_plugin().refresh_screen(self.screen_to_use(screen))
         return []
 
     def add_object(self, obj: NObject) -> bool:

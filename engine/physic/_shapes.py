@@ -30,13 +30,6 @@ class MoveShape(Shape):
             pass
         return new_pos
 
-    # def update(self, screen: Any) -> List[Event]:
-    #     result: List[Event] = []
-    #     if self.movable and self._update():
-    #         for bb in self.shape:
-    #             bb.next(self.next_position(bb))
-    #     return result
-
 
 class ActorShape(MoveShape):
     def __init__(self, **kwargs):
