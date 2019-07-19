@@ -6,7 +6,7 @@ from .._loggar import log
 from ._string import String, Capture
 
 
-c_marked = get_plugin().fmt_bold() | get_plugin.fmt_underline()
+c_marked = get_plugin().fmt("A_BOLD") | get_plugin.fmt("A_UNDERLINE")
 
 
 class Gauge(String):
@@ -121,12 +121,12 @@ class Spinner(String, Capture):
     def pinput(self, screen: Any, keys: List) -> List[Event]:
         if self.capture_input and len(keys):
             key = keys.pop()
-            if get_plugin().key_left() == key:
+            if get_plugin().key("KEY_LEFT") == key:
                 self._update(-self.delta)
                 # self.value = (
                 #     (self.value - self.delta) if self.value > self.min else self.value
                 # )
-            elif get_plugin().key_right() == key:
+            elif get_plugin().key("KEY_RIGHT") == key:
                 self._update(self.delta)
                 # self.value = (
                 #     (self.value + self.delta) if self.value < self.max else self.value
@@ -203,13 +203,13 @@ class Selector(NObject, Capture):
     def pinput(self, screen, keys) -> List[Event]:
         if self.capture_input and len(keys):
             key = keys.pop()
-            if get_plugin().key_left() == key and self.horizontal:
+            if get_plugin().key("KEY_LEFT") == key and self.horizontal:
                 selected = self.selected - 1
-            elif get_plugin().key_right() == key and self.horizontal:
+            elif get_plugin().key("KEY_RIGHT") == key and self.horizontal:
                 selected = self.selected + 1
-            if get_plugin().key_up() == key and not self.horizontal:
+            if get_plugin().key("KEY_UP") == key and not self.horizontal:
                 selected = self.selected - 1
-            elif get_plugin().key_down() == key and not self.horizontal:
+            elif get_plugin().key("KEY_DOWN") == key and not self.horizontal:
                 selected = self.selected + 1
             elif "\n" == chr(key):
                 self.capture_input = False
@@ -234,7 +234,7 @@ class Selector(NObject, Capture):
                 ypos,
                 xpos,
                 token,
-                get_plugin().fmt_reverse() if self.selected == index else len(token),
+                get_plugin().fmt("A_REVERSE") if self.selected == index else len(token),
             )
             if self.horizontal:
                 xpos += len(token) + 1
@@ -277,9 +277,9 @@ class ScrollSelector(Selector):
         selected = self.selected
         if self.capture_input and len(keys):
             key = keys.pop()
-            if self.expanded and get_plugin().key_up() == key:
+            if self.expanded and get_plugin().key("KEY_UP") == key:
                 selected = self.selected - 1
-            elif self.expanded and get_plugin().key_down() == key:
+            elif self.expanded and get_plugin().key("KEY_DOWN") == key:
                 selected = self.selected + 1
             elif self.expanded and "\n" == chr(key):
                 self.expanded = False
@@ -305,14 +305,17 @@ class ScrollSelector(Selector):
                     ypos,
                     xpos,
                     token,
-                    get_plugin().fmt_reverse()
+                    get_plugin().fmt("A_REVERSE")
                     if self.selected == index
                     else len(token),
                 )
                 ypos += 1
         else:
             screen.addstr(
-                self.y, self.x, self.tokens[self.selected], get_plugin().fmt_reverse()
+                self.y,
+                self.x,
+                self.tokens[self.selected],
+                get_plugin().fmt("A_REVERSE"),
             )
         return []
 
