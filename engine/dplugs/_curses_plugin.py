@@ -1,8 +1,9 @@
 import curses
+from ._plugin import Plugin
 
 
-class CursesPlugin:
-    def __init__(self):
+class CursesPlugin(Plugin):
+    def __init__(self, **kwargs):
         pass
 
     def exception(self):
