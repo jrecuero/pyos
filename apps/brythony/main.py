@@ -1,25 +1,12 @@
 from browser import document, timer
-
+from bevent import move_bevent
+from cell import Cell
 
 KEY_LEFT = 37
 KEY_UP = 38
 KEY_RIGHT = 39
 KEY_DOWN = 40
 KEY_SPACE = 32
-
-
-class BryEvent:
-    def __init__(self, system, event, source, dest, evargs, **kwargs):
-        self.system = system
-        self.event = event
-        self.source = source
-        self.dest = dest
-        self.evargs = evargs
-
-
-def move_bevent(source, dest, x, y):
-    evt = BryEvent("update", "move", source, dest, evargs={"x": x, "y": y})
-    return evt
 
 
 class BryObject:
