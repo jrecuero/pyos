@@ -26,7 +26,6 @@ class Matrix:
     def rotate_clockwise(self):
         """Rotate nxn matrix by 90 degrees clockwise.
         """
-        # result matrix
         result = [row[:] for row in self.mat]
         m = len(self.mat[0])
         for x in range(0, m):
@@ -37,7 +36,6 @@ class Matrix:
     def rotate_anticlockwise(self):
         """Rotate nxn matrix by 90 degrees anti-clockwise.
         """
-        # result matrix
         result = [row[:] for row in self.mat]
         m = len(self.mat[0])
         for x in range(0, m):

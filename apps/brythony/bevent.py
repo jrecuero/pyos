@@ -10,3 +10,9 @@ class BryEvent:
 def move_bevent(source, dest, x, y):
     evt = BryEvent("update", "move", source, dest, evargs={"x": x, "y": y})
     return evt
+
+
+def rotate_bevent(source, dest, rotation):
+    evt = BryEvent("update", "rotate", source, dest, evargs={"rotation": rotation})
+    BryEvent("update", "rotate", source, dest, evargs={"rotation": rotation})
+    return evt
