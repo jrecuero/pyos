@@ -1,6 +1,27 @@
 from browser import document, timer
 
 
+KEY_LEFT = 37
+KEY_UP = 38
+KEY_RIGHT = 39
+KEY_DOWN = 40
+KEY_SPACE = 32
+
+
+class BryEvent:
+    def __init__(self, system, event, source, dest, evargs, **kwargs):
+        self.system = system
+        self.event = event
+        self.source = source
+        self.dest = dest
+        self.evargs = evargs
+
+
+def move_bevent(source, dest, x, y):
+    evt = BryEvent("update", "move", source, dest, evargs={"x": x, "y": y})
+    return evt
+
+
 class BryObject:
     def __init__(self, x, y, dx, dy, **kwargs):
         self.x = x
@@ -31,15 +52,45 @@ class TextBO(BryObject):
 class RectBO(BryObject):
     def __init__(self, x, y, dx, dy, **kwargs):
         super(RectBO, self).__init__(x, y, dx, dy, **kwargs)
-        self.lwidth = kwargs.get("lwidth", 10)
+        self.lwidth = kwargs.get("lwidth", 5)
         self.style = kwargs.get("style", "black")
 
     def render(self, ctx, events, **kwargs):
         ctx.beginPath()
         ctx.lineWidth = self.lwidth
         ctx.strokeStyle = self.style
+        ctx.fillStyle = self.style
         ctx.rect(self.x, self.y, self.dx, self.dy)
-        ctx.stroke()
+        ctx.closePath()
+        # ctx.stroke()
+        ctx.fill()
+
+
+class PieceBO(BryObject):
+    def __init__(self, x, y, dx, dy, matrix, **kwargs):
+        super(PieceBO, self).__init__(x, y, dx, dy, **kwargs)
+        self.matrix = matrix
+        self.lwidth = kwargs.get("lwidth", 1)
+        self.style = kwargs.get("style", "black")
+
+    def render(self, ctx, events, **kwargs):
+        ctx.beginPath()
+        ctx.lineWidth = self.lwidth
+        ctx.strokeStyle = self.style
+        ctx.fillStyle = self.style
+        x = self.x
+        y = self.y
+        for i, fill in enumerate(self.matrix):
+            if fill:
+                ctx.rect(x, y, self.dx, self.dy)
+            if i % 3 == 2:
+                y += self.dy
+                x = self.x
+            else:
+                x += self.dx
+        # ctx.endPath()
+        # ctx.stroke()
+        ctx.fill()
 
 
 class SpriteBO(BryObject):
@@ -65,13 +116,20 @@ class Player(Actor):
     def __init__(self, name, bobject, **kwargs):
         super(Player, self).__init__(name, bobject, **kwargs)
         self.playable = True
+        self.gravity = 10
+        self.gindex = 0
 
     def update(self, ctx, events, **kwargs):
+        # self.gindex += 1
+        # if self.gindex == self.gravity:
+        #     self.gindex = 0
+        #     self.bobject.y += 10
+
         for evt in events:
-            if evt["owner"] == "playable":
-                if evt["event"] == "move":
-                    self.bobject.x += evt["args"]["x"]
-                    self.bobject.y += evt["args"]["y"]
+            if evt.system == "update" and evt.dest == "playable":
+                if evt.event == "move":
+                    self.bobject.x += evt.evargs["x"]
+                    self.bobject.y += evt.evargs["y"]
         return self.bobject.update(ctx, events, **kwargs)
 
 
@@ -118,25 +176,19 @@ class BryScene:
             actor.render(ctx, events, **kwargs)
 
     def move(self, x, y):
-        # if self.player:
-        #     self.player.bobject.x += x
-        #     self.player.bobject.y += y
-        pass
-        self.update_events.append(
-            {"owner": "playable", "event": "move", "args": {"x": x, "y": y}}
-        )
+        self.update_events.append(move_bevent(None, "playable", x, y))
 
     def controller(self, evt):
         move = 10
-        if evt.keyCode == 37:
+        if evt.keyCode == KEY_LEFT:
             self.move(-1 * move, 0)
-        elif evt.keyCode == 38:
+        elif evt.keyCode == KEY_UP:
             self.move(0, -1 * move)
-        elif evt.keyCode == 39:
+        elif evt.keyCode == KEY_RIGHT:
             self.move(move, 0)
-        elif evt.keyCode == 40:
+        elif evt.keyCode == KEY_DOWN:
             self.move(0, move)
-        elif evt.keyCode == 32:
+        elif evt.keyCode == KEY_SPACE:
             self.move(0, 0)
 
 
@@ -240,7 +292,9 @@ class BrythonCanvas:
 # document.bind("keydown", canvas.key_down)
 canvas = document["the_canvas"]
 scene = BryScene(0, 0, canvas.width, canvas.height)
-actor = Player("me", RectBO(20, 20, 10, 10, style="blue"))
+# actor = Player("me", RectBO(20, 20, 20, 20, style="red"))
+# actor = Player("me", PieceBO(20, 20, 20, 20, [1, 0, 1, 0, 1, 0, 1, 0, 1], style="blue"))
+actor = Player("me", PieceBO(20, 20, 20, 20, [1, 0, 0, 1, 0, 0, 1, 1, 1], style="blue"))
 scene.add_actor(actor)
 handler = BryHandler(canvas)
 handler.add_scene(scene)
