@@ -1,13 +1,10 @@
 class Cell:
-    def __init__(self, content):
-        self._content = content
-
-    @property
-    def content(self):
-        return self._content
+    def __init__(self, content, pos=None):
+        self.content = content
+        self.pos = pos
 
     def equal(self, content):
-        return self._content.equal(content)
+        return self.content.equal(content)
 
     def match(self):
         return False
@@ -16,10 +13,23 @@ class Cell:
         return self.match() and other.match()
 
     def update_with(self, other):
-        self._content = other._content
+        self.content = other.content
 
     def clone(self):
-        return self.__class__(self._content)
+        return self.__class__(self.content)
 
     def randomize(self):
         return self
+
+    def get_collision_box(self, pos=None):
+        if self.content.is_enable():
+            return self.pos if pos is None else pos
+        else:
+            return None
+
+    def render(self, ctx, **kwargs):
+        if self.pos is not None:
+            self.render_at(ctx, self.pos.x, self.pos.y, **kwargs)
+
+    def render_at(self, ctx, x, y, **kwargs):
+        self.content.render_at(ctx, x, y, **kwargs)

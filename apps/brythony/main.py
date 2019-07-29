@@ -1,6 +1,10 @@
 from browser import document, timer
 from bevent import move_bevent, rotate_bevent
+from point import Point
+from cell import Cell
+from content import Content
 from matrix import Matrix
+from bobject import PieceBO, BoardBO
 
 KEY_LEFT = 37
 KEY_UP = 38
@@ -9,101 +13,6 @@ KEY_DOWN = 40
 KEY_SPACE = 32
 
 STEP = 20
-
-
-class BryObject:
-    def __init__(self, x, y, dx, dy, **kwargs):
-        self.x = x
-        self.y = y
-        self.dx = dx
-        self.dy = dy
-
-    def update(self, ctx, events, **kwargs):
-        pass
-
-    def render(self, ctx, events, **kwargs):
-        pass
-
-
-class TextBO(BryObject):
-    def __init__(self, x, y, texto, **kwargs):
-        super(TextBO, self).__init__(x, y, None, None, **kwargs)
-        self.texto = texto
-        self.font = kwargs.get("font", "12px Arial")
-        self.style = kwargs.get("style", "black")
-
-    def render(self, ctx, events, **kwargs):
-        ctx.font = self.font
-        ctx.fillStyle = self.style
-        ctx.fillText(self.texto, self.x, self.y)
-
-
-class RectBO(BryObject):
-    def __init__(self, x, y, dx, dy, **kwargs):
-        super(RectBO, self).__init__(x, y, dx, dy, **kwargs)
-        self.lwidth = kwargs.get("lwidth", 5)
-        self.style = kwargs.get("style", "black")
-
-    def render(self, ctx, events, **kwargs):
-        ctx.beginPath()
-        ctx.lineWidth = self.lwidth
-        ctx.strokeStyle = self.style
-        ctx.fillStyle = self.style
-        ctx.rect(self.x, self.y, self.dx, self.dy)
-        ctx.closePath()
-        # ctx.stroke()
-        ctx.fill()
-
-
-class PieceBO(BryObject):
-    def __init__(self, x, y, dx, dy, matrix, **kwargs):
-        super(PieceBO, self).__init__(x, y, dx, dy, **kwargs)
-        self.matrix = matrix
-        self.lwidth = kwargs.get("lwidth", 1)
-        self.style = kwargs.get("style", "black")
-
-    def render(self, ctx, events, **kwargs):
-        ctx.beginPath()
-        ctx.lineWidth = self.lwidth
-        ctx.strokeStyle = self.style
-        ctx.fillStyle = self.style
-        x = self.x
-        y = self.y
-        for row in self.matrix.get_mat():
-            for col in row:
-                if col:
-                    ctx.rect(x, y, self.dx, self.dy)
-                x += self.dx
-            y += self.dy
-            x = self.x
-
-        ctx.closePath()
-        # ctx.stroke()
-        ctx.fill()
-
-
-class SpriteBO(BryObject):
-    def __init__(self, x, y, dx, dy, sprite, **kwargs):
-        super(SpriteBO, self).__init__(x, y, dx, dy)
-        self.sprite = sprite
-
-
-class BoardBO(BryObject):
-    def __init__(self, xsize, ysize):
-        super(BoardBO, self).__init__(0, 0, STEP * xsize, STEP * ysize)
-        self.xsize = xsize
-        self.ysize = ysize
-
-    def render(self, ctx, events, **kwargs):
-        ctx.beginPath()
-        ctx.fillStyle = "red"
-        for y in range(self.ysize):
-            ctx.rect(0, y * STEP, STEP, STEP)
-            ctx.rect(STEP * (self.xsize - 1), y * STEP, STEP, STEP)
-        for x in range(self.xsize):
-            ctx.rect(x * STEP, STEP * (self.ysize - 1), STEP, STEP)
-        ctx.closePath()
-        ctx.fill()
 
 
 class Actor:
@@ -135,8 +44,9 @@ class Player(Actor):
         for evt in events:
             if evt.system == "update" and evt.dest == "playable":
                 if evt.event == "move":
-                    self.bobject.x += evt.evargs["x"]
-                    self.bobject.y += evt.evargs["y"]
+                    # self.bobject.x += evt.evargs["x"]
+                    # self.bobject.y += evt.evargs["y"]
+                    self.bobject.matrix.move(evt.evargs["x"], evt.evargs["y"])
                 elif evt.event == "rotate" and evt.evargs["rotation"] == "right":
                     self.bobject.matrix = self.bobject.matrix.rotate_clockwise()
                 elif evt.event == "rotate" and evt.evargs["rotation"] == "left":
@@ -196,17 +106,19 @@ class BryScene:
         self.update_events.append(rotate_bevent(None, "playable", "right"))
 
     def controller(self, evt):
-        move = STEP
+        # move = STEP
         if evt.keyCode == KEY_LEFT:
-            self.move(-1 * move, 0)
+            # self.move(-1 * move, 0)
+            self.move(-1, 0)
         elif evt.keyCode == KEY_UP:
             # self.move(0, -1 * move)
-            self.rotate_left()
+            self.rotate_right()
         elif evt.keyCode == KEY_RIGHT:
-            self.move(move, 0)
+            # self.move(move, 0)
+            self.move(1, 0)
         elif evt.keyCode == KEY_DOWN:
             # self.move(0, move)
-            self.rotate_right()
+            self.rotate_left()
         elif evt.keyCode == KEY_SPACE:
             self.move(0, 0)
 
@@ -234,22 +146,40 @@ class BryHandler:
         self.render(None)
 
 
+def build_matrix_from_mat_at(x, y, dx, dy, mat):
+    matrix = []
+    xpos, ypos = x, y
+    for row in mat:
+        rows = []
+        for col in row:
+            content = Content(dx, dy, "blue")
+            if not col:
+                content.disable()
+            cell = Cell(content)
+            xpos += dx
+            rows.append(cell)
+        ypos += dy
+        xpos = x
+        matrix.append(rows)
+    return matrix
+
+
 canvas = document["the_canvas"]
 scene = BryScene(0, 0, canvas.width, canvas.height)
 # actor = Player("me", RectBO(20, 20, 20, 20, style="red"))
 # actor = Player("me", PieceBO(20, 20, 20, 20, [1, 0, 1, 0, 1, 0, 1, 0, 1], style="blue"))
 # actor = Player("me", PieceBO(20, 20, 20, 20, [1, 0, 0, 1, 0, 0, 1, 1, 1], style="blue"))
-actor = Player(
-    "me",
-    PieceBO(
-        STEP * 2,
-        STEP * 2,
-        STEP,
-        STEP,
-        Matrix([[1, 0, 0], [1, 1, 0], [1, 0, 0]]),
-        style="blue",
-    ),
+_mat = [[1, 0, 0], [1, 1, 0], [1, 0, 0]]
+mat = build_matrix_from_mat_at(STEP * 2, STEP * 2, STEP, STEP, _mat)
+piece = PieceBO(
+    STEP * 2,
+    STEP * 2,
+    STEP,
+    STEP,
+    Matrix(mat, Point(STEP * 2, STEP * 2), STEP, STEP),
+    style="blue",
 )
+actor = Player("me", piece)
 scene.add_bobject(BoardBO(20, 20))
 scene.add_actor(actor)
 handler = BryHandler(canvas)
