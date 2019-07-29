@@ -4,7 +4,7 @@ from point import Point
 from cell import Cell
 from content import Content
 from matrix import Matrix
-from bobject import PieceBO, BoardBO
+from bobject import PieceBO, BoardBO, FloorBO
 
 KEY_LEFT = 37
 KEY_UP = 38
@@ -27,6 +27,9 @@ class Actor:
     def render(self, ctx, events, **kwargs):
         return self.bobject.render(ctx, events, **kwargs)
 
+    def get_collision_box(self):
+        return self.bobject.get_collision_box()
+
 
 class Player(Actor):
     def __init__(self, name, bobject, **kwargs):
@@ -34,18 +37,28 @@ class Player(Actor):
         self.playable = True
         self.gravity = 10
         self.gindex = 0
+        self.last_event = None
+
+    def back(self):
+        evt = self.last_event
+        if evt.system == "update" and evt.dest == "playable":
+            if evt.event == "move":
+                self.bobject.matrix.move(-1 * evt.evargs["x"], -1 * evt.evargs["y"])
+            elif evt.event == "rotate" and evt.evargs["rotation"] == "right":
+                self.bobject.matrix = self.bobject.matrix.rotate_anticlockwise()
+            elif evt.event == "rotate" and evt.evargs["rotation"] == "left":
+                self.bobject.matrix = self.bobject.matrix.rotate_clockwise()
 
     def update(self, ctx, events, **kwargs):
         self.gindex += 1
         if self.gindex == self.gravity:
             self.gindex = 0
-            self.bobject.y += STEP
+            events.append(move_bevent(None, "playable", 0, 1))
 
         for evt in events:
             if evt.system == "update" and evt.dest == "playable":
+                self.last_event = evt
                 if evt.event == "move":
-                    # self.bobject.x += evt.evargs["x"]
-                    # self.bobject.y += evt.evargs["y"]
                     self.bobject.matrix.move(evt.evargs["x"], evt.evargs["y"])
                 elif evt.event == "rotate" and evt.evargs["rotation"] == "right":
                     self.bobject.matrix = self.bobject.matrix.rotate_clockwise()
@@ -82,11 +95,22 @@ class BryScene:
             raise Exception("Scene already has playable actor")
         self.actors.append(actor)
 
+    def check_collision(self):
+        for actor in self.actors:
+            actor_box = actor.get_collision_box()
+            for bobj in self.bobjects:
+                bobj_box = bobj.get_collision_box()
+                if actor_box.collision_with(bobj_box):
+                    if bobj.floor:
+                        print("END GAME")
+                    actor.back()
+
     def update(self, ctx, events, **kwargs):
         for bobj in self.bobjects:
             bobj.update(ctx, self.update_events, **kwargs)
         for actor in self.actors:
             actor.update(ctx, self.update_events, **kwargs)
+        self.check_collision()
         self.update_events = []
 
     def render(self, ctx, events, **kwargs):
@@ -181,6 +205,7 @@ piece = PieceBO(
 )
 actor = Player("me", piece)
 scene.add_bobject(BoardBO(20, 20))
+scene.add_bobject(FloorBO(20, 20))
 scene.add_actor(actor)
 handler = BryHandler(canvas)
 handler.add_scene(scene)
