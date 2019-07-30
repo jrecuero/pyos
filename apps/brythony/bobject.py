@@ -74,49 +74,70 @@ class SpriteBO(BryObject):
 
 
 class BoardBO(BryObject):
-    def __init__(self, xsize, ysize):
-        super(BoardBO, self).__init__(0, 0, STEP * xsize, STEP * ysize)
-        self.xsize = xsize
-        self.ysize = ysize
+    def __init__(self, xsize, ysize, gsize):
+        super(BoardBO, self).__init__(0, 0, xsize, ysize)
+        self.gsize = gsize
+        self.pos = []
+        for y in range(self.dy):
+            self.pos.append(Point(0, y))
+            self.pos.append(Point(self.dx - 1, y))
+
+    def add_pos(self, pos):
+        self.pos.extend(pos)
 
     def get_collision_box(self):
         collision_box = CollisionBox()
-        for y in range(self.ysize):
-            collision_box.add(Point(0, y * STEP))
-            collision_box.add(Point(STEP * (self.xsize - 1), y * STEP))
-        # for x in range(self.xsize):
-        #     collision_box.add(Point(x * STEP, STEP * (self.ysize - 1)))
+        for p in self.pos:
+            collision_box.add(p)
+        # for y in range(self.dy):
+        #     collision_box.add(Point(0, y))
+        #     collision_box.add(Point(self.dx - 1, y))
+        # for x in range(self.dx):
+        #     collision_box.add(Point(x * self.gsize, self.gsize * (self.dy - 1)))
         return collision_box
 
     def render(self, ctx, events, **kwargs):
         ctx.beginPath()
         ctx.fillStyle = "red"
-        for y in range(self.ysize):
-            ctx.rect(0, y * STEP, STEP, STEP)
-            ctx.rect(STEP * (self.xsize - 1), y * STEP, STEP, STEP)
-        # for x in range(self.xsize):
-        #     ctx.rect(x * STEP, STEP * (self.ysize - 1), STEP, STEP)
+        for p in self.pos:
+            ctx.rect(p.x * self.gsize, p.y * self.gsize, self.gsize, self.gsize)
+        # for y in range(self.dy):
+        #     ctx.rect(0, y * self.gsize, self.gsize, self.gsize)
+        #     ctx.rect(self.gsize * (self.dx - 1), y * self.gsize, self.gsize, self.gsize)
+        # for x in range(self.dx):
+        #     ctx.rect(x * self.gsize, self.gsize * (self.dy - 1), self.gsize, self.gsize)
         ctx.closePath()
         ctx.fill()
 
 
 class FloorBO(BryObject):
-    def __init__(self, xsize, ysize):
-        super(BoardBO, self).__init__(0, 0, STEP * xsize, STEP * ysize)
-        self.xsize = xsize
-        self.ysize = ysize
+    def __init__(self, xsize, ysize, gsize):
+        super(BoardBO, self).__init__(0, 0, xsize, ysize)
+        self.gsize = gsize
         self.floor = True
+        self.pos = []
+        for x in range(self.dx):
+            self.pos.append(Point(x, self.dy - 1))
+
+    def add_pos(self, pos):
+        self.pos.extend(pos)
 
     def get_collision_box(self):
         collision_box = CollisionBox()
-        for x in range(self.xsize):
-            collision_box.add(Point(x * STEP, STEP * (self.ysize - 1)))
+        for p in self.pos:
+            collision_box.add(p)
+        # for x in range(self.dx):
+        #     collision_box.add(Point(x, self.dy - 1))
         return collision_box
 
     def render(self, ctx, events, **kwargs):
         ctx.beginPath()
         ctx.fillStyle = "red"
-        for x in range(self.xsize):
-            ctx.rect(x * STEP, STEP * (self.ysize - 1), STEP, STEP)
+        for p in self.pos:
+            ctx.rect(
+                p.x * self.gsize, self.gsize * (self.dy - 1), self.gsize, self.gsize
+            )
+        # for x in range(self.dx):
+        #     ctx.rect(x * self.gsize, self.gsize * (self.dy - 1), self.gsize, self.gsize)
         ctx.closePath()
         ctx.fill()

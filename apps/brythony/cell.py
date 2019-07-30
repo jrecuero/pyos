@@ -21,6 +21,9 @@ class Cell:
     def randomize(self):
         return self
 
+    def is_enable(self):
+        return self.content.is_enable()
+
     def get_collision_box(self, pos=None):
         if self.content.is_enable():
             return self.pos if pos is None else pos

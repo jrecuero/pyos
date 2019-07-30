@@ -20,6 +20,12 @@ class Matrix:
             return False
         return True
 
+    def render_pos(self, index, pos):
+        return (
+            (self.origin.x * self.dx) + (pos.x - self.origin.x) * self.dx,
+            (self.origin.y * self.dy) + (pos.y - self.origin.y) * self.dy,
+        )
+
     def get_mat(self):
         return self.mat
 
@@ -34,18 +40,25 @@ class Matrix:
         xo = self.origin.x
         yo = self.origin.y
         for _y in range(0, len(self.mat)):
-            y = yo + _y * self.dy
+            y = yo + _y
             for _x in range(0, len(self.mat[0])):
-                x = xo + _x * self.dx
+                x = xo + _x
                 self.pos.append(Point(x, y))
             x = self.origin.x
+
+    def get_pos(self):
+        result = []
+        for i, cell in enumerate(self.cells):
+            if cell.is_enable():
+                result.append(self.pos[i])
+        return result
 
     def get_dim(self):
         return len(self.mat), len(self.mat[0])
 
     def move(self, x, y):
-        self.origin.x += x * self.dx
-        self.origin.y += y * self.dy
+        self.origin.x += x
+        self.origin.y += y
         self.set_pos()
 
     def rotate_clockwise(self):
@@ -89,29 +102,8 @@ class Matrix:
         """render renders the matrix, calling render method for every cell.
         """
         for i, cell in enumerate(self.cells):
-            cell.render_at(ctx, self.pos[i].x, self.pos[i].y, **kwargs)
-
-    def get_collisions_with(self, mat):
-        if not self._check(mat):
-            assert False, "wrong matrix dimension: {}".format(mat)
-        m = len(self.mat[0])
-        collisions = []
-        for x in range(m):
-            for y in range(m):
-                if self.mat[x][y].collision(mat[x][y]):
-                    collisions.append((x, y))
-        return collisions
-
-    def is_collision_with(self, mat):
-        return len(self.get_collisions_with(mat)) != 0
-
-    def is_bottom_collision_with(self, mat):
-        collisions = self.get_collisions_with(mat)
-        m = len(self.mat)
-        for entry in collisions:
-            if entry[0] == (m - 1):
-                return True
-        return False
+            x, y = self.render_pos(i, self.pos[i])
+            cell.render_at(ctx, x, y, **kwargs)
 
     def randomize(self):
         for row in self.mat:
