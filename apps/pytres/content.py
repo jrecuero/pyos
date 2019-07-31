@@ -1,11 +1,12 @@
+import random
 import pygame
 
 
 class Content:
-    def __init__(self, dx, dy, color):
+    def __init__(self, dx, dy, colors):
         self.dx = dx
         self.dy = dy
-        self.color = color
+        self.color = random.choice(colors)
         self._enable = True
 
     def enable(self):

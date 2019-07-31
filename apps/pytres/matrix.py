@@ -20,7 +20,7 @@ class Matrix:
             return False
         return True
 
-    def render_pos(self, index, pos):
+    def render_pos(self, pos):
         return (
             (self.origin.x * self.dx) + (pos.x - self.origin.x) * self.dx,
             (self.origin.y * self.dy) + (pos.y - self.origin.y) * self.dy,
@@ -51,6 +51,15 @@ class Matrix:
         for i, cell in enumerate(self.cells):
             if cell.is_enable():
                 result.append(self.pos[i])
+        return result
+
+    def get_cells(self):
+        result = []
+        for i, cell in enumerate(self.cells):
+            if cell.is_enable():
+                x, y = self.render_pos(self.pos[i])
+                cell.pos = Point(x, y)
+                result.append(cell)
         return result
 
     def get_dim(self):
@@ -102,7 +111,7 @@ class Matrix:
         """render renders the matrix, calling render method for every cell.
         """
         for i, cell in enumerate(self.cells):
-            x, y = self.render_pos(i, self.pos[i])
+            x, y = self.render_pos(self.pos[i])
             cell.render_at(surface, x, y, **kwargs)
 
     def randomize(self):

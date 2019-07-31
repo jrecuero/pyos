@@ -1,5 +1,6 @@
 import sys
 import os
+import random
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
@@ -12,19 +13,29 @@ from matrix import Matrix
 
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 GRAVITY_EVENT = pygame.USEREVENT + 1
 GRAVITY_TIMEOUT = 1000
 BSIZE = 20
+pieces = [
+    [[1, 0, 0], [1, 1, 0], [1, 0, 0]],
+    [[0, 1, 0], [0, 1, 0], [0, 1, 0]],
+    [[1, 0, 0], [1, 0, 0], [1, 1, 0]],
+    [[1, 1, 0], [1, 1, 0], [0, 0, 0]],
+    [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
+]
 
 
-def create_matrix(pos, dx, dy, color):
-    figure = [[1, 0, 0], [1, 1, 0], [1, 0, 0]]
+def create_matrix(pos, dx, dy, colors):
+    # piece = [[1, 0, 0], [1, 1, 0], [1, 0, 0]]
+    piece = random.choice(pieces)
     mat = []
-    for row in figure:
+    for row in piece:
         rows = []
         for col in row:
-            cell = Cell(Content(dx, dy, color))
+            cell = Cell(Content(dx, dy, colors))
             if not col:
                 cell.disable()
             rows.append(cell)
@@ -80,8 +91,12 @@ class Floor:
         self.gsize = gsize
         self.floor = True
         self.pos = []
+        self.cells = []
         for x in range(self.dx):
-            self.pos.append(Point(self.x + x, self.y))
+            pos = Point(self.x + x, self.y)
+            self.pos.append(pos)
+            gpos = Point(self.gx(pos.x), self.gy(pos.y))
+            self.cells.append(Cell(Content(gsize, gsize, [RED]), pos=gpos))
 
     def gx(self, x):
         return x * self.gsize
@@ -95,6 +110,9 @@ class Floor:
     def add_pos(self, pos):
         self.pos.extend(pos)
 
+    def add_cells(self, cells):
+        self.cells.extend(cells)
+
     def get_collision_box(self):
         collision_box = CollisionBox()
         for p in self.pos:
@@ -102,9 +120,40 @@ class Floor:
         return collision_box
 
     def render(self, surface, color, **kwargs):
-        for p in self.pos:
-            rect = self.grect(p.x, p.y)
-            pygame.draw.rect(surface, color, rect)
+        # for p in self.pos:
+        #     rect = self.grect(p.x, p.y)
+        #     pygame.draw.rect(surface, color, rect)
+        # for i, cell in enumerate(self.cells):
+        #     cell.render(surface)
+        for i, cell in enumerate(self.cells):
+            cell.render_at(surface, self.gx(self.pos[i].x), self.gy(self.pos[i].y))
+
+    def check_for_rows(self):
+        score = []
+        result = {}
+        indexes = []
+        for pos in self.pos:
+            result.setdefault(pos.y, []).append(pos)
+        for k, v in result.items():
+            if len(v) == self.dx and k != self.y:
+                for p in v:
+                    # self.pos.remove(p)
+                    indexes.append(self.pos.index(p))
+        for i in sorted(indexes, reverse=True):
+            del self.pos[i]
+            score.append(self.cells[i].content.color)
+            del self.cells[i]
+        step = 0
+        for key in sorted(result.keys(), reverse=True):
+            if key == self.y:
+                continue
+            entries = result[key]
+            if len(entries) < self.dx and step:
+                for pos in entries:
+                    pos.y += step
+            elif len(entries) == self.dx:
+                step += 1
+        return score
 
 
 class Actor:
@@ -147,9 +196,13 @@ def check_collision(actor, board, floor):
         actor.back()
         actor_box = actor.gobject.get_collision_box()
         if actor_box.collision_with_upper(collision):
-            pos_to_add = actor.gobject.get_pos()
-            floor.add_pos(pos_to_add)
-            matrix = create_matrix(Point(8, 2), BSIZE, BSIZE, BLUE)
+            floor.add_pos(actor.gobject.get_pos())
+            floor.add_cells(actor.gobject.get_cells())
+            matrix = create_matrix(Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN])
+            score = floor.check_for_rows()
+            # for k in set(score):
+            #     print(f"{k}: {score.count(k)}")
+            print({k: score.count(k) for k in set(score)})
             return Actor("piece", matrix)
     else:
         collision = actor_box.collision_with(board_box)
@@ -163,19 +216,22 @@ def main():
     pygame.display.set_caption("PY-TRES")
     screen = pygame.display.set_mode((500, 400))
     clock = pygame.time.Clock()
-    matrix = create_matrix(Point(8, 2), BSIZE, BSIZE, BLUE)
+    matrix = create_matrix(Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN])
     player = Actor("piece", matrix)
     board = Board(2, 2, 10, 14, BSIZE)
-    floor = Floor(2, 16, 10, 10, BSIZE)
-    # waiting = False
+    floor = Floor(3, 15, 8, 1, BSIZE)
     pygame.key.set_repeat(100, 100)
     pygame.time.set_timer(GRAVITY_EVENT, GRAVITY_TIMEOUT)
     while True:
         clock.tick(30)
+        allow_space = True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
+            elif event.type == GRAVITY_EVENT:
+                player.move(0, 1)
+                allow_space = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     player.move(-1, 0)
@@ -185,8 +241,8 @@ def main():
                     player.rotate()
                 if event.key == pygame.K_DOWN:
                     player.rotate("anticlockwise")
-            elif event.type == GRAVITY_EVENT:
-                player.move(0, 1)
+                if allow_space and event.key == pygame.K_SPACE:
+                    player.move(0, 1)
 
         # Clear the screen
         screen.fill(WHITE)
@@ -195,7 +251,6 @@ def main():
         player = check_collision(player, board, floor)
 
         # Draw objects
-        # screen.blit(rot, (100, 100))
         board.render(screen, RED)
         floor.render(screen, RED)
         player.render(screen)
