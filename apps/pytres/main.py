@@ -26,11 +26,43 @@ pieces = [
     [[1, 1, 0], [1, 1, 0], [0, 0, 0]],
     [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
 ]
+score = {"lines": 0, "colors": {BLACK: 0, BLUE: 0, GREEN: 0}}
+
+next_piece = None
 
 
-def create_matrix(pos, dx, dy, colors):
-    # piece = [[1, 0, 0], [1, 1, 0], [1, 0, 0]]
-    piece = random.choice(pieces)
+def color_to_str(color):
+    if color == BLUE:
+        return "BLUE"
+    elif color == BLACK:
+        return "BLACK"
+    elif color == GREEN:
+        return "GREEN"
+    elif color == RED:
+        return "RED"
+    elif color == WHITE:
+        return "WHITE"
+    else:
+        return "NONE"
+
+
+def message_display(screen, text, pos):
+    # font = pygame.font.Font("freesansbold.ttf", 20)
+    font = pygame.font.SysFont("times", 20)
+    text_surf = font.render(text, True, (0, 0, 0))
+    text_rect = text_surf.get_rect()
+    text_rect.center = (pos.x, pos.y)
+    screen.blit(text_surf, text_rect)
+
+
+def new_piece(pos, dx, dy, colors, the_piece=None):
+    piece = the_piece if the_piece else random.choice(pieces)
+    global next_piece
+    next_piece = random.choice(pieces)
+    return create_matrix(piece, pos, dx, dy, colors)
+
+
+def create_matrix(piece, pos, dx, dy, colors):
     mat = []
     for row in piece:
         rows = []
@@ -45,6 +77,14 @@ def create_matrix(pos, dx, dy, colors):
 
 def draw(surface, x, y):
     pygame.draw.rect(surface, BLUE, (x, y, 100, 50), 1)
+
+
+class Piece:
+    def __init__(self, gobject, **kwargs):
+        self.gobject = gobject
+
+    def render(self, surface, **kwargs):
+        return self.gobject.render(surface, **kwargs)
 
 
 class Board:
@@ -128,6 +168,11 @@ class Floor:
         for i, cell in enumerate(self.cells):
             cell.render_at(surface, self.gx(self.pos[i].x), self.gy(self.pos[i].y))
 
+    def delete_for_color(self, color):
+        for cell in self.cells:
+            if cell.content.color == color:
+                cell.status = "deleted"
+
     def check_for_rows(self):
         score = []
         result = {}
@@ -154,6 +199,30 @@ class Floor:
             elif len(entries) == self.dx:
                 step += 1
         return score
+
+    def check_board(self):
+        to_delete = {}
+        for i, cell in enumerate(self.cells):
+            if cell.status == "deleted":
+                to_delete[self.pos[i]] = (i, cell)
+        result = {}
+        for pos in self.pos:
+            result.setdefault(pos.x, []).append(pos)
+        step = 0
+        for k, v in result.items():
+            if k == self.y:
+                continue
+            for entry in sorted(v, key=lambda p: p.y, reverse=True):
+                if pos in to_delete.keys():
+                    step += 1
+                elif step:
+                    pos.y += step
+        top = len(self.pos) - 1
+        bottom = -1
+        for i in range(top, bottom, -1):
+            if self.cell[i].status == "deleted":
+                del self.cell[i]
+                del self.pos[i]
 
 
 class Actor:
@@ -198,17 +267,24 @@ def check_collision(actor, board, floor):
         if actor_box.collision_with_upper(collision):
             floor.add_pos(actor.gobject.get_pos())
             floor.add_cells(actor.gobject.get_cells())
-            matrix = create_matrix(Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN])
-            score = floor.check_for_rows()
-            # for k in set(score):
-            #     print(f"{k}: {score.count(k)}")
-            print({k: score.count(k) for k in set(score)})
+            matrix = new_piece(
+                Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN], next_piece
+            )
+            line_score = floor.check_for_rows()
+            if line_score:
+                global score
+                score["lines"] += 1
+                for key, value in {
+                    k: line_score.count(k) for k in set(line_score)
+                }.items():
+                    score["colors"][key] += value
+                print(score)
             return Actor("piece", matrix)
     else:
         collision = actor_box.collision_with(board_box)
         if collision:
             actor.back()
-    return actor
+    return None
 
 
 def main():
@@ -216,10 +292,11 @@ def main():
     pygame.display.set_caption("PY-TRES")
     screen = pygame.display.set_mode((500, 400))
     clock = pygame.time.Clock()
-    matrix = create_matrix(Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN])
+    matrix = new_piece(Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN], None)
     player = Actor("piece", matrix)
     board = Board(2, 2, 10, 14, BSIZE)
     floor = Floor(3, 15, 8, 1, BSIZE)
+    next_p = Piece(create_matrix(next_piece, Point(20, 2), BSIZE, BSIZE, [RED]))
     pygame.key.set_repeat(100, 100)
     pygame.time.set_timer(GRAVITY_EVENT, GRAVITY_TIMEOUT)
     while True:
@@ -248,12 +325,31 @@ def main():
         screen.fill(WHITE)
 
         # Update/Move Objects
-        player = check_collision(player, board, floor)
+        new_player = check_collision(player, board, floor)
+        if new_player:
+            player = new_player
+            next_p = Piece(create_matrix(next_piece, Point(20, 2), BSIZE, BSIZE, [RED]))
 
         # Draw objects
         board.render(screen, RED)
         floor.render(screen, RED)
         player.render(screen)
+        pygame.draw.rect(
+            screen, BLACK, (19 * BSIZE, 1 * BSIZE, 5 * BSIZE, 5 * BSIZE), 2
+        )
+        next_p.render(screen)
+        message_display(
+            screen, f"Lines: {score['lines']}", Point(20 * BSIZE, 10 * BSIZE)
+        )
+        message_display(
+            screen, f"Black: {score['colors'][BLACK]}", Point(20 * BSIZE, 11 * BSIZE)
+        )
+        message_display(
+            screen, f"Blue : {score['colors'][BLUE]}", Point(20 * BSIZE, 12 * BSIZE)
+        )
+        message_display(
+            screen, f"Green: {score['colors'][GREEN]}", Point(20 * BSIZE, 13 * BSIZE)
+        )
 
         # Update the screeen
         pygame.display.flip()

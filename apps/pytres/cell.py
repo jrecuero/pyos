@@ -2,6 +2,7 @@ class Cell:
     def __init__(self, content, pos=None):
         self.content = content
         self.pos = pos
+        self.status = None
 
     def equal(self, content):
         return self.content.equal(content)
