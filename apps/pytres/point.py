@@ -19,6 +19,9 @@ class Point(object):
     def x(self, val):
         self._x = val
 
+    def hash(self):
+        return (self.x, self.y)
+
     def set(self, x=None, y=None):
         self._x = self.x if x is None else x
         self._y = self.y if y is None else y
