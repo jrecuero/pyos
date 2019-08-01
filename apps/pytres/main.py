@@ -18,7 +18,8 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 GRAVITY_EVENT = pygame.USEREVENT + 1
 GRAVITY_TIMEOUT = 1000
-BSIZE = 20
+BSIZE = 16
+THRESHOLD = 5
 pieces = [
     [[1, 0, 0], [1, 1, 0], [1, 0, 0]],
     [[0, 1, 0], [0, 1, 0], [0, 1, 0]],
@@ -179,6 +180,8 @@ class Floor:
         indexes = []
         for pos in self.pos:
             result.setdefault(pos.y, []).append(pos)
+        if min(result.keys()) < THRESHOLD:
+            return None, True
         for k, v in result.items():
             if len(v) == self.dx and k != self.y:
                 for p in v:
@@ -198,7 +201,7 @@ class Floor:
                     pos.y += step
             elif len(entries) == self.dx:
                 step += 1
-        return score
+        return score, False
 
     def check_board(self):
         to_delete = {}
@@ -270,7 +273,9 @@ def check_collision(actor, board, floor):
             matrix = new_piece(
                 Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN], next_piece
             )
-            line_score = floor.check_for_rows()
+            line_score, threshold = floor.check_for_rows()
+            if threshold:
+                return None, threshold
             if line_score:
                 global score
                 score["lines"] += 1
@@ -279,12 +284,12 @@ def check_collision(actor, board, floor):
                 }.items():
                     score["colors"][key] += value
                 print(score)
-            return Actor("piece", matrix)
+            return Actor("piece", matrix), False
     else:
         collision = actor_box.collision_with(board_box)
         if collision:
             actor.back()
-    return None
+    return None, False
 
 
 def main():
@@ -294,14 +299,17 @@ def main():
     clock = pygame.time.Clock()
     matrix = new_piece(Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN], None)
     player = Actor("piece", matrix)
-    board = Board(2, 2, 10, 14, BSIZE)
-    floor = Floor(3, 15, 8, 1, BSIZE)
+    board = Board(2, 2, 10, 20, BSIZE)
+    floor = Floor(3, 21, 8, 1, BSIZE)
     next_p = Piece(create_matrix(next_piece, Point(20, 2), BSIZE, BSIZE, [RED]))
     pygame.key.set_repeat(100, 100)
     pygame.time.set_timer(GRAVITY_EVENT, GRAVITY_TIMEOUT)
+    enable_keys = True
+    end_game = False
     while True:
         clock.tick(30)
         allow_space = True
+        trigger_action = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -310,30 +318,61 @@ def main():
                 player.move(0, 1)
                 allow_space = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    player.move(-1, 0)
-                if event.key == pygame.K_RIGHT:
-                    player.move(1, 0)
-                if event.key == pygame.K_UP:
-                    player.rotate()
-                if event.key == pygame.K_DOWN:
-                    player.rotate("anticlockwise")
-                if allow_space and event.key == pygame.K_SPACE:
-                    player.move(0, 1)
+                if enable_keys:
+                    if event.key == pygame.K_LEFT:
+                        player.move(-1, 0)
+                    if event.key == pygame.K_RIGHT:
+                        player.move(1, 0)
+                    if event.key == pygame.K_UP:
+                        player.rotate()
+                    if event.key == pygame.K_DOWN:
+                        player.rotate("anticlockwise")
+                    if allow_space and event.key == pygame.K_SPACE:
+                        player.move(0, 1)
+                    if event.key == pygame.K_q:
+                        floor.delete_for_color(BLACK)
+                        trigger_action = True
+                    if event.key == pygame.K_w:
+                        floor.delete_for_color(BLUE)
+                        trigger_action = True
+                    if event.key == pygame.K_e:
+                        floor.delete_for_color(GREEN)
+                        trigger_action = True
 
         # Clear the screen
         screen.fill(WHITE)
 
-        # Update/Move Objects
-        new_player = check_collision(player, board, floor)
-        if new_player:
-            player = new_player
-            next_p = Piece(create_matrix(next_piece, Point(20, 2), BSIZE, BSIZE, [RED]))
+        if not end_game:
+            # Update/Move Objects
+            new_player, threshold = check_collision(player, board, floor)
+            if threshold:
+                end_game = True
+                pygame.time.set_timer(GRAVITY_EVENT, 0)
+                enable_keys = False
+                # pygame.quit()
+                # exit(0)
+            elif new_player:
+                player = new_player
+                next_p = Piece(
+                    create_matrix(next_piece, Point(20, 2), BSIZE, BSIZE, [RED])
+                )
+
+            if trigger_action:
+                floor.check_board()
 
         # Draw objects
         board.render(screen, RED)
         floor.render(screen, RED)
-        player.render(screen)
+        # threshold at y= 4 * BSIZE
+        pygame.draw.line(
+            screen,
+            BLACK,
+            (3 * BSIZE, THRESHOLD * BSIZE),
+            (11 * BSIZE, THRESHOLD * BSIZE),
+            1,
+        )
+        if player:
+            player.render(screen)
         pygame.draw.rect(
             screen, BLACK, (19 * BSIZE, 1 * BSIZE, 5 * BSIZE, 5 * BSIZE), 2
         )
@@ -350,6 +389,8 @@ def main():
         message_display(
             screen, f"Green: {score['colors'][GREEN]}", Point(20 * BSIZE, 13 * BSIZE)
         )
+        if end_game:
+            message_display(screen, "END GAME", Point(20 * BSIZE, 18 * BSIZE))
 
         # Update the screeen
         pygame.display.flip()
