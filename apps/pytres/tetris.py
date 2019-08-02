@@ -28,7 +28,12 @@ pieces = [
     [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
 ]
 score = {"lines": 0, "colors": {BLACK: 0, BLUE: 0, GREEN: 0}}
-
+thresholds = [
+    {"lines": 25, "gravity": 500},
+    {"lines": 50, "gravity": 250},
+    {"lines": 100, "gravity": 100},
+    {"lines": 200, "gravity": 50},
+]
 next_piece = None
 
 
@@ -49,7 +54,7 @@ def color_to_str(color):
 
 def message_display(screen, text, pos):
     # font = pygame.font.Font("freesansbold.ttf", 20)
-    font = pygame.font.SysFont("times", 20)
+    font = pygame.font.SysFont("courier", 20)
     text_surf = font.render(text, True, (0, 0, 0))
     text_rect = text_surf.get_rect()
     text_rect.center = (pos.x, pos.y)
@@ -271,7 +276,7 @@ def check_collision(actor, board, floor):
             floor.add_pos(actor.gobject.get_pos())
             floor.add_cells(actor.gobject.get_cells())
             matrix = new_piece(
-                Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN], next_piece
+                Point(6, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN], next_piece
             )
             line_score, threshold = floor.check_for_rows()
             if threshold:
@@ -283,7 +288,7 @@ def check_collision(actor, board, floor):
                     k: line_score.count(k) for k in set(line_score)
                 }.items():
                     score["colors"][key] += value
-                print(score)
+                # print(score)
             return Actor("piece", matrix), False
     else:
         collision = actor_box.collision_with(board_box)
@@ -293,11 +298,12 @@ def check_collision(actor, board, floor):
 
 
 def main():
+    global GRAVITY_TIMEOUT
     pygame.init()
     pygame.display.set_caption("PY-TRES")
     screen = pygame.display.set_mode((500, 400))
     clock = pygame.time.Clock()
-    matrix = new_piece(Point(8, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN], None)
+    matrix = new_piece(Point(6, 2), BSIZE, BSIZE, [BLACK, BLUE, GREEN], None)
     player = Actor("piece", matrix)
     board = Board(2, 2, 10, 20, BSIZE)
     floor = Floor(3, 21, 8, 1, BSIZE)
@@ -306,6 +312,7 @@ def main():
     pygame.time.set_timer(GRAVITY_EVENT, GRAVITY_TIMEOUT)
     enable_keys = True
     end_game = False
+    level = 0
     while True:
         clock.tick(30)
         allow_space = True
@@ -364,12 +371,28 @@ def main():
         board.render(screen, RED)
         floor.render(screen, RED)
         # threshold at y= 4 * BSIZE
+        for x in range(8):
+            pygame.draw.line(
+                screen,
+                BLACK,
+                ((4 + x) * BSIZE, (THRESHOLD) * BSIZE),
+                ((4 + x) * BSIZE, (THRESHOLD + 16) * BSIZE),
+                1,
+            )
+        for y in range(16):
+            pygame.draw.line(
+                screen,
+                BLACK,
+                (3 * BSIZE, (THRESHOLD + y) * BSIZE),
+                (11 * BSIZE, (THRESHOLD + y) * BSIZE),
+                1,
+            )
         pygame.draw.line(
             screen,
-            BLACK,
+            RED,
             (3 * BSIZE, THRESHOLD * BSIZE),
             (11 * BSIZE, THRESHOLD * BSIZE),
-            1,
+            2,
         )
         if player:
             player.render(screen)
@@ -377,6 +400,19 @@ def main():
             screen, BLACK, (19 * BSIZE, 1 * BSIZE, 5 * BSIZE, 5 * BSIZE), 2
         )
         next_p.render(screen)
+        # if level == 0 and score["lines"] > thresholds[level]["lines"]:
+        #     level = 1
+        # elif level == 1 and score["lines"] > thresholds[level]["lines"]:
+        #     level = 2
+        # elif level == 2 and score["lines"] > thresholds[level]["lines"]:
+        #     level = 3
+        # elif level == 3 and score["lines"] > thresholds[level]["lines"]:
+        #     level = 4
+        if level < len(thresholds) and score["lines"] > thresholds[level]["lines"]:
+            level += 1
+            GRAVITY_TIMEOUT = thresholds[level]["gravity"]
+            pygame.time.set_timer(GRAVITY_EVENT, GRAVITY_TIMEOUT)
+
         message_display(
             screen, f"Lines: {score['lines']}", Point(20 * BSIZE, 10 * BSIZE)
         )
