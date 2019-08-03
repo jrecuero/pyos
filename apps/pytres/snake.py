@@ -111,36 +111,37 @@ class Link:
         pygame.draw.rect(surface, color, self.sprite)
 
 
-# class Entity:
-#     def __init__(self):
-#         self.shape = []
-#         self.timeout = 0
+class Entity:
+    def __init__(self):
+        self.shape = []
+        self.timeout = 0
 
-#     @property
-#     def head(self):
-#         if len(self.shape):
-#             return self.shape[0]
-#         return None
+    @property
+    def head(self):
+        if len(self.shape):
+            return self.shape[0]
+        return None
 
-#     def add(self, link):
-#         self.shape.append(link)
-#         return self
+    def add(self, link):
+        self.shape.append(link)
+        return self
 
-#     def update(self, timeout):
-#         if timeout:
-#             self.timeout += 1
-#             if timeout > self.timeout:
-#                 return False
-#             self.timeout = 0
-#         return True
+    def update(self, timeout):
+        return True
 
-#     def render(self, surface, color):
-#         for link in self.shape:
-#             link.render(surface, color)
+    def get_collision_box(self):
+        collision_box = CollisionBox()
+        collision_box.add(self.head.pos)
+        return collision_box
+
+    def render(self, surface, color):
+        for link in self.shape:
+            link.render(surface, color)
 
 
 class Chain:
     def __init__(self, length, sprite):
+        self.sprite = sprite
         self.timeout = 0
         self.shape = []
         for _ in range(length):
@@ -166,13 +167,13 @@ class Chain:
         last_link = self.shape[-1]
         new_link.move = last_link.move
         if new_link.move == Move.UP:
-            new_link.pos = Point(last_link.y + 1, last_link.x)
+            new_link.pos = Point(last_link.x, last_link.y + 1)
         elif new_link.move == Move.DOWN:
-            new_link.pos = Point(last_link.y - 1, last_link.x)
+            new_link.pos = Point(last_link.x, last_link.y - 1)
         elif new_link.move == Move.RIGHT:
-            new_link.pos = Point(last_link.y, last_link.x - 1)
+            new_link.pos = Point(last_link.x - 1, last_link.y)
         elif new_link.move == Move.LEFT:
-            new_link.pos = Point(last_link.y, last_link.x + 1)
+            new_link.pos = Point(last_link.x + 1, last_link.y)
         self.shape.append(new_link)
 
     def update(self):
@@ -211,6 +212,14 @@ class Chain:
         if achain_collision_box.collision_with(board_collision_box):
             self.back()
             self.update()
+
+    def check_rock(self, rock):
+        self_collision_box = self.get_collision_box()
+        rock_collision_box = rock.get_collision_box()
+        if self_collision_box.collision_with(rock_collision_box):
+            self.add_link()
+            return True
+        return False
 
     def back(self):
         if self.head.move == Move.UP:
@@ -377,8 +386,10 @@ def main():
     screen = pygame.display.set_mode((600, 400))
     clock = pygame.time.Clock()
     board = Board(2, 2, 30, 20, BSIZE)
-    # alink = Link(pygame.Rect(5, 5, 16, 16))
-    achain = Chain(10, pygame.Rect(5, 5, 16, 16))
+    x = random.randint(3, 30)
+    y = random.randint(3, 20)
+    rock = Entity().add(Link(pygame.Rect(x, y, 16, 16)))
+    achain = Chain(1, pygame.Rect(5, 5, 16, 16))
     achain.start_at(Move.RIGHT, Point(5, 5))
     pygame.key.set_repeat(500, 500)
     enable_keys = True
@@ -415,11 +426,16 @@ def main():
 
         # achain.update(5, board)
         achain.check_collision(board)
+        if achain.check_rock(rock):
+            x = random.randint(3, 30)
+            y = random.randint(3, 20)
+            rock = Entity().add(Link(pygame.Rect(x, y, 16, 16)))
 
         # Draw objects
         achain.render(screen, BLUE)
         if end_game:
             message_display(screen, "END GAME", Point(20 * BSIZE, 18 * BSIZE))
+        rock.render(screen, BLACK)
         board.render(screen, RED)
 
         # Update the screeen
