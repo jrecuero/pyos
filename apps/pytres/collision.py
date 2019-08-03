@@ -16,3 +16,6 @@ class CollisionBox:
         for x, y in collision:
             upper_box.add(Point(x, y - 1))
         return self.collision_with(upper_box)
+
+    def __str__(self):
+        return str(self.box)
