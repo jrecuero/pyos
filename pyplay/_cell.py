@@ -1,8 +1,32 @@
-class Cell:
+from _move import Move
+from _collision import CollisionBox
 
-    def __init__(self, content, pos=None):
+
+class Cell:
+    def __init__(self, content, pos=None, move=Move.NONE, pushed=False):
         self.content = content
         self.pos = pos
+        self.move = move
+        self.pushed = pushed
+
+    def __str__(self):
+        return str(self.pos)
+
+    @property
+    def y(self):
+        return self.pos.y
+
+    @y.setter
+    def y(self, val):
+        self.pos.y = val
+
+    @property
+    def x(self):
+        return self.pos.x
+
+    @x.setter
+    def x(self, val):
+        self.pos.x = val
 
     def update_with(self, other_cell):
         self.content = other_cell.content
@@ -20,13 +44,13 @@ class Cell:
         return self.content.is_enable()
 
     def get_collision_box(self, pos=None):
+        collision_box = CollisionBox()
         if self.content.is_enable():
-            return self.pos if pos is None else pos
-        else:
-            return None
+            collision_box.add(self.pos if pos is None else pos)
+        return collision_box
 
     def render(self, surface, **kwargs):
-        if sefl.pos is not None:
+        if self.pos is not None:
             self.render_at(surface, self.pos.x, self.pox.y, **kwargs)
 
     def render_at(self, surface, x, y, **kwargs):

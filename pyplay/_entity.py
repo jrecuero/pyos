@@ -2,13 +2,15 @@ import pygame
 
 
 class Entity:
-
-    def __init__(self, sprite, dx, dx, color):
+    def __init__(self, sprite, dx, dy, color):
         self.sprite = sprite
         self.dx = dx
         self.dy = dy
         self.color = color
         self._enable = True
+
+    def __str__(self):
+        return f"[{self.dx}, {self.dy}, {self.color}]"
 
     def enable(self):
         self._enable = True
