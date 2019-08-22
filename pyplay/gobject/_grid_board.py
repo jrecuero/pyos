@@ -1,16 +1,15 @@
 import pygame
 from _point import Point
 from _collision import CollisionBox
+from ._board import Board
 
 
-class Board:
-    def __init__(self, x, y, dx, dy, gsize, **kwargs):
-        self.x = x
-        self.y = y
-        self.dx = dx
-        self.dy = dy
+class GridBoard(Board):
+    def __init__(self, name, x, y, dx, dy, gsize, **kwargs):
+        super(GridBoard, self).__init__(name, x, y, dx, dy, **kwargs)
         self.gsize = gsize
         self.detailed = kwargs.get("detailed", True)
+        self.color = kwargs.get("color", True)
         self.pos = []
         for x in range(self.dx):
             self.pos.append(Point(self.x + x, self.y))
@@ -46,14 +45,14 @@ class Board:
             collision_box.add(p)
         return collision_box
 
-    def render(self, surface, color, **kwargs):
+    def render(self, surface, **kwargs):
         for p in self.pos:
-            pygame.draw.rect(surface, color, self.grect(p.x, p.y))
+            pygame.draw.rect(surface, self.color, self.grect(p.x, p.y))
         if self.detailed:
             for x in range(self.dx):
                 pygame.draw.line(
                     surface,
-                    color,
+                    self.color,
                     ((self.x + x) * self.gsize, (self.y * self.gsize)),
                     ((self.x + x) * self.gsize, (self.y + self.dy) * self.gsize),
                     1,
@@ -61,7 +60,7 @@ class Board:
             for y in range(self.dy):
                 pygame.draw.line(
                     surface,
-                    color,
+                    self.color,
                     (self.x * self.gsize, (self.y + y) * self.gsize),
                     ((self.x + self.dx) * self.gsize, (self.y + y) * self.gsize),
                     1,

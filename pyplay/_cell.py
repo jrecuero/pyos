@@ -32,7 +32,7 @@ class Cell:
         self.content = other_cell.content
 
     def clone(self):
-        return self.__class_(self.content, self.pos)
+        return self.__class__(self.content, self.pos)
 
     def enable(self):
         self.content.enable()
