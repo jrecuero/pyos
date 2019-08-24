@@ -1,5 +1,7 @@
+# from ._loggar import log
 from ._point import Point
 from ._move import Move
+from ._color import Color
 
 
 class GObject:
@@ -11,8 +13,10 @@ class GObject:
 
     NONE = 0
     RECT = 1
-    SHAPE = 2
-    BOARD = 3
+    CIRCLE = 2
+    SHAPE = 3
+    BOARD = 4
+    POLYGON = 5
     IMAGE = 10
     TEXT = 20
 
@@ -28,6 +32,9 @@ class GObject:
         self.enable = kwargs.get("enable", True)
         self.visible = kwargs.get("visible", True)
         self.solid = kwargs.get("solid", True)
+        self.color = kwargs.get("color", Color.BLACK)
+        self.outline = kwargs.get("outline", 0)
+        self.catch_keyboard = kwargs.get("keyboard", False)
 
     @property
     def gid(self):
@@ -68,8 +75,51 @@ class GObject:
         self.content = content
         self.ctype = ctype
 
-    def update(self, surface, **kwargs):
+    def reverse(self):
+        """reverse inverts movement with the same speed value.
+        """
+        return self.move.reverse()
+
+    def bounce_x(self):
+        """bounce_x bounces against an X-plane, it means y-component will
+        be reversed.
+        """
+        return self.move.bounce_x()
+
+    def bounce_y(self):
+        """bounce_y bounces against an Y-plane, it means x-component will
+        be reversed.
+        """
+        return self.move.bounce_y()
+
+    def move_inc(self, inc_x, inc_y):
+        """move_inc moves the grafical object by the given x and y components.
+        """
+        self.x += int(inc_x)
+        self.y += int(inc_y)
+
+    def move_to(self, x, y):
+        """move_to moves the grafical object to the given position.
+        """
+        self.x = int(x)
+        self.y = int(y)
+
+    def scale(self, dx, dy):
+        """scale transfor the graphical object based on given x and y
+        percentages.
+        """
         pass
+
+    def handle_keyboard_event(self, event):
+        """handle_keyboard_event should process the keyboard event given.
+        """
+        return True
+
+    def update(self, surface, **kwargs):
+        """update updates x and y compoments based on the move attribute
+        x and y components.
+        """
+        self.move_inc(self.move.x, self.move.y)
 
     def render(self, surface, **kwargs):
         if self.ctype == GObject.NONE:

@@ -1,6 +1,6 @@
 import pygame
-from _point import Point
-from _collision import CollisionBox
+from ._point import Point
+from ._collision import CollisionBox
 from ._board import Board
 
 

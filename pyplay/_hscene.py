@@ -116,6 +116,13 @@ class SceneHandler:
             self.iactive = len(self.scences) - 1
             self.scenes[self.iactive].open()
 
+    def handle_keyboard_event(self, event):
+        """handle_keyboard_event should process the keyboard event given.
+        Keyboard events are passed to the active scene to be handle.
+        """
+        if self.iactive is not None and self.scenes:
+            self.scenes[self.iactive].handle_keyboard_event(event)
+
     def update(self, **kwargs):
         """update calls update for the active scene.
         """

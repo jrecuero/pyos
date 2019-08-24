@@ -56,6 +56,12 @@ class GHandler:
         """
         pass
 
+    def handle_keyboard_event(self, event):
+        """handle_keyboard_event should process the keyboard event given.
+        Keyboard events are passed to the active scene to be handle.
+        """
+        self.hscene.handle_keyboard_event(event)
+
     def update(self, **kwargs):
         """update calls update method for all scenes and  graphical objects.
         """

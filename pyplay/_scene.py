@@ -64,6 +64,12 @@ class Scene:
         """
         pass
 
+    def handle_keyboard_event(self, event):
+        """handle_keyboard_event should process the keyboard event given.
+        """
+        for gobj in self.gobjects:
+            gobj.handle_keyboard_event(event)
+
     def update(self, **kwargs):
         """update calls update method for all scene graphical objects.
         """
