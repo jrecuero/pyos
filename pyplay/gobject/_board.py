@@ -45,6 +45,14 @@ class Board(GObject):
         for gobj in self.gobjects:
             gobj.handle_keyboard_event(event)
 
+    def handle_custom_event(self, event):
+        """handle_custom_event should process pygame custom event given.
+        Any object in the game, like, scene, graphic objects, ... can post
+        customs events, and those should be handled at this time.
+        """
+        for gobj in self.gobjects:
+            gobj.handle_custom_event(event)
+
     def update(self, surface, **kwargs):
         for gobj in self.gobjects:
             gobj.update(surface, **kwargs)
@@ -53,10 +61,13 @@ class Board(GObject):
             if not self.bounds().contains(gobj.bounds()):
                 rect = gobj.bounds()
                 if (rect.x < 0) or (rect.x + rect.w) > (self.x + self.dx):
-                    gobj.bounce_x()
+                    # gobj.bounce_x()
+                    response = gobj.out_of_bounds_x_response()
                 elif (rect.y < 0) or (rect.y + rect.h) > (self.y + self.dy):
-                    gobj.bounce_y()
-                rect.clamp_ip(self.bounds())
+                    # gobj.bounce_y()
+                    response = gobj.out_of_bounds_y_response()
+                if not response:
+                    rect.clamp_ip(self.bounds())
                 # gobj.reverse()
             # <-
             # -> check collision
@@ -65,5 +76,5 @@ class Board(GObject):
 
     def render(self, surface, **kwargs):
         pygame.draw.rect(surface, self.color, self.content, self.outline)
-        for gobj in self.gobjects:
+        for gobj in sorted(self.gobjects, key=lambda obj: obj.z):
             gobj.render(surface, **kwargs)

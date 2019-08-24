@@ -1,6 +1,8 @@
 import pygame
 from .._gobject import GObject
 
+from .._loggar import log
+
 
 class GPolygon(GObject):
     """GPolygon implements a graphical object that is rendered as a polygon.
@@ -62,6 +64,22 @@ class GPolygon(GObject):
                 p.y = self.y + int(((p.y - self.y) * dy) / 100)
         self.content = self._calculate_content(self.points)
 
+    def bounce_x(self):
+        """bounce_x bounces against an X-plane, it means y-component will
+        be reversed.
+        """
+        result = super(GPolygon, self).bounce_x()
+        self.move_inc(self.move.x, self.move.y)
+        return result
+
+    def bounce_y(self):
+        """bounce_y bounces against an Y-plane, it means x-component will
+        be reversed.
+        """
+        result = super(GPolygon, self).bounce_y()
+        self.move_inc(self.move.x, self.move.y)
+        return result
+
     def update(self, surface, **kwargs):
         for p in self.points:
             p.x += int(self.move.x)
@@ -70,4 +88,6 @@ class GPolygon(GObject):
 
     def render(self, surface, **kwargs):
         points = [p.get() for p in self.points]
+        log.GPolygon(self.name).Bounds(self.bounds()).Move(self.move).call()
+        log.GPolygon(self.name).Points(points).call()
         pygame.draw.polygon(surface, self.color, points, self.outline)

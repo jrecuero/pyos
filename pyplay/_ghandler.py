@@ -37,12 +37,12 @@ class GHandler:
         """
         self.hscene.delete(scene)
 
-    def handle_custom_events(self):
-        """handle_custom_events should process all pygame custom events. Any
-        object in the game, like, scene, graphic objects, ... can post
+    def handle_custom_event(self, event):
+        """handle_custom_event should process pygame custom event given.
+        Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        pass
+        self.hscene.handle_custom_event(event)
 
     def handle_these_events(self, events):
         """handle_these_events should process the given list of events. That

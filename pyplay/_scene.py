@@ -70,6 +70,14 @@ class Scene:
         for gobj in self.gobjects:
             gobj.handle_keyboard_event(event)
 
+    def handle_custom_event(self, event):
+        """handle_custom_event should process pygame custom event given.
+        Any object in the game, like, scene, graphic objects, ... can post
+        customs events, and those should be handled at this time.
+        """
+        for gobj in self.gobjects:
+            gobj.handle_custom_event(event)
+
     def update(self, **kwargs):
         """update calls update method for all scene graphical objects.
         """

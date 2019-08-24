@@ -26,6 +26,9 @@ class GObject:
         self.name = name
         self.content = kwargs.get("content", None)
         self.ctype = kwargs.get("ctype", GObject.NONE)
+        self.x = kwargs.get("x", None)
+        self.y = kwargs.get("y", None)
+        self.z = kwargs.get("z", 0)
         self.pos = kwargs.get("pos", None)
         self.move = kwargs.get("move", Move())
         self.pushed = kwargs.get("pushed", None)
@@ -49,10 +52,11 @@ class GObject:
 
     @x.setter
     def x(self, val):
-        if self.pos is None:
-            self.pos = Point(val, 0)
-        else:
-            self.pos.x = val
+        if val is not None:
+            if self.pos is None:
+                self.pos = Point(val, 0)
+            else:
+                self.pos.x = val
 
     @property
     def y(self):
@@ -60,10 +64,11 @@ class GObject:
 
     @y.setter
     def y(self, val):
-        if self.pos is None:
-            self.pos = Point(0, val)
-        else:
-            self.pos.y = val
+        if val is not None:
+            if self.pos is None:
+                self.pos = Point(0, val)
+            else:
+                self.pos.y = val
 
     def bounds(self):
         """bounds should returns a rectangle that contains the whole
@@ -114,6 +119,31 @@ class GObject:
         """handle_keyboard_event should process the keyboard event given.
         """
         return True
+
+    def handle_custom_event(self, event):
+        """handle_custom_event should process pygame custom event given.
+        Any object in the game, like, scene, graphic objects, ... can post
+        customs events, and those should be handled at this time.
+        """
+        return True
+
+    def out_of_bounds_x_response(self):
+        """out_of_bounds_x_response takes action when the graphical object is
+        out of bound at the X-axis.
+        Return True if objects is lost out of bound or False if object should
+        be in bounds.
+        """
+        self.bounce_x()
+        return False
+
+    def out_of_bounds_y_response(self):
+        """out_of_bounds_y_response takes action when the graphical object is
+        out of bound at the Y-axis.
+        Return True if objects is lost out of bound or False if object should
+        be in bounds.
+        """
+        self.bounce_y()
+        return False
 
     def update(self, surface, **kwargs):
         """update updates x and y compoments based on the move attribute
