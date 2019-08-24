@@ -1,5 +1,6 @@
 import sys
 import os
+import random
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
@@ -52,8 +53,9 @@ class Actor(GPolygon):
 
 
 class Bullet(GCircle):
-    def __init__(self, x, y, radius, **kwargs):
+    def __init__(self, x, y, radius, parent, **kwargs):
         super(Bullet, self).__init__("bullet", x, y, radius, **kwargs)
+        self.parent = parent
 
     def out_of_bounds_x_response(self):
         gev = pygame.event.Event(GEvent.DELETE, source=self)
@@ -64,6 +66,13 @@ class Bullet(GCircle):
         gev = pygame.event.Event(GEvent.DELETE, source=self)
         pygame.event.post(gev)
         return True
+
+    def collide_with(self, other):
+        if other != self.parent:
+            del_self = pygame.event.Event(GEvent.DELETE, source=self)
+            del_other = pygame.event.Event(GEvent.DELETE, source=other)
+            pygame.event.post(del_self)
+            pygame.event.post(del_other)
 
 
 class GameBoard(Board):
@@ -77,15 +86,20 @@ class GameBoard(Board):
         """
         if event.type == GEvent.CREATE:
             # log.Board(self.name).Create(event.klass).At(f"{event.at}").call()
-            bullet = Bullet(event.at.x, event.at.y, 2, z=event.at.z, move=event.move)
+            bullet = Bullet(
+                event.at.x, event.at.y, 2, event.source, z=event.at.z, move=event.move
+            )
             self.add_gobject(bullet)
         elif event.type == GEvent.DELETE:
-            bullet = event.source
-            self.gobjects.remove(bullet)
+            log.Board(self.name).Delete(event.source).call()
+            gobj = event.source
+            if gobj in self.gobjects:
+                self.gobjects.remove(gobj)
 
 
 def main():
     pygame.init()
+    pygame.mixer.init()
     pygame.display.set_caption("PY-PLUS")
     surface = pygame.display.set_mode((600, 400))
     clock = pygame.time.Clock()
@@ -93,20 +107,39 @@ def main():
     gh = GHandler("app", surface)
     scene = Scene("main", surface)
     board = GameBoard("board", 0, 0, 600, 300, outline=1)
-    obj1 = GRect("rect", 100, 100, 50, 50, move=Move(1, 1), color=Color.RED)
-    obj2 = GCircle("circle", 50, 50, 25, move=Move(1, 1), color=Color.GREEN)
+    # Generate balls and squares
+    for _ in range(10):
+        x = random.randint(50, 500)
+        y = random.randint(50, 200)
+        size = random.randint(10, 50)
+        speed_x = random.randint(1, 5)
+        speed_y = random.randint(1, 5)
+        selection = random.choice(["rect", "circle"])
+        if selection == "rect":
+            obj = GRect(
+                "rect",
+                x,
+                y,
+                size,
+                size,
+                move=Move(speed_x, speed_y),
+                color=Color.RED,
+                outline=2,
+            )
+            board.add_gobject(obj)
+        else:
+            obj = GCircle(
+                "circle",
+                x,
+                y,
+                size,
+                move=Move(speed_x, speed_y),
+                color=Color.GREEN,
+                outline=2,
+            )
+            board.add_gobject(obj)
     obj3 = Actor(color=Color.BLUE, z=1, outline=1)
-    # obj3 = GPolygon(
-    #     "pol",
-    #     [Point(300, 100), Point(350, 50), Point(400, 100)],
-    #     color=Color.BLUE,
-    #     outline=1,
-    #     move=Move(2, 3),
-    # )
-    # obj3.scale(dx=25, dy=25)
     text = GText("text", 10, 310, "Bouncing Ball")
-    board.add_gobject(obj1)
-    board.add_gobject(obj2)
     board.add_gobject(obj3)
     scene.add_gobject(board)
     scene.add_gobject(text)

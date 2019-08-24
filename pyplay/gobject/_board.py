@@ -56,22 +56,28 @@ class Board(GObject):
     def update(self, surface, **kwargs):
         for gobj in self.gobjects:
             gobj.update(surface, **kwargs)
+
+        # only check those objects that can move for out of bounds or
+        # collisions.
+        for gobj in [obj for obj in self.gobjects if obj.move]:
             # -> check out of bound at this point
             # log.Board().GObject(gobj.bounds()).call()
             if not self.bounds().contains(gobj.bounds()):
                 rect = gobj.bounds()
                 if (rect.x < 0) or (rect.x + rect.w) > (self.x + self.dx):
-                    # gobj.bounce_x()
                     response = gobj.out_of_bounds_x_response()
                 elif (rect.y < 0) or (rect.y + rect.h) > (self.y + self.dy):
-                    # gobj.bounce_y()
                     response = gobj.out_of_bounds_y_response()
                 if not response:
                     rect.clamp_ip(self.bounds())
-                # gobj.reverse()
             # <-
-            # -> check collision
-            pass
+            # -> check collision against any other object
+            for other in [_ for _ in self.gobjects if _ != gobj]:
+                rect = gobj.bounds()
+                other_rect = other.bounds()
+                if rect.colliderect(other_rect):
+                    gobj.collide_with(other)
+                    other.collide_with(gobj)
             # <-
 
     def render(self, surface, **kwargs):

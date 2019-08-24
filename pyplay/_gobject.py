@@ -145,6 +145,11 @@ class GObject:
         self.bounce_y()
         return False
 
+    def collide_with(self, other):
+        """collide_with processes a collision with other object.
+        """
+        pass
+
     def update(self, surface, **kwargs):
         """update updates x and y compoments based on the move attribute
         x and y components.
