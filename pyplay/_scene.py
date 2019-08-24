@@ -1,3 +1,6 @@
+import pygame
+
+
 class Scene:
     """Scene class identifies a pyplay scene. A scene can contain multiple
     elements like boards, objects, ...
@@ -12,7 +15,7 @@ class Scene:
         self.__gid = Scene.__GID
         self.name = name
         self.surface = surface
-        self.gobjects = []
+        self.gobjects = pygame.sprite.Group()
         self.timers = []
         self.enable = kwargs.get("enable", True)
         self.visible = kwargs.get("visible", True)
@@ -27,7 +30,7 @@ class Scene:
     def add_gobject(self, gobject):
         """add_gobject adds a graphical object to the scene.
         """
-        self.gobjects.append(gobject)
+        self.gobjects.add(gobject)
 
     def del_gobject(self, gobject):
         """del_gobject deletes a graphical object from the scene.
@@ -81,11 +84,11 @@ class Scene:
     def update(self, **kwargs):
         """update calls update method for all scene graphical objects.
         """
-        for gobj in self.gobjects:
-            gobj.update(self.surface, **kwargs)
+        self.gobjects.update(self.surface)
 
     def render(self, **kwargs):
         """render calls render method for all scene graphical objects.
         """
+        self.gobjects.draw(self.surface)
         for gobj in self.gobjects:
             gobj.render(self.surface, **kwargs)

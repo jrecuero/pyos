@@ -7,25 +7,24 @@ import pygame
 from pyplay import GHandler, Scene, Move, Point, Color, GEvent
 from pyplay.gobject import Board, GRect, GCircle, GText, GPolygon
 
-from logging import FileHandler
-from tools.loggar import get_loggar
-
-log = get_loggar("pyplus", handler=FileHandler("loggar.log", mode="w"))
+# from logging import FileHandler
+# from tools.loggar import get_loggar
+#
+# log = get_loggar("pyplus", handler=FileHandler("loggar.log", mode="w"))
 
 
 class Actor(GPolygon):
     def __init__(self, **kwargs):
         points = [
-            Point(100, 100),
-            Point(100, 90),
-            Point(110, 90),
-            Point(120, 80),
-            Point(130, 90),
-            Point(140, 90),
-            Point(140, 100),
+            Point(0, 20),
+            Point(0, 10),
+            Point(10, 10),
+            Point(20, 0),
+            Point(30, 10),
+            Point(40, 10),
+            Point(40, 20),
         ]
-        super(Actor, self).__init__("actor", points, **kwargs)
-        # self.scale(50, 50)
+        super(Actor, self).__init__("actor", 300, 250, points, **kwargs)
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
@@ -46,8 +45,8 @@ class Actor(GPolygon):
                 GEvent.CREATE,
                 source=self,
                 klass="bullet",
-                at=Point(self.content.centerx, self.content.centery, -1),
-                move=Move(0, -5),
+                at=Point(self.rect.centerx, self.rect.centery, -1),
+                move=Move(0, -10),
             )
             pygame.event.post(gev)
 
@@ -91,7 +90,7 @@ class GameBoard(Board):
             )
             self.add_gobject(bullet)
         elif event.type == GEvent.DELETE:
-            log.Board(self.name).Delete(event.source).call()
+            # log.Board(self.name).Delete(event.source).call()
             gobj = event.source
             if gobj in self.gobjects:
                 self.gobjects.remove(gobj)
@@ -117,32 +116,19 @@ def main():
         selection = random.choice(["rect", "circle"])
         if selection == "rect":
             obj = GRect(
-                "rect",
-                x,
-                y,
-                size,
-                size,
-                move=Move(speed_x, speed_y),
-                color=Color.RED,
-                outline=2,
+                "rect", x, y, size, size, move=Move(speed_x, speed_y), color=Color.RED
             )
             board.add_gobject(obj)
         else:
             obj = GCircle(
-                "circle",
-                x,
-                y,
-                size,
-                move=Move(speed_x, speed_y),
-                color=Color.GREEN,
-                outline=2,
+                "circle", x, y, size, move=Move(speed_x, speed_y), color=Color.GREEN
             )
             board.add_gobject(obj)
-    obj3 = Actor(color=Color.BLUE, z=1, outline=1)
+    player = Actor(color=Color.BLUE, z=1)
+    board.add_gobject(player)
     text = GText("text", 10, 310, "Bouncing Ball")
-    board.add_gobject(obj3)
-    scene.add_gobject(board)
     scene.add_gobject(text)
+    scene.add_gobject(board)
     gh.add_scene(scene)
     gh.hscene.active()
     # <-

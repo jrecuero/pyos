@@ -103,12 +103,15 @@ class LoggarProc:
                 line = fd.readline()
 
     def tag(self, tagname: str):
-        result: List[str] = []
-        for data in self.log_data:
-            tagdata = data.get(tagname, None)
-            if tagdata:
-                result.append(tagdata)
-        return "\n".join(result)
+        if tagname:
+            result: List[str] = []
+            for data in self.log_data:
+                tagdata = data.get(tagname, None)
+                if tagdata:
+                    result.append(tagdata)
+            return "\n".join(result)
+        else:
+            return json.dumps(self.log_data, indent=4)
 
 
 if __name__ == "__main__":
@@ -123,6 +126,6 @@ if __name__ == "__main__":
         default="loggar.log",
         help="Loggar filename (default: loggar.log)",
     )
-    parser.add_argument("tag", help="Tag name")
+    parser.add_argument("-t", "--tag", nargs="?", default="", help="Tag name")
     args = parser.parse_args()
     print(LoggarProc(args.filename).tag(args.tag))
