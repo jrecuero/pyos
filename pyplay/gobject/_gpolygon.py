@@ -23,9 +23,9 @@ class GPolygon(GObject):
         max_x = max(xs)
         min_y = min(ys)
         max_y = max(ys)
-        self.dx = max_x - min_x
-        self.dy = max_y - min_y
-        return pygame.Rect(min_x, min_y, self.dx, self.dy)
+        self._dx = max_x - min_x
+        self._dy = max_y - min_y
+        return pygame.Rect(min_x, min_y, self._dx, self._dy)
 
     def __str__(self):
         return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {[str(p) for p in self.points]}"

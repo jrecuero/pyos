@@ -52,9 +52,9 @@ class Board(GObject):
             log.Board().OutOfBounds(str(gobj)).call()
             if not self.rect.contains(gobj.rect):
                 rect = gobj.rect
-                if (rect.x < 0) or (rect.x + rect.w) > (self.x + self.dx):
+                if (rect.x < self.x) or (rect.x + rect.w) > (self.x + self.dx):
                     response = gobj.out_of_bounds_x_response()
-                elif (rect.y < 0) or (rect.y + rect.h) > (self.y + self.dy):
+                elif (rect.y < self.y) or (rect.y + rect.h) > (self.y + self.dy):
                     response = gobj.out_of_bounds_y_response()
                 if not response:
                     rect.clamp_ip(self.rect)
