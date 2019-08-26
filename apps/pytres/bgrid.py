@@ -5,29 +5,12 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from pyplay import GHandler, Scene, Color
 from pyplay.gobject import GText
-from pyplay.gobject.grid import GridBoard, GridRect
+from pyplay.gobject.grid import GridBoard, GridShape
 
 
-class Actor(GridRect):
-    def __init__(self, x, y, **kwargs):
-        super(Actor, self).__init__("actor", x, y, 50, 50, **kwargs)
-
-    def handle_keyboard_event(self, event):
-        """handle_keyboard_event should process the keyboard event given.
-        """
-        speed = 50
-        if event.key == pygame.K_LEFT:
-            self.move_inc(speed * (-1), 0)
-            self.gridx -= 1
-        if event.key == pygame.K_RIGHT:
-            self.move_inc(speed, 0)
-            self.gridx += 1
-        if event.key == pygame.K_UP:
-            self.move_inc(0, speed * (-1))
-            self.gridy -= 1
-        if event.key == pygame.K_DOWN:
-            self.move_inc(0, speed)
-            self.gridy += 1
+class Actor(GridShape):
+    def __init__(self, x, y, matrix, gsize, **kwargs):
+        super(Actor, self).__init__("actor", x, y, matrix, gsize, **kwargs)
 
 
 def main():
@@ -40,7 +23,7 @@ def main():
     gh = GHandler("app", surface)
     scene = Scene("main", surface)
     board = GridBoard("board", 50, 50, 500, 400, 50, outline=1)
-    actor = Actor(0, 0, color=Color.BLUE)
+    actor = Actor(0, 0, [[1, 0, 0], [0, 1, 0], [0, 0, 1]], 50, color=Color.BLUE)
     board.add_gobject(actor)
     text = GText("text", 10, 460, "loading...")
     scene.add_gobject(board)
