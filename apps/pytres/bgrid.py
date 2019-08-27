@@ -7,7 +7,7 @@ from pyplay import GHandler, Scene, Color
 from pyplay.gobject import GText
 
 # from pyplay.gobject.grid import GridBoard, GridShape
-from pyplay.gobject.xgrid import Cell, Shape, GridBoard
+from pyplay.gobject.xgrid import Cell, Shape, GravityBoard
 
 
 # class Actor(GridShape):
@@ -15,27 +15,32 @@ from pyplay.gobject.xgrid import Cell, Shape, GridBoard
 #         super(Actor, self).__init__("actor", x, y, matrix, gsize, **kwargs)
 
 
-def main():
-    pygame.init()
-    pygame.mixer.init()
-    pygame.display.set_caption("B-GRID")
-    surface = pygame.display.set_mode((600, 500))
-    clock = pygame.time.Clock()
-    # -> Create game handler, scenes and graphical objects.
+def _create_game(surface):
     gh = GHandler("app", surface)
     scene = Scene("main", surface)
-    board = GridBoard("board", 50, 50, 500, 400, 50, outline=1)
+    board = GravityBoard("gravity-board", 50, 50, 450, 600, 50, outline=1)
     # actor = Actor(0, 0, [[0, 0, 0], [1, 1, 1], [0, 0, 0]], 50, color=Color.BLUE)
     actor = Shape("actor")
     actor.add_cell(Cell("cell-actor", 0, 0, 50, 50, color=Color.GREEN))
     actor.add_cell(Cell("cell-actor", 1, 1, 50, 50, color=Color.GREEN))
     actor.add_cell(Cell("cell-actor", 2, 2, 50, 50, color=Color.GREEN))
     board.add_gobject(actor)
-    text = GText("text", 10, 460, "loading...")
+    text = GText("text", 10, 660, "loading...")
     scene.add_gobject(board)
     scene.add_gobject(text)
     gh.add_scene(scene)
     gh.hscene.active()
+    return gh
+
+
+def main():
+    pygame.init()
+    pygame.mixer.init()
+    pygame.display.set_caption("B-GRID")
+    surface = pygame.display.set_mode((550, 700))
+    clock = pygame.time.Clock()
+    # -> Create game handler, scenes and graphical objects.
+    gh = _create_game(surface)
     # <-
     while True:
         clock.tick(30)

@@ -10,4 +10,5 @@ class GEvent:
     USER = pygame.USEREVENT
     CREATE = pygame.USEREVENT + 1
     DELETE = pygame.USEREVENT + 2
+    GRAVITY = pygame.USEREVENT + 3
     # limit is pygame.NUMEVENTS = 32

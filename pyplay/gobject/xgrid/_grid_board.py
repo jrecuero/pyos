@@ -1,5 +1,6 @@
 import pygame
 from .._board import Board
+from ..._loggar import log
 
 
 class GridBoard(Board):
@@ -8,18 +9,14 @@ class GridBoard(Board):
 
     def __init__(self, name, x, y, dx, dy, xsize, ysize=None, **kwargs):
         super(GridBoard, self).__init__(name, x, y, dx, dy, **kwargs)
-        # self.x = x
-        # self.y = y
-        # self.dx = dx
-        # self.dy = dy
         self.gobjects = []
         self.xsize = xsize
         self.ysize = ysize if ysize is not None else xsize
         self.border = kwargs.get("border", True)
         self.dx_cells = self.dx // self.xsize
         self.dy_cells = self.dy // self.ysize
-        self.dx_play_cells = (self.dx_cells - 2) if self.border else self.dx_cells
-        self.dy_play_cells = (self.dy_cells - 2) if self.border else self.dy_cells
+        self.dx_play_cells = self.dx_cells
+        self.dy_play_cells = self.dy_cells
         self.play_cells = [[None] * self.dx_play_cells] * self.dy_play_cells
 
     def add_gobject(self, shape):
@@ -41,13 +38,12 @@ class GridBoard(Board):
             shape.update(surface, **kwargs)
 
         for shape in self.gobjects:
-            x = 1 if self.border else 0
-            y = 1 if self.border else 0
             collision_box = shape.get_collision_box()
             if collision_box.check_out_of_bounds(
-                x, y, self.dx_play_cells, self.dy_play_cells
+                0, 0, self.dx_play_cells, self.dy_play_cells
             ):
-                pass
+                log.GridBoard().Collision(shape).call()
+                shape.back_it()
 
     def render(self, surface, **kwargs):
         for x in range(self.dx // self.xsize):

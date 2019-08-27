@@ -1,5 +1,6 @@
 import pygame
 from ..._gid import new_gid
+from ..._gevent import GEvent
 from ._cell import Cell
 from ._collision_box import CollisionBox
 
@@ -12,6 +13,7 @@ class Shape:
         self.__gid = new_gid()
         self.name = name
         self.cells = cells if cells else []
+        self.gravity = False
 
     @property
     def gid(self):
@@ -35,9 +37,16 @@ class Shape:
         for cell in self.cells:
             cell.move_it(dx, dy)
 
+    def back_it(self):
+        """back_it moves back all cells in the shape move.
+        """
+        for cell in self.cells:
+            cell.back_it()
+
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
+        self.gravity = False
         if event.key == pygame.K_LEFT:
             self.move_it(-1, 0)
         if event.key == pygame.K_RIGHT:
@@ -45,6 +54,15 @@ class Shape:
         if event.key == pygame.K_UP:
             self.move_it(0, -1)
         if event.key == pygame.K_DOWN:
+            self.move_it(0, 1)
+
+    def handle_custom_event(self, event):
+        """handle_custom_event should process pygame custom event given.
+        Any object in the game, like, scene, graphic objects, ... can post
+        customs events, and those should be handled at this time.
+        """
+        if event.type == GEvent.GRAVITY:
+            self.gravity = True
             self.move_it(0, 1)
 
     def get_collision_box(self):
