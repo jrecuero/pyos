@@ -24,18 +24,17 @@ class GridShape(GridObject):
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
-        speed = 50
         if event.key == pygame.K_LEFT:
-            self.move_inc(speed * (-1), 0)
+            self.move_inc(self.gsize * (-1), 0)
             self.gridx -= 1
         if event.key == pygame.K_RIGHT:
-            self.move_inc(speed, 0)
+            self.move_inc(self.gsize, 0)
             self.gridx += 1
         if event.key == pygame.K_UP:
-            self.move_inc(0, speed * (-1))
+            self.move_inc(0, self.gsize * (-1))
             self.gridy -= 1
         if event.key == pygame.K_DOWN:
-            self.move_inc(0, speed)
+            self.move_inc(0, self.gsize)
             self.gridy += 1
         if event.key == pygame.K_SPACE:
             self.image = pygame.transform.rotate(self.image, -90)
