@@ -12,6 +12,7 @@ class GridBoard(Board):
         # self.y = y
         # self.dx = dx
         # self.dy = dy
+        self.gobjects = []
         self.xsize = xsize
         self.ysize = ysize if ysize is not None else xsize
         self.border = kwargs.get("border", True)
@@ -20,24 +21,33 @@ class GridBoard(Board):
         self.dx_play_cells = (self.dx_cells - 2) if self.border else self.dx_cells
         self.dy_play_cells = (self.dy_cells - 2) if self.border else self.dy_cells
         self.play_cells = [[None] * self.dx_play_cells] * self.dy_play_cells
-        self.shapes = []
 
-    def add_shape(self, shape):
+    def add_gobject(self, shape):
         """add_shape adds a new shape to be handle by the grid board.
         """
-        shape.x = self.x + shape.x * self.xsize
-        shape.y = self.y + shape.y * self.ysize
-        self.shapes.append(shape)
+        for cell in shape.cells:
+            cell.x = self.x + cell.x * self.xsize
+            cell.y = self.y + cell.y * self.ysize
+        self.gobjects.append(shape)
 
-    def del_shape(self, shape):
+    def del_gobject(self, shape):
         """del_shape deletes a shape from the grid board.
         """
-        if shape in self.shapes:
-            self.shapes.remove(shape)
+        if shape in self.gobjects:
+            self.gobjects.remove(shape)
 
     def update(self, surface, **kwargs):
-        for shape in self.shapes:
+        for shape in self.gobjects:
             shape.update(surface, **kwargs)
+
+        for shape in self.gobjects:
+            x = 1 if self.border else 0
+            y = 1 if self.border else 0
+            collision_box = shape.get_collision_box()
+            if collision_box.check_out_of_bounds(
+                x, y, self.dx_play_cells, self.dy_play_cells
+            ):
+                pass
 
     def render(self, surface, **kwargs):
         for x in range(self.dx // self.xsize):
@@ -56,5 +66,5 @@ class GridBoard(Board):
                 (self.dx, y * self.ysize),
                 1,
             )
-        for shape in self.shapes:
+        for shape in self.gobjects:
             shape.render(surface, **kwargs)

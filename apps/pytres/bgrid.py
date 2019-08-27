@@ -7,7 +7,7 @@ from pyplay import GHandler, Scene, Color
 from pyplay.gobject import GText
 
 # from pyplay.gobject.grid import GridBoard, GridShape
-from pyplay.gobject.xgrid import Shape, GridBoard
+from pyplay.gobject.xgrid import Cell, Shape, GridBoard
 
 
 # class Actor(GridShape):
@@ -26,9 +26,11 @@ def main():
     scene = Scene("main", surface)
     board = GridBoard("board", 50, 50, 500, 400, 50, outline=1)
     # actor = Actor(0, 0, [[0, 0, 0], [1, 1, 1], [0, 0, 0]], 50, color=Color.BLUE)
-    actor = Shape("actor", 0, 0, 50, 50, color=Color.GREEN)
-    # board.add_gobject(actor)
-    board.add_shape(actor)
+    actor = Shape("actor")
+    actor.add_cell(Cell("cell-actor", 0, 0, 50, 50, color=Color.GREEN))
+    actor.add_cell(Cell("cell-actor", 1, 1, 50, 50, color=Color.GREEN))
+    actor.add_cell(Cell("cell-actor", 2, 2, 50, 50, color=Color.GREEN))
+    board.add_gobject(actor)
     text = GText("text", 10, 460, "loading...")
     scene.add_gobject(board)
     scene.add_gobject(text)
@@ -48,7 +50,7 @@ def main():
 
         # -> update objects
         gh.update()
-        text.message = f"({actor.gridx}, {actor.gridy})"
+        # text.message = f"({actor.gridx}, {actor.gridy})"
         # <-
 
         # -> render objects

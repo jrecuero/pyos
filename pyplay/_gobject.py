@@ -1,6 +1,7 @@
 import pygame
 
 # from ._loggar import log
+from ._gid import new_gid
 from ._move import Move
 from ._color import Color
 
@@ -9,8 +10,6 @@ class GObject(pygame.sprite.Sprite):
     """GObject contains all information related with any object to be
     placed or used by the GHandler.
     """
-
-    __GID = 0
 
     NONE = 0
     RECT = 1
@@ -23,8 +22,7 @@ class GObject(pygame.sprite.Sprite):
 
     def __init__(self, name, x, y, dx, dy, **kwargs):
         super(GObject, self).__init__()
-        GObject.__GID += 1
-        self.__gid = GObject.__GID
+        self.__gid = new_gid()
         self.name = name
         self._x = x
         self._y = y
@@ -148,8 +146,8 @@ class GObject(pygame.sprite.Sprite):
         return False
 
     def out_of_bounds_y_response(self):
-        """out_of_bounds_y_response takes action when the graphical object is
-        out of bound at the Y-axis.
+        """out_of_bounds_x_response takes action when the graphical object is
+        out of bound at the X-axis.
         Return True if objects is lost out of bound or False if object should
         be in bounds.
         """
