@@ -10,7 +10,7 @@ class Cell:
     """
 
     def __init__(self, name, x, y, dx, dy, **kwargs):
-        self.__id = new_gid()
+        self.__gid = new_gid()
         self.x = x
         self.y = y
         self.z = kwargs.get("z", 0)
@@ -34,6 +34,9 @@ class Cell:
     @property
     def gid(self):
         return self.__gid
+
+    def __str__(self):
+        return f"[{self.gid}] : {self.__class__.__name__} | {self.x} {self.y} {self.dx} {self.dy} {self.gridx} {self.gridy}"
 
     def get_collision_box(self):
         """get_collision_box retrieves grid cells that can collide with any

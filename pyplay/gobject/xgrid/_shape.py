@@ -1,6 +1,7 @@
 import pygame
 from ..._gid import new_gid
 from ..._gevent import GEvent
+from ..._color import Color
 from ._cell import Cell
 from ._collision_box import CollisionBox
 
@@ -9,11 +10,14 @@ class Shape:
     """Shape represents a collection of cells to be displayed in a grid board.
     """
 
-    def __init__(self, name, cells=None, **kwargs):
+    def __init__(self, name, x, y, cells=None, **kwargs):
         self.__gid = new_gid()
         self.name = name
+        self.gridx = x
+        self.gridy = y
         self.cells = cells if cells else []
         self.gravity = False
+        self.color = kwargs.get("color", Color.BLACK)
 
     @property
     def gid(self):
@@ -49,12 +53,16 @@ class Shape:
         self.gravity = False
         if event.key == pygame.K_LEFT:
             self.move_it(-1, 0)
+            self.gridx -= 1
         if event.key == pygame.K_RIGHT:
             self.move_it(1, 0)
+            self.gridx += 1
         if event.key == pygame.K_UP:
             self.move_it(0, -1)
+            self.gridy -= 1
         if event.key == pygame.K_DOWN:
             self.move_it(0, 1)
+            self.gridy += 1
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
@@ -64,6 +72,7 @@ class Shape:
         if event.type == GEvent.GRAVITY:
             self.gravity = True
             self.move_it(0, 1)
+            self.gridy += 1
 
     def get_collision_box(self):
         """get_collision_box retrieves collision box for all cells containes

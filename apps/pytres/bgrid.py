@@ -7,7 +7,7 @@ from pyplay import GHandler, Scene, Color
 from pyplay.gobject import GText
 
 # from pyplay.gobject.grid import GridBoard, GridShape
-from pyplay.gobject.xgrid import Cell, Shape, GravityBoard
+from pyplay.gobject.xgrid import Cell, TriShape, GravityBoard
 
 
 # class Actor(GridShape):
@@ -20,10 +20,11 @@ def _create_game(surface):
     scene = Scene("main", surface)
     board = GravityBoard("gravity-board", 50, 50, 450, 600, 50, outline=1)
     # actor = Actor(0, 0, [[0, 0, 0], [1, 1, 1], [0, 0, 0]], 50, color=Color.BLUE)
-    actor = Shape("actor")
-    actor.add_cell(Cell("cell-actor", 0, 0, 50, 50, color=Color.GREEN))
-    actor.add_cell(Cell("cell-actor", 1, 1, 50, 50, color=Color.GREEN))
-    actor.add_cell(Cell("cell-actor", 2, 2, 50, 50, color=Color.GREEN))
+    # actor = Shape("actor")
+    # actor.add_cell(Cell("cell-actor", 2, 1, 50, 50, color=Color.GREEN))
+    # actor.add_cell(Cell("cell-actor", 2, 2, 50, 50, color=Color.GREEN))
+    # actor.add_cell(Cell("cell-actor", 3, 3, 50, 50, color=Color.GREEN))
+    actor = TriShape("actor", 1, 1, [[1, 1, 0], [1, 0, 0], [1, 0, 0]], 50, 50)
     board.add_gobject(actor)
     text = GText("text", 10, 660, "loading...")
     scene.add_gobject(board)

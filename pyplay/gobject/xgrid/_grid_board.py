@@ -18,6 +18,9 @@ class GridBoard(Board):
         self.dx_play_cells = self.dx_cells
         self.dy_play_cells = self.dy_cells
         self.play_cells = [[None] * self.dx_play_cells] * self.dy_play_cells
+        # log.GravityBoard().PlayCells(
+        #     f"{self.dx_play_cells}, {self.dy_play_cells}"
+        # ).call()
 
     def add_gobject(self, shape):
         """add_shape adds a new shape to be handle by the grid board.
@@ -42,7 +45,7 @@ class GridBoard(Board):
             if collision_box.check_out_of_bounds(
                 0, 0, self.dx_play_cells, self.dy_play_cells
             ):
-                log.GridBoard().Collision(shape).call()
+                # log.GridBoard().Collision(shape).call()
                 shape.back_it()
 
     def render(self, surface, **kwargs):
