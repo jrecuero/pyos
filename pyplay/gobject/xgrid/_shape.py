@@ -53,8 +53,13 @@ class Shape:
         """back_it moves back all cells in the shape move. It basically the
         reverse operation for move_it().
         """
+        result = []
         for cell in self.cells:
-            cell.back_it()
+            result.append(cell.back_it())
+        backx, backy = result[-1]
+        self.gridx -= backx
+        self.gridy -= backy
+        return result
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.

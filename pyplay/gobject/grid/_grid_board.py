@@ -37,32 +37,7 @@ class GridBoard(Board):
         self.gobjects.add(gobject)
 
     def is_inside(self, pos):
+        """is_inside checks if the given position is inside the board.
+        """
         x, y = pos.get()
         return (self.x < x < (self.x + self.dx)) and (self.y < y < (self.y + self.dy))
-
-    # def get_collision_box(self):
-    #     collision_box = CollisionBox()
-    #     for p in self.pos:
-    #         collision_box.add(p)
-    #     return collision_box
-    #
-    # def render(self, surface, **kwargs):
-    #     for p in self.pos:
-    #         pygame.draw.rect(surface, self.color, self.grect(p.x, p.y))
-    #     if self.detailed:
-    #         for x in range(self.dx):
-    #             pygame.draw.line(
-    #                 surface,
-    #                 self.color,
-    #                 ((self.x + x) * self.gsize, (self.y * self.gsize)),
-    #                 ((self.x + x) * self.gsize, (self.y + self.dy) * self.gsize),
-    #                 1,
-    #             )
-    #         for y in range(self.dy):
-    #             pygame.draw.line(
-    #                 surface,
-    #                 self.color,
-    #                 (self.x * self.gsize, (self.y + y) * self.gsize),
-    #                 ((self.x + self.dx) * self.gsize, (self.y + y) * self.gsize),
-    #                 1,
-    #             )

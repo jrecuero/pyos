@@ -62,12 +62,15 @@ class Cell:
         operation for move_it().
         """
         if self.stepx is not None and self.stepy is not None:
+            result = self.stepx, self.stepy
             self.gridx -= self.stepx
             self.gridy -= self.stepy
             self.x -= self.stepx * self.dx
             self.y -= self.stepy * self.dy
             self.stepx = None
             self.stepy = None
+            return result
+        return 0, 0
 
     def update(self, surface, **kwargs):
         """update provides any functionality to be done every tick.

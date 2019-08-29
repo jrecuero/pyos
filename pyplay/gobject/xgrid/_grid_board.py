@@ -1,7 +1,7 @@
 import pygame
+from ..._loggar import log
 from .._board import Board
-
-# from ..._loggar import log
+from ._collision_box import CollisionBox
 
 
 class GridBoard(Board):
@@ -43,6 +43,17 @@ class GridBoard(Board):
         if shape in self.gobjects:
             self.gobjects.remove(shape)
 
+    def add_shape_to_play_cells(self, shape):
+        """add_shape_to_play_cells adds the given shape to the play_cells
+        attribute. shape will be deleted from the gobjects list.
+        """
+        for cell in shape.cells:
+            x, y = cell.gridx, cell.gridy
+            log.GravityBoard().PlayCellsAt(f"{x}, {y}").call()
+            self.play_cells[y][x] = cell
+            # log.GravityBoard().Gravity(self.play_cells).call()
+        self.del_gobject(shape)
+
     def update(self, surface, **kwargs):
         """update provides any functionality to be done every tick.
         """
@@ -56,6 +67,15 @@ class GridBoard(Board):
             ):
                 # log.GridBoard().Collision(shape).call()
                 shape.back_it()
+
+    def get_play_collision_box(self):
+        """get_play_collision_box returns the collision box for all cells
+        included in play_cells attribute.
+        """
+        collision_box = CollisionBox()
+        for cell in [c for row in self.play_cells for c in row if c]:
+            collision_box.update(cell.get_collision_box())
+        return collision_box
 
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.

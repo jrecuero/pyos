@@ -105,16 +105,12 @@ class GObject(pygame.sprite.Sprite):
     def move_inc(self, inc_x, inc_y):
         """move_inc moves the grafical object by the given x and y components.
         """
-        # self.rect.x += int(inc_x)
-        # self.rect.y += int(inc_y)
         self.x += inc_x
         self.y += inc_y
 
     def move_to(self, x, y):
         """move_to moves the grafical object to the given position.
         """
-        # self.rect.x = int(x)
-        # self.rect.y = int(y)
         self.x = x
         self.y = y
 
@@ -166,4 +162,6 @@ class GObject(pygame.sprite.Sprite):
         self.move_inc(self.move.x, self.move.y)
 
     def render(self, surface, **kwargs):
+        """render should draws the instance on the given surface.
+        """
         pass
