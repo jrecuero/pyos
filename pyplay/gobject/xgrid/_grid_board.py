@@ -1,6 +1,7 @@
 import pygame
 from .._board import Board
-from ..._loggar import log
+
+# from ..._loggar import log
 
 
 class GridBoard(Board):
@@ -17,7 +18,13 @@ class GridBoard(Board):
         self.dy_cells = self.dy // self.ysize
         self.dx_play_cells = self.dx_cells
         self.dy_play_cells = self.dy_cells
-        self.play_cells = [[None] * self.dx_play_cells] * self.dy_play_cells
+        # self.play_cells = [[None] * self.dx_play_cells] * self.dy_play_cells
+        self.play_cells = []
+        for irow in range(self.dy_play_cells):
+            row = []
+            for icol in range(self.dx_play_cells):
+                row.append(None)
+            self.play_cells.append(row)
         # log.GravityBoard().PlayCells(
         #     f"{self.dx_play_cells}, {self.dy_play_cells}"
         # ).call()
@@ -37,6 +44,8 @@ class GridBoard(Board):
             self.gobjects.remove(shape)
 
     def update(self, surface, **kwargs):
+        """update provides any functionality to be done every tick.
+        """
         for shape in self.gobjects:
             shape.update(surface, **kwargs)
 
@@ -49,6 +58,8 @@ class GridBoard(Board):
                 shape.back_it()
 
     def render(self, surface, **kwargs):
+        """render should draws the instance on the given surface.
+        """
         for x in range(self.dx // self.xsize):
             pygame.draw.line(
                 self.image,
@@ -65,5 +76,7 @@ class GridBoard(Board):
                 (self.dx, y * self.ysize),
                 1,
             )
+        for cell in [c for row in self.play_cells for c in row if c]:
+            cell.render(surface, **kwargs)
         for shape in self.gobjects:
             shape.render(surface, **kwargs)

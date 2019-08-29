@@ -16,12 +16,16 @@ class Shape:
         self.gridx = x
         self.gridy = y
         self.cells = cells if cells else []
-        self.gravity = False
         self.color = kwargs.get("color", Color.BLACK)
+        self.gravity = kwargs.get("gravity", True)
+        self.gravity_step = False
 
     @property
     def gid(self):
         return self.__gid
+
+    def __str__(self):
+        return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.gridx} {self.gridy}"
 
     def add_cell(self, cell):
         """add_cell add a new cell to the shape.
@@ -34,15 +38,20 @@ class Shape:
         if cell in self.cells:
             self.cells.remove(cell)
 
-    def move_it(self, dx, dy):
+    def move_it(self, dx, dy, update=True):
         """move_it moves a shape the given X and Y offsets. Grid position
-        and graphical position are stored and move delta is stored.
+        and graphical position are stored and move delta is stored. It moreover
+        updates gridx and gridy attributes if update flag is True.
         """
+        if update:
+            self.gridx += dx
+            self.gridy += dy
         for cell in self.cells:
             cell.move_it(dx, dy)
 
     def back_it(self):
-        """back_it moves back all cells in the shape move.
+        """back_it moves back all cells in the shape move. It basically the
+        reverse operation for move_it().
         """
         for cell in self.cells:
             cell.back_it()
@@ -50,29 +59,24 @@ class Shape:
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
-        self.gravity = False
+        self.gravity_step = False
         if event.key == pygame.K_LEFT:
             self.move_it(-1, 0)
-            self.gridx -= 1
         if event.key == pygame.K_RIGHT:
             self.move_it(1, 0)
-            self.gridx += 1
         if event.key == pygame.K_UP:
             self.move_it(0, -1)
-            self.gridy -= 1
         if event.key == pygame.K_DOWN:
             self.move_it(0, 1)
-            self.gridy += 1
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        if event.type == GEvent.GRAVITY:
-            self.gravity = True
+        if self.gravity and event.type == GEvent.GRAVITY:
+            self.gravity_step = True
             self.move_it(0, 1)
-            self.gridy += 1
 
     def get_collision_box(self):
         """get_collision_box retrieves collision box for all cells containes
@@ -102,9 +106,13 @@ class Shape:
             cell.back_it()
 
     def update(self, surface, **kwargs):
+        """update provides any functionality to be done every tick.
+        """
         for cell in self.cells:
             cell.update(surface, **kwargs)
 
     def render(self, surface, **kwargs):
+        """render should draws the instance on the given surface.
+        """
         for cell in self.cells:
             cell.render(surface, **kwargs)

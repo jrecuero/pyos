@@ -1,13 +1,27 @@
 import sys
 import os
+import random
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
-from pyplay import GHandler, Scene, Color
+from pyplay import GHandler, Scene, Color, GEvent
 from pyplay.gobject import GText
 
 # from pyplay.gobject.grid import GridBoard, GridShape
-from pyplay.gobject.xgrid import Cell, TriShape, GravityBoard
+from pyplay.gobject.xgrid import TriShape, GravityBoard
+
+
+pieces = []
+pieces.append([[1, 1, 0], [1, 0, 0], [1, 0, 0]])
+pieces.append([[1, 0, 0], [1, 0, 0], [1, 1, 0]])
+pieces.append([[0, 1, 0], [0, 1, 0], [0, 1, 0]])
+pieces.append([[1, 1, 0], [0, 1, 1], [0, 0, 0]])
+pieces.append([[0, 0, 0], [0, 1, 1], [1, 1, 0]])
+pieces.append([[1, 1, 0], [1, 1, 0], [0, 0, 0]])
+
+
+def next_piece():
+    return random.choice(pieces)
 
 
 # class Actor(GridShape):
@@ -15,16 +29,38 @@ from pyplay.gobject.xgrid import Cell, TriShape, GravityBoard
 #         super(Actor, self).__init__("actor", x, y, matrix, gsize, **kwargs)
 
 
+class GameBoard(GravityBoard):
+    # def __init__(self, name, x, y, dx, dy, xsize, ysize=None, **kwargs):
+    #     super(GameBoard, self).__init__(name, x, y, dx, dy, xsize, ysize, **kwargs)
+
+    def handle_custom_event(self, event):
+        """handle_custom_event should process pygame custom event given.
+        Any object in the game, like, scene, graphic objects, ... can post
+        customs events, and those should be handled at this time.
+        """
+        # First we have to handle the event before calling the super, because
+        # some object could be added or created at this time.
+        if event.type == GEvent.CREATE:
+            pass
+        elif event.type == GEvent.DELETE:
+            gobj = event.source
+            if gobj in self.gobjects:
+                self.del_gobject(gobj)
+                actor = TriShape("actor", 4, 0, next_piece(), 50, 50, color=Color.BLUE)
+                self.add_gobject(actor)
+        super(GameBoard, self).handle_custom_event(event)
+
+
 def _create_game(surface):
     gh = GHandler("app", surface)
     scene = Scene("main", surface)
-    board = GravityBoard("gravity-board", 50, 50, 450, 600, 50, outline=1)
+    board = GameBoard("gravity-board", 50, 50, 450, 600, 50, outline=1)
     # actor = Actor(0, 0, [[0, 0, 0], [1, 1, 1], [0, 0, 0]], 50, color=Color.BLUE)
-    # actor = Shape("actor")
-    # actor.add_cell(Cell("cell-actor", 2, 1, 50, 50, color=Color.GREEN))
-    # actor.add_cell(Cell("cell-actor", 2, 2, 50, 50, color=Color.GREEN))
-    # actor.add_cell(Cell("cell-actor", 3, 3, 50, 50, color=Color.GREEN))
-    actor = TriShape("actor", 1, 1, [[1, 1, 0], [1, 0, 0], [1, 0, 0]], 50, 50)
+    # actor = Shape("actor", 0, 0)
+    # actor.add_cell(Cell("cell-actor", 0, 1, 50, 50, color=Color.GREEN))
+    # actor.add_cell(Cell("cell-actor", 0, 2, 50, 50, color=Color.GREEN))
+    # actor.add_cell(Cell("cell-actor", 0, 3, 50, 50, color=Color.GREEN))
+    actor = TriShape("actor", 4, 0, next_piece(), 50, 50, color=Color.BLUE)
     board.add_gobject(actor)
     text = GText("text", 10, 660, "loading...")
     scene.add_gobject(board)

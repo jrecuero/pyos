@@ -43,6 +43,8 @@ class Board(GObject):
             gobj.handle_custom_event(event)
 
     def update(self, surface, **kwargs):
+        """update provides any functionality to be done every tick.
+        """
         self.gobjects.update(surface)
 
         # only check those objects that can move for out of bounds or
@@ -69,4 +71,6 @@ class Board(GObject):
             # <-
 
     def render(self, surface, **kwargs):
+        """render should draws the instance on the given surface.
+        """
         self.gobjects.draw(surface)

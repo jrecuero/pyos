@@ -6,6 +6,13 @@ import sys
 import inspect
 
 
+NONE = 0
+DEBUG = 1
+INFO = 3
+WARNING = 4
+ERROR = 5
+
+
 def _log_runner(self, attr: str):
     """log_runner adds to the logger attribute and arguments passed in any
     called method.
@@ -63,7 +70,7 @@ class _Logging(logging.Logger):
         except Exception:
             return _log_runner(self, attr)
 
-    def call(self):
+    def call(self, level=INFO):
         """call should be called when implementing attribute/value pairs using
         method calls.
         """
@@ -71,7 +78,18 @@ class _Logging(logging.Logger):
         self.dicta["file-name"] = pframe.filename
         self.dicta["lineno"] = pframe.lineno
         self.dicta["func-name"] = pframe.function
-        self.info(self.dicta)
+        if level == NONE:
+            pass
+        elif level == DEBUG:
+            self.debug(self.dicta)
+        elif level == INFO:
+            self.info(self.dicta)
+        elif level == WARNING:
+            self.warning(self.dicta)
+        elif level == ERROR:
+            self.error(self.dicta)
+        else:
+            pass
         self.dicta = {}
 
 

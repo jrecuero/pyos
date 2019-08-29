@@ -14,9 +14,9 @@ class TriShape(Shape):
         self._matrix = matrix
         self.xsize = xsize
         self.ysize = ysize
-        self._matrix_to_cells(x, y)
+        self._matrix_to_cells(x, y, **kwargs)
 
-    def _matrix_to_cells(self, x, y):
+    def _matrix_to_cells(self, x, y, **kwargs):
         """_matrix_to_cells populates cells attributes based on the given
         matrix array. It creates one rectangular cell (default) for every
         one in the matrix provided.
@@ -27,14 +27,7 @@ class TriShape(Shape):
             for col in row:
                 if col:
                     self.add_cell(
-                        Cell(
-                            f"{row},{col}",
-                            c,
-                            r,
-                            self.xsize,
-                            self.ysize,
-                            color=self.color,
-                        )
+                        Cell(f"{row},{col}", c, r, self.xsize, self.ysize, **kwargs)
                     )
                 c += 1
             r += 1
@@ -79,13 +72,11 @@ class TriShape(Shape):
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
-        self.gravity = False
+        self.gravity_step = False
         if event.key == pygame.K_LEFT:
             self.move_it(-1, 0)
-            self.gridx -= 1
         if event.key == pygame.K_RIGHT:
             self.move_it(1, 0)
-            self.gridx += 1
         if event.key == pygame.K_UP:
             #     self.move_it(0, -1)
             #     self.gridy -= 1

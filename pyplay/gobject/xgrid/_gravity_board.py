@@ -14,6 +14,8 @@ class GravityBoard(GridBoard):
         pygame.time.set_timer(GEvent.GRAVITY, 1000)
 
     def update(self, surface, **kwargs):
+        """update provides any functionality to be done every tick.
+        """
         for shape in self.gobjects:
             shape.update(surface, **kwargs)
 
@@ -23,9 +25,12 @@ class GravityBoard(GridBoard):
                 0, 0, self.dx_play_cells, self.dy_play_cells
             ):
                 shape.back_it()
-                if shape.gravity:
+                if shape.gravity_step:
                     for cell in shape.cells:
                         x, y = cell.gridx, cell.gridy
-                        log.GridBoard().PlayCellsAt(f"{x}, {y}").call()
+                        log.GravityBoard().PlayCellsAt(f"{x}, {y}").call()
                         self.play_cells[y][x] = cell
-                    # log.GridBoard().Gravity(self.play_cells).call()
+                        # log.GravityBoard().Gravity(self.play_cells).call()
+                    # self.del_gobject(shape)
+                    del_shape = pygame.event.Event(GEvent.DELETE, source=shape)
+                    pygame.event.post(del_shape)

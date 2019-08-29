@@ -58,7 +58,8 @@ class Cell:
         self.stepy = dy
 
     def back_it(self):
-        """back_it moves back last cell move.
+        """back_it moves back last cell move. It is basically the reverse
+        operation for move_it().
         """
         if self.stepx is not None and self.stepy is not None:
             self.gridx -= self.stepx
@@ -69,7 +70,11 @@ class Cell:
             self.stepy = None
 
     def update(self, surface, **kwargs):
+        """update provides any functionality to be done every tick.
+        """
         pass
 
     def render(self, surface, **kwargs):
+        """render should draws the instance on the given surface.
+        """
         pygame.draw.rect(surface, self.color, (self.x, self.y, self.dx, self.dy))
