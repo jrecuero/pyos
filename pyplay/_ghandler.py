@@ -15,6 +15,7 @@ class GHandler:
         self.hscene = SceneHandler()
         self.gobjects = []
         self.timers = []
+        self.running = True
 
     def add_gobject(self, gobject):
         """add_gobject adds a graphical object to the game handler.

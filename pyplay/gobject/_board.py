@@ -12,6 +12,7 @@ class Board(GObject):
     def __init__(self, name, x, y, dx, dy, **kwargs):
         super(Board, self).__init__(name, x, y, dx, dy, **kwargs)
         self.gobjects = pygame.sprite.Group()
+        self.running = True
         pygame.draw.rect(self.image, self.color, (0, 0, self.dx, self.dy), self.outline)
 
     def __str__(self):
@@ -31,8 +32,9 @@ class Board(GObject):
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
-        for gobj in self.gobjects:
-            gobj.handle_keyboard_event(event)
+        if self.running:
+            for gobj in self.gobjects:
+                gobj.handle_keyboard_event(event)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.

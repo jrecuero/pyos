@@ -75,13 +75,13 @@ class TriShape(Shape):
         self.gravity_step = False
         if event.key == pygame.K_LEFT:
             self.move_it(-1, 0)
-        if event.key == pygame.K_RIGHT:
+        elif event.key == pygame.K_RIGHT:
             self.move_it(1, 0)
-        if event.key == pygame.K_UP:
+        elif event.key == pygame.K_UP:
             #     self.move_it(0, -1)
             #     self.gridy -= 1
             self.rotate_clockwise()
-        if event.key == pygame.K_DOWN:
+        elif event.key == pygame.K_DOWN:
             #     self.move_it(0, 1)
             #     self.gridy += 1
             self.rotate_anticlockwise()

@@ -1,7 +1,7 @@
 import pygame
 
-# from ..._gevent import GEvent
 from ..._loggar import log
+from ..._color import Color
 from ._grid_board import GridBoard
 from ._grid_event import GridEvent
 
@@ -13,7 +13,8 @@ class GravityBoard(GridBoard):
 
     def __init__(self, name, x, y, dx, dy, xsize, ysize=None, **kwargs):
         super(GravityBoard, self).__init__(name, x, y, dx, dy, xsize, ysize, **kwargs)
-        self.gravity_timer = kwargs.get("gravity_timer", 1000)
+        self.gravity_timer = kwargs.get("gravity_timer", 500)
+        self.threshold_level = kwargs.get("threshold", 11)
         pygame.time.set_timer(GridEvent.GRAVITY, self.gravity_timer)
 
     def add_shape_to_play_cells(self, shape):
@@ -22,8 +23,17 @@ class GravityBoard(GridBoard):
         to create a new shape will be sent to pygame.
         """
         super(GravityBoard, self).add_shape_to_play_cells(shape)
-        create_shape = pygame.event.Event(GridEvent.CREATE, source=None)
-        pygame.event.post(create_shape)
+
+    def check_threshold_level(self):
+        """check_threshold_level checks if the play cells are is over the
+        threshold level. Return True if there is a piece that is over the
+        threshold, False in other case.
+        """
+        threshold = len(self.play_cells) - self.threshold_level - 1
+        for row in self.play_cells[threshold::-1]:
+            if any(row):
+                return True
+        return False
 
     def check_completed_line(self):
         """check_completed_line looks at play cells if there is a full line
@@ -33,10 +43,6 @@ class GravityBoard(GridBoard):
         for index, row in enumerate(self.play_cells[::-1]):
             if all(row):
                 self.play_cells.remove(row)
-                # row = []
-                # for icol in range(self.dx_play_cells):
-                #     row.append(None)
-                # self.play_cells.insert(0, row)
                 self.play_cells.insert(0, [None] * self.dx_play_cells)
                 completed_lines.append((index, row))
                 log.GravityBoard("Completed Line").Line(index).Row(row).call()
@@ -65,6 +71,8 @@ class GravityBoard(GridBoard):
                 shape.back_it()
                 if shape.gravity_step:
                     self.add_shape_to_play_cells(shape)
+                    create_shape = pygame.event.Event(GridEvent.CREATE, source=None)
+                    pygame.event.post(create_shape)
 
         # Check all cells for collisions, between cells or with play cells.
         for shape in self.gobjects:
@@ -73,8 +81,30 @@ class GravityBoard(GridBoard):
                 log.GravityBoard().Shape(f"{shape}").BackIt(f"{result}").call()
                 backx, backy = result[-1]
                 if backy:
+                    # Check if the last piece is out of the threshold level.
                     self.add_shape_to_play_cells(shape)
+                    if self.check_threshold_level():
+                        pygame.time.set_timer(GridEvent.GRAVITY, 0)
+                        end_event = pygame.event.Event(GridEvent.END, source=None)
+                        pygame.event.post(end_event)
+                        self.running = False
+                    else:
+                        create_shape = pygame.event.Event(GridEvent.CREATE, source=None)
+                        pygame.event.post(create_shape)
 
         # After all shapes have been checked against out of bounds and
         # collisions, it is time to process if there is a line completed.
         self.check_completed_line()
+
+    def render(self, surface, **kwargs):
+        """render should draws the instance on the given surface.
+        """
+        super(GravityBoard, self).render(surface, **kwargs)
+        threshold = len(self.play_cells) - self.threshold_level
+        pygame.draw.line(
+            self.image,
+            Color.RED,
+            (0, threshold * self.ysize),
+            (self.dx, threshold * self.ysize),
+            5,
+        )

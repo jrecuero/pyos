@@ -2,7 +2,6 @@ import pygame
 from ..._gid import new_gid
 from ..._gevent import GEvent
 from ..._color import Color
-from ._cell import Cell
 from ._collision_box import CollisionBox
 
 
