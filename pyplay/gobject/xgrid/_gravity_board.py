@@ -56,6 +56,23 @@ class GravityBoard(GridBoard):
             pygame.event.post(completed_event)
         return completed_lines
 
+    def handle_keyboard_event(self, event):
+        """handle_keyboard_event should process the keyboard event given.
+        """
+        super(GravityBoard, self).handle_keyboard_event(event)
+
+        # Check all shapes are not out of bounds.
+        for shape in self.gobjects:
+            if shape.get_collision_box().check_out_of_bounds(
+                0, 0, self.dx_play_cells, self.dy_play_cells
+            ):
+                shape.back_it()
+
+        # Check all cells for collisions, between cells or with play cells.
+        for shape in self.gobjects:
+            if self.get_play_collision_box().collision_with(shape.get_collision_box()):
+                shape.back_it()
+
     def update(self, surface, **kwargs):
         """update provides any functionality to be done every tick.
         """
@@ -64,8 +81,7 @@ class GravityBoard(GridBoard):
 
         # Check all shapes are not out of bounds.
         for shape in self.gobjects:
-            shape_collision_box = shape.get_collision_box()
-            if shape_collision_box.check_out_of_bounds(
+            if shape.get_collision_box().check_out_of_bounds(
                 0, 0, self.dx_play_cells, self.dy_play_cells
             ):
                 shape.back_it()

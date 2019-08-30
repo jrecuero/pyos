@@ -12,13 +12,13 @@ from pyplay.gobject.xgrid import TriShape, GravityBoard, GridEvent
 
 
 pieces = []
-pieces.append([[1, 1, 0], [1, 0, 0], [1, 0, 0]])
-pieces.append([[1, 0, 0], [1, 0, 0], [1, 1, 0]])
-pieces.append([[0, 1, 0], [0, 1, 0], [0, 1, 0]])
-pieces.append([[1, 1, 0], [0, 1, 1], [0, 0, 0]])
-pieces.append([[0, 0, 0], [0, 1, 1], [1, 1, 0]])
-pieces.append([[1, 1, 0], [1, 1, 0], [0, 0, 0]])
-pieces.append([[1, 1, 1], [0, 1, 0], [0, 0, 0]])
+pieces.append({"piece": [[0, 1, 1], [0, 1, 0], [0, 1, 0]], "rotation": True})
+pieces.append({"piece": [[1, 1, 0], [0, 1, 0], [0, 1, 0]], "rotation": True})
+pieces.append({"piece": [[0, 1, 0], [0, 1, 0], [0, 1, 0]], "rotation": True})
+pieces.append({"piece": [[1, 1, 0], [0, 1, 1], [0, 0, 0]], "rotation": True})
+pieces.append({"piece": [[0, 0, 0], [0, 1, 1], [1, 1, 0]], "rotation": True})
+pieces.append({"piece": [[1, 1, 0], [1, 1, 0], [0, 0, 0]], "rotation": False})
+pieces.append({"piece": [[0, 0, 0], [1, 1, 1], [0, 1, 0]], "rotation": True})
 
 colors = [Color.BLACK, Color.BLUE, Color.GREEN, Color.RED]
 
@@ -38,7 +38,17 @@ def next_color():
 def next_actor():
     """next_actor generates the next actor with random piece and color.
     """
-    return TriShape("actor", 4, 0, next_piece(), 50, 50, color=next_color())
+    next_one = next_piece()
+    return TriShape(
+        "actor",
+        4,
+        0,
+        next_one["piece"],
+        50,
+        50,
+        color=next_color(),
+        rotation=next_one["rotation"],
+    )
 
 
 # class Actor(GridShape):
@@ -114,7 +124,9 @@ def _create_game(surface):
     """
     gh = GameHandler("app", surface)
     scene = Scene("main", surface)
-    board = GameBoard("gravity-board", 50, 50, 450, 700, 50, outline=1)
+    board = GameBoard(
+        "gravity-board", 50, 50, 450, 700, 50, outline=1, gravity_timer=1000
+    )
     board.add_gobject(next_actor())
     gh.console = GText("console", 10, 760, " " * 50)
     scene.add_gobject(board)

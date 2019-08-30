@@ -1,8 +1,9 @@
 import pygame
-from ..._loggar import log
-from ..._gevent import GEvent
+
+# from ..._loggar import log
 from ._cell import Cell
 from ._shape import Shape
+from ._grid_event import GridEvent
 
 
 class TriShape(Shape):
@@ -36,13 +37,9 @@ class TriShape(Shape):
     def rotate_clockwise(self):
         """rotate_clockwise rotates the shape by 90 degrees clockwise.
         """
-        # result = [row[:] for row in self._matrix]
-        # matrix_size = len(self._matrix[0])
-        # for x in range(0, matrix_size):
-        #     for j in range(0, matrix_size):
-        #         result[j][matrix_size - 1 - x] = self._matrix[x][j]
-        # self._matrix = result
-        # self._matrix_to_cells(self.gridx, self.gridy)
+        if not self.allow_rotation:
+            return
+        self.is_rotation = True
         matrix_size = len(self._matrix)
         for cell in self.cells:
             gridx = cell.gridx - self.gridx
@@ -54,13 +51,9 @@ class TriShape(Shape):
     def rotate_anticlockwise(self):
         """rotate_anticlockwise rotates the shape by 90 degrees anti-clockwise.
         """
-        # result = [row[:] for row in self._matrix]
-        # matrix_size = len(self._matrix[0])
-        # for x in range(0, matrix_size):
-        #     for j in range(0, matrix_size):
-        #         result[x][j] = self._matrix[j][matrix_size - 1 - x]
-        # self._matrix = result
-        # self._matrix_to_cells(self.gridx, self.gridy)
+        if not self.allow_rotation:
+            return
+        self.is_rotation = True
         matrix_size = len(self._matrix)
         for cell in self.cells:
             gridx = cell.gridx - self.gridx
@@ -78,23 +71,10 @@ class TriShape(Shape):
         elif event.key == pygame.K_RIGHT:
             self.move_it(1, 0)
         elif event.key == pygame.K_UP:
-            #     self.move_it(0, -1)
-            #     self.gridy -= 1
             self.rotate_clockwise()
         elif event.key == pygame.K_DOWN:
-            #     self.move_it(0, 1)
-            #     self.gridy += 1
             self.rotate_anticlockwise()
-        # if event.key == pygame.K_SPACE:
-        #     self.rotate_clockwise()
-
-    # def handle_custom_event(self, event):
-    #     """handle_custom_event should process pygame custom event given.
-    #     Any object in the game, like, scene, graphic objects, ... can post
-    #     customs events, and those should be handled at this time.
-    #     """
-    #     super(TriShape, self).handle_custom_event(event)
-    #     if event.type == GEvent.GRAVITY:
-    #         log.Gravity().TriShape(f"{self.gridx}, {self.gridy}").Cell(
-    #             f"{self.cells[0].gridx}, {self.cells[0].gridy}"
-    #         ).call()
+        elif event.key == pygame.K_SPACE:
+            # self.gravity_move(1)
+            gravity_event = pygame.event.Event(GridEvent.GRAVITY)
+            pygame.event.post(gravity_event)

@@ -1,8 +1,8 @@
 import pygame
 from ..._gid import new_gid
-from ..._gevent import GEvent
 from ..._color import Color
 from ._collision_box import CollisionBox
+from ._grid_event import GridEvent
 
 
 class Shape:
@@ -17,7 +17,9 @@ class Shape:
         self.cells = cells if cells else []
         self.color = kwargs.get("color", Color.BLACK)
         self.gravity = kwargs.get("gravity", True)
+        self.allow_rotation = kwargs.get("rotation", True)
         self.gravity_step = False
+        self.is_rotation = False
 
     @property
     def gid(self):
@@ -42,6 +44,7 @@ class Shape:
         and graphical position are stored and move delta is stored. It moreover
         updates gridx and gridy attributes if update flag is True.
         """
+        self.is_rotation = False
         if update:
             self.gridx += dx
             self.gridy += dy
@@ -55,9 +58,12 @@ class Shape:
         result = []
         for cell in self.cells:
             result.append(cell.back_it())
-        backx, backy = result[-1]
-        self.gridx -= backx
-        self.gridy -= backy
+        # Rotation does not update grid position, so they should not be changed
+        # back now.
+        if not self.is_rotation:
+            backx, backy = result[-1]
+            self.gridx -= backx
+            self.gridy -= backy
         return result
 
     def handle_keyboard_event(self, event):
@@ -73,14 +79,22 @@ class Shape:
         if event.key == pygame.K_DOWN:
             self.move_it(0, 1)
 
+    def gravity_move(self, steps):
+        """gravity_move represents a gravity movement down the board for the
+        given number of steps.
+        """
+        self.gravity_step = True
+        self.move_it(0, steps)
+
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        if self.gravity and event.type == GEvent.GRAVITY:
-            self.gravity_step = True
-            self.move_it(0, 1)
+        if self.gravity and event.type == GridEvent.GRAVITY:
+            self.gravity_move(1)
+            # self.gravity_step = True
+            # self.move_it(0, 1)
 
     def get_collision_box(self):
         """get_collision_box retrieves collision box for all cells containes
