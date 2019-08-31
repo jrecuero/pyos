@@ -4,7 +4,7 @@ import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from pyplay import GHandler, Scene, Color, Move
-from pyplay.gobject.xgrid import Cell, Shape, GridBoard, GridEvent
+from pyplay.gobject.grid import Cell, Shape, GridBoard, GridEvent
 
 
 colors = [Color.BLACK, Color.BLUE, Color.GREEN, Color.RED]

@@ -1,6 +1,6 @@
 import random
 from pyplay import Color
-from pyplay.gobject.xgrid import GravityBoard, GridEvent, TriShape
+from pyplay.gobject.grid import GravityBoard, GridEvent, TriShape
 
 pieces = []
 pieces.append({"piece": [[0, 1, 1], [0, 1, 0], [0, 1, 0]], "rotation": True})

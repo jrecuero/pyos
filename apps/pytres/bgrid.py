@@ -8,7 +8,7 @@ from pyplay import GHandler, Scene, Color
 from pyplay.gobject import GText
 
 # from pyplay.gobject.grid import GridBoard, GridShape
-from pyplay.gobject.xgrid import TriShape, GravityBoard, GridEvent
+from pyplay.gobject.grid import TriShape, GravityBoard, GridEvent
 
 
 pieces = []

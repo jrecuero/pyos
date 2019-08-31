@@ -1,5 +1,5 @@
 from pyplay import GHandler, Color
-from pyplay.gobject.xgrid import GridEvent
+from pyplay.gobject.grid import GridEvent
 
 
 class GameHandler(GHandler):

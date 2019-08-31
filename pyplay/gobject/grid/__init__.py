@@ -1,6 +1,8 @@
-from ._grid_object import GridObject
-from ._grid_rect import GridRect
+from ._cell import Cell
+from ._shape import Shape
+from ._tri_shape import TriShape
 from ._grid_board import GridBoard
-from ._grid_shape import GridShape
+from ._gravity_board import GravityBoard
+from ._grid_event import GridEvent
 
-__all__ = ["GridObject", "GridRect", "GridBoard", "GridShape"]
+__all__ = ["Cell", "Shape", "TriShape", "GridBoard", "GravityBoard", "GridEvent"]
