@@ -17,13 +17,6 @@ class GravityBoard(GridBoard):
         self.threshold_level = kwargs.get("threshold", 11)
         pygame.time.set_timer(GridEvent.GRAVITY, self.gravity_timer)
 
-    # def add_shape_to_play_cells(self, shape):
-    #     """add_shape_to_play_cells adds the given shape to the play_cells
-    #     attribute. shape will be deleted from the gobjects list and an event
-    #     to create a new shape will be sent to pygame.
-    #     """
-    #     super(GravityBoard, self).add_shape_to_play_cells(shape)
-
     def check_threshold_level(self):
         """check_threshold_level checks if the play cells are is over the
         threshold level. Return True if there is a piece that is over the

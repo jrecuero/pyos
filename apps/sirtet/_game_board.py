@@ -1,4 +1,5 @@
 import random
+import pygame
 from pyplay import Color
 from pyplay.gobject.grid import GravityBoard, GridEvent, TriShape
 
@@ -47,13 +48,30 @@ class GameBoard(GravityBoard):
     played.
     """
 
-    # def __init__(self, name, x, y, dx, dy, xsize, ysize=None, **kwargs):
-    #     super(GameBoard, self).__init__(name, x, y, dx, dy, xsize, ysize, **kwargs)
+    def __init__(self, name, x, y, dx, dy, xsize, ysize=None, **kwargs):
+        super(GameBoard, self).__init__(name, x, y, dx, dy, xsize, ysize, **kwargs)
+        self.pause_timer = 0
 
     def next_actor(self):
         """next_actor adds a new actor to the board.
         """
         self.add_gobject(next_actor())
+
+    def handle_keyboard_event(self, event):
+        """handle_keyboard_event should process the keyboard event given.
+        """
+        if event.key == pygame.K_p:
+            pygame.time.set_timer(GridEvent.GRAVITY, self.pause_timer)
+            if self.pause_timer:
+                self.pause_timer = 0
+                pause_event = pygame.event.Event(GridEvent.PAUSE, source=False)
+                self.running = True
+            else:
+                self.pause_timer = self.gravity_timer
+                pause_event = pygame.event.Event(GridEvent.PAUSE, source=True)
+                self.running = False
+            pygame.event.post(pause_event)
+        super(GravityBoard, self).handle_keyboard_event(event)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.

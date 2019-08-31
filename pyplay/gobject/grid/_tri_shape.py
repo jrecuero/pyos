@@ -36,34 +36,6 @@ class TriShape(Shape):
             # c = x
             c = 0
 
-    # def rotate_clockwise(self):
-    #     """rotate_clockwise rotates the shape by 90 degrees clockwise.
-    #     """
-    #     if not self.allow_rotation:
-    #         return
-    #     self.is_rotation = True
-    #     matrix_size = len(self._matrix)
-    #     for cell in self.cells:
-    #         gridx = cell.gridx - self.gridx
-    #         gridy = cell.gridy - self.gridy
-    #         deltax = matrix_size - 1 - gridy - gridx
-    #         deltay = gridx - gridy
-    #         cell.move_it(deltax, deltay)
-
-    # def rotate_anticlockwise(self):
-    #     """rotate_anticlockwise rotates the shape by 90 degrees anti-clockwise.
-    #     """
-    #     if not self.allow_rotation:
-    #         return
-    #     self.is_rotation = True
-    #     matrix_size = len(self._matrix)
-    #     for cell in self.cells:
-    #         gridx = cell.gridx - self.gridx
-    #         gridy = cell.gridy - self.gridy
-    #         deltay = matrix_size - 1 - gridx - gridy
-    #         deltax = gridy - gridx
-    #         cell.move_it(deltax, deltay)
-
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """

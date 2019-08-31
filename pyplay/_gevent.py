@@ -12,5 +12,6 @@ class GEvent:
     DELETE = pygame.USEREVENT + 2
     END = pygame.USEREVENT + 3
     GRAVITY = pygame.USEREVENT + 4
-    LAST = pygame.USEREVENT + 4
+    PAUSE = pygame.USEREVENT + 5
+    LAST = pygame.USEREVENT + 5
     # limit is pygame.NUMEVENTS = 32

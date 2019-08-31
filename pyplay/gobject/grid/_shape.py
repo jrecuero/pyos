@@ -33,6 +33,7 @@ class Shape:
         self.is_rotation = False
         self.dx_move = xsize
         self.dy_move = ysize
+
         for cell in self.cells:
             cell.incr_xy(self.gridx, self.gridy)
             cell.move = self.move
@@ -129,10 +130,12 @@ class Shape:
 
     def gravity_move(self, steps):
         """gravity_move represents a gravity movement down the board for the
-        given number of steps.
+        given number of steps. This movement can be called only one time for
+        every tick.
         """
-        self.gravity_step = True
-        self.move_it(0, steps)
+        if not self.gravity_step:
+            self.gravity_step = True
+            self.move_it(0, steps)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
@@ -141,8 +144,6 @@ class Shape:
         """
         if self.gravity and event.type == GridEvent.GRAVITY:
             self.gravity_move(1)
-            # self.gravity_step = True
-            # self.move_it(0, 1)
 
     def get_collision_box(self):
         """get_collision_box retrieves collision box for all cells containes
@@ -193,5 +194,6 @@ class Shape:
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.
         """
+        self.gravity_step = False
         for cell in self.cells:
             cell.render(surface, **kwargs)

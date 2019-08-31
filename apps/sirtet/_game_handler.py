@@ -1,5 +1,7 @@
 from pyplay import GHandler, Color
+from pyplay.gobject import GText
 from pyplay.gobject.grid import GridEvent
+from _game_stat import GameStat
 
 
 class GameHandler(GHandler):
@@ -8,14 +10,8 @@ class GameHandler(GHandler):
 
     def __init__(self, name, surface, **kwargs):
         super(GameHandler, self).__init__(name, surface, **kwargs)
-        self.total_lines = 0
-        self.console = None
-        self.color_cells = {
-            Color.color_to_str(Color.BLACK): 0,
-            Color.color_to_str(Color.BLUE): 0,
-            Color.color_to_str(Color.RED): 0,
-            Color.color_to_str(Color.GREEN): 0,
-        }
+        self.gstat = GameStat()
+        self.console = GText("console", 10, 800, f"> {' ' * 50}")
 
     def handle_completed_lines(self, lines):
         """handle_completed_lines handles lines that have been completed in the
@@ -23,11 +19,8 @@ class GameHandler(GHandler):
         """
         for _, line in lines:
             for cell in line:
-                self.color_cells[Color.color_to_str(cell.color)] += 1
-            print(f"{[Color.color_to_str(x.color) for x in line]}")
-            print(f"{self.color_cells}")
-        self.total_lines += len(lines)
-        self.console.message = f"Lines Completed: {self.total_lines}"
+                self.gstat.add_to_color(cell.color)
+        self.gstat.add_to_lines(len(lines))
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
@@ -37,6 +30,13 @@ class GameHandler(GHandler):
         if event.type == GridEvent.COMPLETED:
             self.handle_completed_lines(event.source)
         elif event.type == GridEvent.END:
-            self.console.message = f"GAME OVER"
+            self.console.message = f"> GAME OVER"
             self.running = False
+        elif event.type == GridEvent.PAUSE:
+            if event.source:
+                self.console.message = f"> PAUSED"
+                self.running = False
+            else:
+                self.console.message = f">"
+                self.running = True
         super(GameHandler, self).handle_custom_event(event)

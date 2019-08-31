@@ -4,9 +4,14 @@ import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from pyplay import Scene
-from pyplay.gobject import GText
 from _game_board import GameBoard
 from _game_handler import GameHandler
+
+
+SCREEN_SIZE = (1200, 850)
+BOARD_ORIGIN = {"x": 50, "y": 50}
+BOARD_SIZE = {"dx": 450, "dy": 700}
+CSIZE = 50
 
 
 def _create_game(surface):
@@ -16,12 +21,21 @@ def _create_game(surface):
     gh = GameHandler("app", surface)
     scene = Scene("main", surface)
     board = GameBoard(
-        "gravity-board", 50, 50, 450, 700, 50, outline=1, gravity_timer=1000
+        "gravity-board",
+        BOARD_ORIGIN["x"],
+        BOARD_ORIGIN["y"],
+        BOARD_SIZE["dx"],
+        BOARD_SIZE["dy"],
+        CSIZE,
+        outline=1,
+        gravity_timer=1000,
     )
     board.next_actor()
-    gh.console = GText("console", 10, 760, " " * 50)
     scene.add_gobject(board)
     scene.add_gobject(gh.console)
+    scene.add_gobject(gh.gstat.gtext_total_lines)
+    for gtext in gh.gstat.gtext_colors.values():
+        scene.add_gobject(gtext)
     gh.add_scene(scene)
     gh.hscene.active()
     return gh
@@ -33,7 +47,7 @@ def main():
     pygame.init()
     pygame.mixer.init()
     pygame.display.set_caption("SIRTET")
-    surface = pygame.display.set_mode((550, 800))
+    surface = pygame.display.set_mode(SCREEN_SIZE)
     clock = pygame.time.Clock()
     # -> Create game handler, scenes and graphical objects.
     gh = _create_game(surface)

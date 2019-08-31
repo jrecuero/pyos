@@ -26,9 +26,6 @@ class GridBoard(Board):
             for icol in range(self.dx_play_cells):
                 row.append(None)
             self.play_cells.append(row)
-        # log.GravityBoard().PlayCells(
-        #     f"{self.dx_play_cells}, {self.dy_play_cells}"
-        # ).call()
 
     def add_gobject(self, shape):
         """add_shape adds a new shape to be handle by the grid board.
