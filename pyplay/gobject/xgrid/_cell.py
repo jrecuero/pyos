@@ -11,6 +11,7 @@ class Cell:
 
     def __init__(self, name, x, y, dx, dy, **kwargs):
         self.__gid = new_gid()
+        self.name = name
         self.x = x
         self.y = y
         self.z = kwargs.get("z", 0)
@@ -30,6 +31,8 @@ class Cell:
         self.content = kwargs.get("content", None)
         self.stepx = None
         self.stepy = None
+        self.dx_move = dx
+        self.dy_move = dy
 
     @property
     def gid(self):
@@ -37,6 +40,15 @@ class Cell:
 
     def __str__(self):
         return f"[{self.gid}] : {self.__class__.__name__} | {self.x} {self.y} {self.dx} {self.dy} {self.gridx} {self.gridy}"
+
+    def incr_xy(self, dx=0, dy=0):
+        """incr_xy increases values properly for x and gridx, y and gridy with
+        the given increments.
+        """
+        self.x += dx
+        self.gridx += dx
+        self.y += dy
+        self.gridy += dy
 
     def get_collision_box(self):
         """get_collision_box retrieves grid cells that can collide with any
@@ -75,7 +87,24 @@ class Cell:
     def update(self, surface, **kwargs):
         """update provides any functionality to be done every tick.
         """
-        pass
+        if self.move.x:
+            self.x += self.move.x
+            self.dx_move += abs(self.move.x)
+            if self.dx_move > self.dx:
+                self.dx_move -= self.dx
+                if self.move.is_right():
+                    self.gridx += 1
+                if self.move.is_left():
+                    self.gridx -= 1
+        if self.move.y:
+            self.y += self.move.y
+            self.dy_move += abs(self.move.y)
+            if self.dy_move > self.dy:
+                self.dy_move -= self.dy
+                if self.move.is_down():
+                    self.gridy += 1
+                if self.move.is_up():
+                    self.gridy -= 1
 
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.

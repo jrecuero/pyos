@@ -1,6 +1,7 @@
 import pygame
 from ..._gid import new_gid
 from ..._color import Color
+from ..._move import Move
 from ._collision_box import CollisionBox
 from ._grid_event import GridEvent
 
@@ -9,17 +10,32 @@ class Shape:
     """Shape represents a collection of cells to be displayed in a grid board.
     """
 
-    def __init__(self, name, x, y, cells=None, **kwargs):
+    def __init__(self, name, x, y, xcells, ycells, xsize, ysize, cells=None, **kwargs):
         self.__gid = new_gid()
         self.name = name
         self.gridx = x
         self.gridy = y
+        self.xcells = xcells
+        self.ycells = ycells
+        self.xsize = xsize
+        self.ysize = ysize
         self.cells = cells if cells else []
+        self.move = kwargs.get("move", Move())
+        self.pushed = kwargs.get("pushed", None)
         self.color = kwargs.get("color", Color.BLACK)
         self.gravity = kwargs.get("gravity", True)
-        self.allow_rotation = kwargs.get("rotation", True)
+        self.allow_rotation = (
+            kwargs.get("rotation", True) if (self.xcells == self.ycells) else False
+        )
+        self.allow_key_handle = kwargs.get("hkey", False)
+        self.transient = kwargs.get("transient", False)
         self.gravity_step = False
         self.is_rotation = False
+        self.dx_move = xsize
+        self.dy_move = ysize
+        for cell in self.cells:
+            cell.incr_xy(self.gridx, self.gridy)
+            cell.move = self.move
 
     @property
     def gid(self):
@@ -31,6 +47,8 @@ class Shape:
     def add_cell(self, cell):
         """add_cell add a new cell to the shape.
         """
+        cell.incr_xy(self.gridx, self.gridy)
+        cell.move = self.move
         self.cells.append(cell)
 
     def del_cell(self, cell):
@@ -66,9 +84,37 @@ class Shape:
             self.gridy -= backy
         return result
 
+    def rotate_clockwise(self):
+        """rotate_clockwise rotates the shape by 90 degrees clockwise.
+        """
+        if not self.allow_rotation:
+            return
+        self.is_rotation = True
+        for cell in self.cells:
+            gridx = cell.gridx - self.gridx
+            gridy = cell.gridy - self.gridy
+            deltax = self.xcells - 1 - gridy - gridx
+            deltay = gridx - gridy
+            cell.move_it(deltax, deltay)
+
+    def rotate_anticlockwise(self):
+        """rotate_anticlockwise rotates the shape by 90 degrees anti-clockwise.
+        """
+        if not self.allow_rotation:
+            return
+        self.is_rotation = True
+        for cell in self.cells:
+            gridx = cell.gridx - self.gridx
+            gridy = cell.gridy - self.gridy
+            deltay = self.xcells - 1 - gridx - gridy
+            deltax = gridy - gridx
+            cell.move_it(deltax, deltay)
+
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
+        if not self.allow_key_handle:
+            return
         self.gravity_step = False
         if event.key == pygame.K_LEFT:
             self.move_it(-1, 0)
@@ -78,6 +124,8 @@ class Shape:
             self.move_it(0, -1)
         if event.key == pygame.K_DOWN:
             self.move_it(0, 1)
+        if event.key == pygame.K_SPACE:
+            self.rotate_clockwise()
 
     def gravity_move(self, steps):
         """gravity_move represents a gravity movement down the board for the
@@ -111,14 +159,27 @@ class Shape:
         Return True if objects is lost out of bound or False if object should
         be in bounds.
         """
-        for cell in self.cells:
-            cell.back_it()
+        return self.out_of_bounds_response()
 
     def out_of_bounds_y_response(self):
         """out_of_bounds_x_response takes action when the graphical object is
         out of bound at the X-axis.
         Return True if objects is lost out of bound or False if object should
         be in bounds.
+        """
+        return self.out_of_bounds_response()
+
+    def out_of_bounds_response(self):
+        """out_of_bounds_x_response takes action when the graphical object is
+        out of bound at the X-axis or Y-axis
+        Return True if objects is lost out of bound or False if object should
+        be in bounds.
+        """
+        for cell in self.cells:
+            cell.back_it()
+
+    def collide_with(self, other, collision):
+        """collide_with processes a collision with other object.
         """
         for cell in self.cells:
             cell.back_it()

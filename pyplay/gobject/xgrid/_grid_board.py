@@ -2,6 +2,7 @@ import pygame
 from ..._loggar import log
 from .._board import Board
 from ._collision_box import CollisionBox
+from ._grid_event import GridEvent
 
 
 class GridBoard(Board):
@@ -65,8 +66,25 @@ class GridBoard(Board):
             if collision_box.check_out_of_bounds(
                 0, 0, self.dx_play_cells, self.dy_play_cells
             ):
-                # log.GridBoard().Collision(shape).call()
-                shape.back_it()
+                if shape.transient:
+                    self.del_gobject(shape)
+                else:
+                    shape.out_of_bounds_response()
+
+        # Check all cells for collisions, between cells or with play cells.
+        for shape in [s for s in self.gobjects if s.move.speed]:
+            for other in [o for o in self.gobjects if o != shape]:
+                collision = shape.get_collision_box().collision_with(
+                    other.get_collision_box()
+                )
+                if collision:
+                    if shape.transient:
+                        self.del_gobject(shape)
+                        other.collide_with(shape, collision)
+                    else:
+                        shape.collide_with(other, collision)
+                        other.collide_with(shape, collision)
+                        # shape.back_it()
 
     def get_play_collision_box(self):
         """get_play_collision_box returns the collision box for all cells
