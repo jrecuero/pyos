@@ -155,7 +155,7 @@ class Shape:
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        if self.gravity and event.type == GEvent.GRAVITY:
+        if self.gravity and event.type == GEvent.T_GRAVITY:
             self.gravity_move(1)
 
     def get_collision_box(self):
@@ -195,6 +195,9 @@ class Shape:
     def collide_with(self, other, collision):
         """collide_with processes a collision with other object.
         """
+        # TODO: Move all keyboard events at this time, and the GRAVITY event too
+        # so they can be handled all together. At this point all pygame events
+        # have been handled (keyboard and custom).
         for cell in self.cells:
             cell.back_it()
 

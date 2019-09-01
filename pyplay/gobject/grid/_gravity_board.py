@@ -15,7 +15,7 @@ class GravityBoard(GridBoard):
         super(GravityBoard, self).__init__(name, x, y, dx, dy, xsize, ysize, **kwargs)
         self.gravity_timer = kwargs.get("gravity_timer", 500)
         self.threshold_level = kwargs.get("threshold", 11)
-        pygame.time.set_timer(GEvent.GRAVITY, self.gravity_timer)
+        pygame.time.set_timer(GEvent.T_GRAVITY, self.gravity_timer)
 
     def check_threshold_level(self):
         """check_threshold_level checks if the play cells are is over the
@@ -44,7 +44,7 @@ class GravityBoard(GridBoard):
                     cell.move_it(0, len(completed_lines))
         if completed_lines:
             completed_event = pygame.event.Event(
-                GEvent.GAMEPLAY, subtype=GEvent.COMPLETED, source=completed_lines
+                GEvent.ENGINE, subtype=GEvent.COMPLETED, source=completed_lines
             )
             pygame.event.post(completed_event)
         return completed_lines
@@ -92,7 +92,7 @@ class GravityBoard(GridBoard):
                     # <-
                     self.add_shape_to_play_cells(shape)
                     create_shape = pygame.event.Event(
-                        GEvent.DB, subtype=GEvent.CREATE, source=None
+                        GEvent.ENGINE, subtype=GEvent.CREATE, source=None
                     )
                     pygame.event.post(create_shape)
 
@@ -108,13 +108,13 @@ class GravityBoard(GridBoard):
                     if self.check_threshold_level():
                         pygame.time.set_timer(GEvent.GRAVITY, 0)
                         end_event = pygame.event.Event(
-                            GEvent.HANDLING, subtype=GEvent.END, source=None
+                            GEvent.ENGINE, subtype=GEvent.END, source=None
                         )
                         pygame.event.post(end_event)
                         self.running = False
                     else:
                         create_shape = pygame.event.Event(
-                            GEvent.DB, subtype=GEvent.CREATE, source=None
+                            GEvent.ENGINE, subtype=GEvent.CREATE, source=None
                         )
                         pygame.event.post(create_shape)
 

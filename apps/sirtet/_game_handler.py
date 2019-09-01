@@ -58,12 +58,12 @@ class GameHandler(GHandler):
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        if event.type == GEvent.GAMEPLAY and event.subtype == GEvent.COMPLETED:
+        if event.type == GEvent.ENGINE and event.subtype == GEvent.COMPLETED:
             self.handle_completed_lines(event.source)
-        elif event.type == GEvent.HANDLING and event.subtype == GEvent.END:
+        elif event.type == GEvent.ENGINE and event.subtype == GEvent.END:
             self.console.message = f"> GAME OVER"
             self.running = False
-        elif event.type == GEvent.HANDLING and event.subtype == GEvent.PAUSE:
+        elif event.type == GEvent.ENGINE and event.subtype == GEvent.PAUSE:
             if event.source:
                 self.console.message = f"> PAUSED"
                 self.running = False
@@ -76,13 +76,13 @@ class GameHandler(GHandler):
         """update calls update method for all scenes and  graphical objects.
         """
         actor_event = pygame.event.Event(
-            GEvent.DISPLAY, subtype=GEvent.GDISPLAY, source=self.actor, actor="actor"
+            GEvent.ENGINE, subtype=GEvent.DISPLAY, source=self.actor, actor="actor"
         )
         pygame.event.post(actor_event)
 
         targets_event = pygame.event.Event(
-            GEvent.DISPLAY,
-            subtype=GEvent.GDISPLAY,
+            GEvent.ENGINE,
+            subtype=GEvent.DISPLAY,
             source=self.targets[0],
             actor="target",
         )

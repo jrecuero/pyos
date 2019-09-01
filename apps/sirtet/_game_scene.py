@@ -18,14 +18,14 @@ class GameScene(Scene):
         customs events, and those should be handled at this time.
         """
         super(GameScene, self).handle_custom_event(event)
-        if event.type == GEvent.DISPLAY and event.subtype == GEvent.NEXT:
+        if event.type == GEvent.ENGINE and event.subtype == GEvent.NEXT:
             if self.next_piece:
                 self.del_gobject(self.next_piece)
             self.next_piece = event.source
             self.next_piece.x = 550
             self.next_piece.y = 50
             self.add_gobject(self.next_piece)
-        elif event.type == GEvent.DISPLAY and event.subtype == GEvent.GDISPLAY:
+        elif event.type == GEvent.ENGINE and event.subtype == GEvent.DISPLAY:
             if event.actor == "actor":
                 if self.gtext_actor:
                     self.del_gobject(self.gtext_actor)

@@ -50,5 +50,5 @@ class TriShape(Shape):
             self.rotate_anticlockwise()
         elif event.key == pygame.K_SPACE:
             # self.gravity_move(1)
-            gravity_event = pygame.event.Event(GEvent.GRAVITY)
+            gravity_event = pygame.event.Event(GEvent.T_GRAVITY)
             pygame.event.post(gravity_event)

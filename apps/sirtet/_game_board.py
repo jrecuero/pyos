@@ -62,7 +62,7 @@ class GameBoard(GravityBoard):
             self.add_gobject(next_piece())
         self.the_next_piece = next_piece()
         next_piece_event = pygame.event.Event(
-            GEvent.DISPLAY, subtype=GEvent.NEXT, source=self.get_next_piece_at()
+            GEvent.ENGINE, subtype=GEvent.NEXT, source=self.get_next_piece_at()
         )
         pygame.event.post(next_piece_event)
 
@@ -79,17 +79,17 @@ class GameBoard(GravityBoard):
         """handle_keyboard_event should process the keyboard event given.
         """
         if event.key == pygame.K_p:
-            pygame.time.set_timer(GEvent.GRAVITY, self.pause_timer)
+            pygame.time.set_timer(GEvent.T_GRAVITY, self.pause_timer)
             if self.pause_timer:
                 self.pause_timer = 0
                 pause_event = pygame.event.Event(
-                    GEvent.HANDLING, subtype=GEvent.PAUSE, source=False
+                    GEvent.ENGINE, subtype=GEvent.PAUSE, source=False
                 )
                 self.running = True
             else:
                 self.pause_timer = self.gravity_timer
                 pause_event = pygame.event.Event(
-                    GEvent.HANDLING, subtype=GEvent.PAUSE, source=True
+                    GEvent.ENGINE, subtype=GEvent.PAUSE, source=True
                 )
                 self.running = False
             pygame.event.post(pause_event)
@@ -102,9 +102,9 @@ class GameBoard(GravityBoard):
         """
         # First we have to handle the event before calling the super, because
         # some object could be added or created at this time.
-        if event.type == GEvent.DB and event.subtype == GEvent.CREATE:
+        if event.type == GEvent.ENGINE and event.subtype == GEvent.CREATE:
             # self.add_gobject(next_piece())
             self.next_piece()
-        elif event.type == GEvent.DB and event.subtype == GEvent.DELETE:
+        elif event.type == GEvent.ENGINE and event.subtype == GEvent.DELETE:
             pass
         super(GameBoard, self).handle_custom_event(event)
