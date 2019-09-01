@@ -57,6 +57,7 @@ def main():
     # <-
     while True:
         clock.tick(30)
+        gh.start_tick()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -75,6 +76,7 @@ def main():
         gh.render()
         pygame.display.flip()
         # <-
+        gh.end_tick()
 
 
 if __name__ == "__main__":

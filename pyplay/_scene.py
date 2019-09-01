@@ -50,24 +50,37 @@ class Scene:
         """
         pass
 
-    def handle_custom_events(self):
-        """handle_custom_events should process all pygame custom events. Any
-        object in the game, like, scene, graphic objects, ... can post
-        customs events, and those should be handled at this time.
-        """
-        pass
+    # def handle_custom_events(self):
+    #     """handle_custom_events should process all pygame custom events. Any
+    #     object in the game, like, scene, graphic objects, ... can post
+    #     customs events, and those should be handled at this time.
+    #     """
+    #     pass
+    #
+    # def handle_these_events(self, events):
+    #     """handle_these_events should process the given list of events. That
+    #     list can contains custom or pygame events.
+    #     """
+    #     pass
+    #
+    # def handle_these_custom_events(self, events):
+    #     """handle_these_custom_events should process the given list of custom
+    #     events.
+    #     """
+    #     pass
 
-    def handle_these_events(self, events):
-        """handle_these_events should process the given list of events. That
-        list can contains custom or pygame events.
+    def start_tick(self):
+        """start_tick should set all elements ready for a new tick.
         """
-        pass
+        for gobj in self.gobjects:
+            gobj.start_tick()
 
-    def handle_these_custom_events(self, events):
-        """handle_these_custom_events should process the given list of custom
-        events.
+    def end_tick(self):
+        """end_tick shoudl set all elements ready for the end of a tick. Any
+        structure to be clean up can be done at this point.
         """
-        pass
+        for gobj in self.gobjects:
+            gobj.end_tick()
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.

@@ -116,6 +116,19 @@ class SceneHandler:
             self.iactive = len(self.scences) - 1
             self.scenes[self.iactive].open()
 
+    def start_tick(self):
+        """start_tick should set all elements ready for a new tick.
+        """
+        if self.iactive is not None and self.scenes:
+            self.scenes[self.iactive].start_tick()
+
+    def end_tick(self):
+        """end_tick shoudl set all elements ready for the end of a tick. Any
+        structure to be clean up can be done at this point.
+        """
+        if self.iactive is not None and self.scenes:
+            self.scenes[self.iactive].end_tick()
+
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         Keyboard events are passed to the active scene to be handle.

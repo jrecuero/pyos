@@ -29,6 +29,19 @@ class Board(GObject):
         if gobject in self.gobjects:
             self.gobjects.remove(gobject)
 
+    def start_tick(self):
+        """start_tick should set all elements ready for a new tick.
+        """
+        for gobj in self.gobjects:
+            gobj.start_tick()
+
+    def end_tick(self):
+        """end_tick shoudl set all elements ready for the end of a tick. Any
+        structure to be clean up can be done at this point.
+        """
+        for gobj in self.gobjects:
+            gobj.end_tick()
+
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """

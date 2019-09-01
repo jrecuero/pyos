@@ -38,6 +38,17 @@ class GHandler:
         """
         self.hscene.delete(scene)
 
+    def start_tick(self):
+        """start_tick should set all elements ready for a new tick.
+        """
+        self.hscene.start_tick()
+
+    def end_tick(self):
+        """end_tick shoudl set all elements ready for the end of a tick. Any
+        structure to be clean up can be done at this point.
+        """
+        self.hscene.end_tick()
+
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
@@ -45,17 +56,17 @@ class GHandler:
         """
         self.hscene.handle_custom_event(event)
 
-    def handle_these_events(self, events):
-        """handle_these_events should process the given list of events. That
-        list can contains custom or pygame events.
-        """
-        pass
-
-    def handle_these_custom_events(self, events):
-        """handle_these_custom_events should process the given list of custom
-        events.
-        """
-        pass
+    # def handle_these_events(self, events):
+    #     """handle_these_events should process the given list of events. That
+    #     list can contains custom or pygame events.
+    #     """
+    #     pass
+    #
+    # def handle_these_custom_events(self, events):
+    #     """handle_these_custom_events should process the given list of custom
+    #     events.
+    #     """
+    #     pass
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.

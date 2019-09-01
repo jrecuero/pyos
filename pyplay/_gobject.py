@@ -120,6 +120,17 @@ class GObject(pygame.sprite.Sprite):
         """
         self.dxdy(dx, dy)
 
+    def start_tick(self):
+        """start_tick should set all elements ready for a new tick.
+        """
+        pass
+
+    def end_tick(self):
+        """end_tick shoudl set all elements ready for the end of a tick. Any
+        structure to be clean up can be done at this point.
+        """
+        pass
+
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
