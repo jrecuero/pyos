@@ -1,9 +1,9 @@
 import pygame
 from ..._gid import new_gid
+from ..._gevent import GEvent
 from ..._color import Color
 from ..._move import Move
 from ._collision_box import CollisionBox
-from ._grid_event import GridEvent
 
 
 class Shape:
@@ -144,7 +144,7 @@ class Shape:
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        if self.gravity and event.type == GridEvent.GRAVITY:
+        if self.gravity and event.type == GEvent.GRAVITY:
             self.gravity_move(1)
 
     def get_collision_box(self):

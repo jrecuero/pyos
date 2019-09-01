@@ -1,9 +1,9 @@
 import pygame
 
 # from ..._loggar import log
+from ..._gevent import GEvent
 from ._cell import Cell
 from ._shape import Shape
-from ._grid_event import GridEvent
 
 
 class TriShape(Shape):
@@ -50,5 +50,5 @@ class TriShape(Shape):
             self.rotate_anticlockwise()
         elif event.key == pygame.K_SPACE:
             # self.gravity_move(1)
-            gravity_event = pygame.event.Event(GridEvent.GRAVITY)
+            gravity_event = pygame.event.Event(GEvent.GRAVITY)
             pygame.event.post(gravity_event)

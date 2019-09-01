@@ -28,7 +28,7 @@ def _create_game(surface):
         BOARD_SIZE["dy"],
         CSIZE,
         outline=1,
-        gravity_timer=1000,
+        gravity_timer=500,
     )
     board.next_piece()
     scene.add_gobject(board)
@@ -36,6 +36,7 @@ def _create_game(surface):
     # scene.add_gobject(scene.next_piece)
     scene.add_gobject(gh.console)
     scene.add_gobject(gh.gstat.gtext_total_lines)
+    # scene.add_gobject(gh.actor.gtext)
     for gtext in gh.gstat.gtext_colors.values():
         scene.add_gobject(gtext)
     gh.add_scene(scene)

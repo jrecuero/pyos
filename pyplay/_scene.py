@@ -30,6 +30,8 @@ class Scene:
     def add_gobject(self, gobject):
         """add_gobject adds a graphical object to the scene.
         """
+        if gobject in self.gobjects:
+            raise Exception(f"gobject {gobject} already present in list")
         self.gobjects.add(gobject)
 
     def del_gobject(self, gobject):

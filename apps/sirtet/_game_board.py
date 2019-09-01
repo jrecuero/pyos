@@ -1,7 +1,7 @@
 import random
 import pygame
-from pyplay import Color, GObject
-from pyplay.gobject.grid import GravityBoard, GridEvent, TriShape
+from pyplay import Color, GObject, GEvent
+from pyplay.gobject.grid import GravityBoard, TriShape
 
 pieces = []
 pieces.append({"piece": [[0, 1, 1], [0, 1, 0], [0, 1, 0]], "rotation": True})
@@ -62,7 +62,7 @@ class GameBoard(GravityBoard):
             self.add_gobject(next_piece())
         self.the_next_piece = next_piece()
         next_piece_event = pygame.event.Event(
-            GridEvent.NEXT, source=self.get_next_piece_at()
+            GEvent.DISPLAY, subtype=GEvent.NEXT, source=self.get_next_piece_at()
         )
         pygame.event.post(next_piece_event)
 
@@ -79,17 +79,21 @@ class GameBoard(GravityBoard):
         """handle_keyboard_event should process the keyboard event given.
         """
         if event.key == pygame.K_p:
-            pygame.time.set_timer(GridEvent.GRAVITY, self.pause_timer)
+            pygame.time.set_timer(GEvent.GRAVITY, self.pause_timer)
             if self.pause_timer:
                 self.pause_timer = 0
-                pause_event = pygame.event.Event(GridEvent.PAUSE, source=False)
+                pause_event = pygame.event.Event(
+                    GEvent.HANDLING, subtype=GEvent.PAUSE, source=False
+                )
                 self.running = True
             else:
                 self.pause_timer = self.gravity_timer
-                pause_event = pygame.event.Event(GridEvent.PAUSE, source=True)
+                pause_event = pygame.event.Event(
+                    GEvent.HANDLING, subtype=GEvent.PAUSE, source=True
+                )
                 self.running = False
             pygame.event.post(pause_event)
-        super(GravityBoard, self).handle_keyboard_event(event)
+        super(GameBoard, self).handle_keyboard_event(event)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
@@ -98,9 +102,9 @@ class GameBoard(GravityBoard):
         """
         # First we have to handle the event before calling the super, because
         # some object could be added or created at this time.
-        if event.type == GridEvent.CREATE:
+        if event.type == GEvent.DB and event.subtype == GEvent.CREATE:
             # self.add_gobject(next_piece())
             self.next_piece()
-        elif event.type == GridEvent.DELETE:
+        elif event.type == GEvent.DB and event.subtype == GEvent.DELETE:
             pass
         super(GameBoard, self).handle_custom_event(event)

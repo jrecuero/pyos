@@ -7,3 +7,12 @@ def new_gid():
     global __GID
     __GID += 1
     return __GID
+
+
+class Gid:
+    def __init__(self):
+        self.__gid = new_gid()
+
+    @property
+    def gid(self):
+        return self.__gid
