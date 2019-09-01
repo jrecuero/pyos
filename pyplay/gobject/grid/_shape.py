@@ -19,6 +19,8 @@ class Shape:
         self.ycells = ycells
         self.xsize = xsize
         self.ysize = ysize
+        self.dx = xcells * xsize
+        self.dy = ycells * ysize
         self.cells = cells if cells else []
         self.move = kwargs.get("move", Move())
         self.pushed = kwargs.get("pushed", None)
@@ -43,7 +45,7 @@ class Shape:
         return self.__gid
 
     def __str__(self):
-        return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.gridx} {self.gridy}"
+        return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.gridx} {self.gridy} {self.cells}"
 
     def add_cell(self, cell):
         """add_cell add a new cell to the shape.

@@ -3,8 +3,8 @@ import os
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
-from pyplay import Scene
 from _game_board import GameBoard
+from _game_scene import GameScene
 from _game_handler import GameHandler
 
 
@@ -19,7 +19,7 @@ def _create_game(surface):
     actual game implementation.
     """
     gh = GameHandler("app", surface)
-    scene = Scene("main", surface)
+    scene = GameScene(surface)
     board = GameBoard(
         "gravity-board",
         BOARD_ORIGIN["x"],
@@ -30,8 +30,10 @@ def _create_game(surface):
         outline=1,
         gravity_timer=1000,
     )
-    board.next_actor()
+    board.next_piece()
     scene.add_gobject(board)
+    # scene.next_piece = board.get_next_piece_at(550, 50)
+    # scene.add_gobject(scene.next_piece)
     scene.add_gobject(gh.console)
     scene.add_gobject(gh.gstat.gtext_total_lines)
     for gtext in gh.gstat.gtext_colors.values():

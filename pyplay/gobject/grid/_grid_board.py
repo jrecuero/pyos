@@ -2,7 +2,8 @@ import pygame
 from ..._loggar import log
 from .._board import Board
 from ._collision_box import CollisionBox
-from ._grid_event import GridEvent
+
+# from ._grid_event import GridEvent
 
 
 class GridBoard(Board):

@@ -8,11 +8,17 @@ class GText(GObject):
         self._message = message
         self.font_name = kwargs.get("font_name", "Courier")
         self.font_size = kwargs.get("font_size", 18)
-        self.font = pygame.font.SysFont(self.font_name, self.font_size)
+        self.font_bold = kwargs.get("font_bold", False)
+        self.font_italic = kwargs.get("font_italic", False)
+        self.font = pygame.font.SysFont(
+            self.font_name, self.font_size, bold=self.font_bold, italic=self.font_italic
+        )
         self.color = kwargs.get("color", Color.BLACK)
+        self.background_color = kwargs.get("bcolor", Color.WHITE)
         self.gtext = self.font.render(self._message, True, self.color)
         rect = self.gtext.get_rect()
         super(GText, self).__init__(name, x, y, rect.w, rect.h, **kwargs)
+        self.image.fill(self.background_color)
         self.image.blit(self.gtext, (0, 0, self.dx, self.dy))
 
     def __str__(self):
@@ -32,4 +38,5 @@ class GText(GObject):
         self._dx = self.rect.w
         self._dy = self.rect.h
         self.image.fill((255, 255, 255, 0))
+        self.image.fill(self.background_color)
         self.image.blit(self.gtext, (0, 0, self.dx, self.dy))

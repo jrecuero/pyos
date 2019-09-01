@@ -1,6 +1,6 @@
 import random
 import pygame
-from pyplay import Color
+from pyplay import Color, GObject
 from pyplay.gobject.grid import GravityBoard, GridEvent, TriShape
 
 pieces = []
@@ -15,7 +15,7 @@ pieces.append({"piece": [[0, 0, 0], [1, 1, 1], [0, 1, 0]], "rotation": True})
 colors = [Color.BLACK, Color.BLUE, Color.GREEN, Color.RED]
 
 
-def next_piece():
+def new_piece():
     """next_piece generates the next piece to be placed in the board.
     """
     return random.choice(pieces)
@@ -27,10 +27,10 @@ def next_color():
     return random.choice(colors)
 
 
-def next_actor():
+def next_piece():
     """next_actor generates the next actor with random piece and color.
     """
-    next_one = next_piece()
+    next_one = new_piece()
     return TriShape(
         "actor",
         4,
@@ -51,11 +51,29 @@ class GameBoard(GravityBoard):
     def __init__(self, name, x, y, dx, dy, xsize, ysize=None, **kwargs):
         super(GameBoard, self).__init__(name, x, y, dx, dy, xsize, ysize, **kwargs)
         self.pause_timer = 0
+        self.the_next_piece = None
 
-    def next_actor(self):
-        """next_actor adds a new actor to the board.
+    def next_piece(self):
+        """next_piece adds a new actor/piece to the board.
         """
-        self.add_gobject(next_actor())
+        if self.the_next_piece:
+            self.add_gobject(self.the_next_piece)
+        else:
+            self.add_gobject(next_piece())
+        self.the_next_piece = next_piece()
+        next_piece_event = pygame.event.Event(
+            GridEvent.NEXT, source=self.get_next_piece_at()
+        )
+        pygame.event.post(next_piece_event)
+
+    def get_next_piece_at(self, x=0, y=0):
+        sprite = GObject("next", x, y, 150, 150)
+        pygame.draw.rect(sprite.image, Color.BLACK, (0, 0, 150, 150), 1)
+        for cell in self.the_next_piece.cells:
+            x = (cell.x - 4) * cell.dx
+            y = cell.y * cell.dy
+            pygame.draw.rect(sprite.image, cell.color, (x, y, cell.dx, cell.dy))
+        return sprite
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
@@ -81,7 +99,8 @@ class GameBoard(GravityBoard):
         # First we have to handle the event before calling the super, because
         # some object could be added or created at this time.
         if event.type == GridEvent.CREATE:
-            self.add_gobject(next_actor())
+            # self.add_gobject(next_piece())
+            self.next_piece()
         elif event.type == GridEvent.DELETE:
             pass
         super(GameBoard, self).handle_custom_event(event)
