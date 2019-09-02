@@ -71,14 +71,24 @@ class GravityBoard(GridBoard):
     #         if self.get_play_collision_box().collision_with(shape.get_collision_box()):
     #             shape.back_it()
 
+    def handle_custom_event(self, event):
+        """handle_custom_event should process pygame custom event given.
+        Any object in the game, like, scene, graphic objects, ... can post
+        customs events, and those should be handled at this time.
+        """
+        if event.type == GEvent.ENGINE and event.subtype == GEvent.END:
+            pygame.time.set_timer(GEvent.T_GRAVITY, 0)
+            self.running = False
+        super(GravityBoard, self).handle_custom_event(event)
+
     def handle_add_shape_to_play_cells(self):
         if self.check_threshold_level():
-            pygame.time.set_timer(GEvent.T_GRAVITY, 0)
+            # pygame.time.set_timer(GEvent.T_GRAVITY, 0)
+            # self.running = False
             end_event = pygame.event.Event(
-                GEvent.ENGINE, subtype=GEvent.END, source=None
+                GEvent.ENGINE, subtype=GEvent.END, winner="target"
             )
             pygame.event.post(end_event)
-            self.running = False
         else:
             create_shape = pygame.event.Event(
                 GEvent.ENGINE, subtype=GEvent.CREATE, source=None

@@ -34,12 +34,16 @@ class GameScene(Scene):
                 self.gtext_actor.y = 500
                 self.add_gobject(self.gtext_actor)
             elif event.actor == "target":
-                if self.gtext_target:
-                    self.del_gobject(self.gtext_target)
-                self.gtext_target = event.source.gdisplay()
-                self.gtext_target.x = 550
-                self.gtext_target.y = 550
-                self.add_gobject(self.gtext_target)
+                if event.source is None:
+                    if self.gtext_target:
+                        self.del_gobject(self.gtext_target)
+                else:
+                    if self.gtext_target:
+                        self.del_gobject(self.gtext_target)
+                    self.gtext_target = event.source.gdisplay()
+                    self.gtext_target.x = 550
+                    self.gtext_target.y = 550
+                    self.add_gobject(self.gtext_target)
 
     def render(self, **kwargs):
         """render calls render method for all scene graphical objects.
