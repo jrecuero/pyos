@@ -41,14 +41,18 @@ class TriShape(Shape):
         """
         self.gravity_step = False
         if event.key == pygame.K_LEFT:
-            self.move_it(-1, 0)
+            # self.move_it(-1, 0)
+            self.move_actions.append({"call": self.move_it, "args": (-1, 0)})
         elif event.key == pygame.K_RIGHT:
-            self.move_it(1, 0)
+            # self.move_it(1, 0)
+            self.move_actions.append({"call": self.move_it, "args": (1, 0)})
         elif event.key == pygame.K_UP:
-            self.rotate_clockwise()
+            # self.rotate_clockwise()
+            self.move_actions.append({"call": self.rotate_clockwise, "args": ()})
         elif event.key == pygame.K_DOWN:
-            self.rotate_anticlockwise()
+            # self.rotate_anticlockwise()
+            self.move_actions.append({"call": self.rotate_anticlockwise, "args": ()})
         elif event.key == pygame.K_SPACE:
-            # self.gravity_move(1)
-            gravity_event = pygame.event.Event(GEvent.T_GRAVITY)
-            pygame.event.post(gravity_event)
+            self.gravity_move(1)
+            # gravity_event = pygame.event.Event(GEvent.T_GRAVITY)
+            # pygame.event.post(gravity_event)

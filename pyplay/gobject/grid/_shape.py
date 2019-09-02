@@ -35,6 +35,7 @@ class Shape:
         self.is_rotation = False
         self.dx_move = xsize
         self.dy_move = ysize
+        self.move_actions = []
 
         for cell in self.cells:
             cell.incr_xy(self.gridx, self.gridy)
@@ -116,7 +117,7 @@ class Shape:
     def start_tick(self):
         """start_tick should set all elements ready for a new tick.
         """
-        pass
+        self.move_actions = []
 
     def end_tick(self):
         """end_tick shoudl set all elements ready for the end of a tick. Any
@@ -148,7 +149,8 @@ class Shape:
         """
         if not self.gravity_step:
             self.gravity_step = True
-            self.move_it(0, steps)
+            # self.move_it(0, steps)
+            self.move_actions.append({"call": self.move_it, "args": (0, steps)})
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
@@ -195,9 +197,7 @@ class Shape:
     def collide_with(self, other, collision):
         """collide_with processes a collision with other object.
         """
-        # TODO: Move all keyboard events at this time, and the GRAVITY event too
-        # so they can be handled all together. At this point all pygame events
-        # have been handled (keyboard and custom).
+
         for cell in self.cells:
             cell.back_it()
 

@@ -28,7 +28,7 @@ def _create_game(surface):
         BOARD_SIZE["dy"],
         CSIZE,
         outline=1,
-        gravity_timer=500,
+        gravity_timer=400,
     )
     board.next_piece()
     scene.add_gobject(board)
