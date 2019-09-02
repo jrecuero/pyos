@@ -2,7 +2,6 @@ import pygame
 
 from .._loggar import log
 from .._gobject import GObject
-from .._gevent import GEvent
 
 
 class Board(GObject):

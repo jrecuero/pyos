@@ -102,9 +102,10 @@ class GameBoard(GravityBoard):
         """
         # First we have to handle the event before calling the super, because
         # some object could be added or created at this time.
-        if event.type == GEvent.ENGINE and event.subtype == GEvent.CREATE:
-            # self.add_gobject(next_piece())
-            self.next_piece()
+        if event.type == GEvent.ENGINE:
+            if event.subtype == GEvent.CREATE and event.dest == GEvent.BOARD:
+                # self.add_gobject(next_piece())
+                self.next_piece()
         elif event.type == GEvent.ENGINE and event.subtype == GEvent.DELETE:
             pass
         super(GameBoard, self).handle_custom_event(event)

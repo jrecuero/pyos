@@ -36,7 +36,14 @@ def _create_game(surface):
     # scene.add_gobject(scene.next_piece)
     scene.add_gobject(gh.console)
     scene.add_gobject(gh.gstat.gtext_total_lines)
-    # scene.add_gobject(gh.actor.gtext)
+    display_actor = gh.actor.gdisplay()
+    display_actor.x = 550
+    display_actor.y = 500
+    scene.add_gobject(display_actor)
+    scene.display_target = gh.targets[0].gdisplay()
+    scene.display_target.x = 550
+    scene.display_target.y = 550
+    scene.add_gobject(scene.display_target)
     for gtext in gh.gstat.gtext_colors.values():
         scene.add_gobject(gtext)
     gh.add_scene(scene)

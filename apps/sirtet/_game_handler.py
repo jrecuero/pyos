@@ -64,6 +64,14 @@ class GameHandler(GHandler):
         )
         if target.health <= 0:
             self.targets.remove(target)
+            if len(self.targets):
+                new_target = pygame.event.Event(
+                    GEvent.ENGINE,
+                    subtype=GEvent.CREATE,
+                    dest=GEvent.SCENE,
+                    source=self.targets[0].gdisplay(),
+                )
+                pygame.event.post(new_target)
         if len(self.targets) == 0:
             end_event = pygame.event.Event(
                 GEvent.ENGINE, subtype=GEvent.END, winner="actor"
@@ -95,16 +103,16 @@ class GameHandler(GHandler):
     def update(self, **kwargs):
         """update calls update method for all scenes and  graphical objects.
         """
-        actor_event = pygame.event.Event(
-            GEvent.ENGINE, subtype=GEvent.DISPLAY, source=self.actor, actor="actor"
-        )
-        pygame.event.post(actor_event)
+        # actor_event = pygame.event.Event(
+        #     GEvent.ENGINE, subtype=GEvent.DISPLAY, source=self.actor, actor="actor"
+        # )
+        # pygame.event.post(actor_event)
 
-        targets_event = pygame.event.Event(
-            GEvent.ENGINE,
-            subtype=GEvent.DISPLAY,
-            source=self.targets[0] if len(self.targets) else None,
-            actor="target",
-        )
-        pygame.event.post(targets_event)
+        # targets_event = pygame.event.Event(
+        #     GEvent.ENGINE,
+        #     subtype=GEvent.DISPLAY,
+        #     source=self.targets[0] if len(self.targets) else None,
+        #     actor="target",
+        # )
+        # pygame.event.post(targets_event)
         super(GameHandler, self).update(**kwargs)

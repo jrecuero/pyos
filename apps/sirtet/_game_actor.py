@@ -11,6 +11,11 @@ class GameDisplayActor(GObject):
         self.text_actor = self.font.render(f"{actor}", True, self.color)
         self.image.blit(self.text_actor, (0, 20, dx, 100))
 
+    def update(self, surface, **kwargs):
+        self.text_actor = self.font.render(f"{self.actor}", True, self.color)
+        self.image.fill((255, 255, 255, 0))
+        self.image.blit(self.text_actor, (0, 20, self.dx, 100))
+
 
 class GameActor(Gid):
     """GameActor implements any actor in the game.

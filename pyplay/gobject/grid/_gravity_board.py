@@ -49,28 +49,6 @@ class GravityBoard(GridBoard):
             pygame.event.post(completed_event)
         return completed_lines
 
-    # def handle_keyboard_event(self, event):
-    #     """handle_keyboard_event should process the keyboard event given.
-    #     """
-    #     super(GravityBoard, self).handle_keyboard_event(event)
-    #     # Check all shapes are not out of bounds.
-    #     for shape in self.gobjects:
-    #         if shape.get_collision_box().check_out_of_bounds(
-    #             0, 0, self.dx_play_cells, self.dy_play_cells
-    #         ):
-    #             shape.back_it()
-    #             # TODO: To Be Tested if this resolve the problem with merging
-    #             # pieces when they are being rotated and getting out of bounds.
-    #             # if shape.get_collision_box().check_out_of_bounds(
-    #             #     0, 0, self.dx_play_cells, self.dy_play_cells
-    #             # ):
-    #             #     shape.move_it(0, -1)
-    #
-    #     # Check all cells for collisions, between cells or with play cells.
-    #     for shape in self.gobjects:
-    #         if self.get_play_collision_box().collision_with(shape.get_collision_box()):
-    #             shape.back_it()
-
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
@@ -91,7 +69,7 @@ class GravityBoard(GridBoard):
             pygame.event.post(end_event)
         else:
             create_shape = pygame.event.Event(
-                GEvent.ENGINE, subtype=GEvent.CREATE, source=None
+                GEvent.ENGINE, subtype=GEvent.CREATE, dest=GEvent.BOARD, source=None
             )
             pygame.event.post(create_shape)
             log.Post(create_shape).call()
@@ -111,19 +89,6 @@ class GravityBoard(GridBoard):
                     if shape.gravity_step:
                         self.add_shape_to_play_cells(shape)
                         self.handle_add_shape_to_play_cells()
-                        # if self.check_threshold_level():
-                        #     pygame.time.set_timer(GEvent.T_GRAVITY, 0)
-                        #     end_event = pygame.event.Event(
-                        #         GEvent.ENGINE, subtype=GEvent.END, source=None
-                        #     )
-                        #     pygame.event.post(end_event)
-                        #     self.running = False
-                        # else:
-                        #     create_shape = pygame.event.Event(
-                        #         GEvent.ENGINE, subtype=GEvent.CREATE, source=None
-                        #     )
-                        #     pygame.event.post(create_shape)
-                        #     log.Post(create_shape).call()
                         break
 
                 if self.get_play_collision_box().collision_with(shape_collision_box):
@@ -137,64 +102,10 @@ class GravityBoard(GridBoard):
                         # Check if the last piece is out of the threshold level.
                         self.add_shape_to_play_cells(shape)
                         self.handle_add_shape_to_play_cells()
-                        # if self.check_threshold_level():
-                        #     pygame.time.set_timer(GEvent.T_GRAVITY, 0)
-                        #     end_event = pygame.event.Event(
-                        #         GEvent.ENGINE, subtype=GEvent.END, source=None
-                        #     )
-                        #     pygame.event.post(end_event)
-                        #     self.running = False
-                        # else:
-                        #     create_shape = pygame.event.Event(
-                        #         GEvent.ENGINE, subtype=GEvent.CREATE, source=None
-                        #     )
-                        #     pygame.event.post(create_shape)
-                        #     log.Post(create_shape).call()
                         break
 
         for shape in self.gobjects:
             shape.update(surface, **kwargs)
-
-        # # Check all shapes are not out of bounds.
-        # for shape in self.gobjects:
-        #     if shape.get_collision_box().check_out_of_bounds(
-        #         0, 0, self.dx_play_cells, self.dy_play_cells
-        #     ):
-        #         shape.back_it()
-        #         if shape.gravity_step:
-        #             # -> TODO: To Be Tested if resolve out of bounds pieces.
-        #             if shape.get_collision_box().check_out_of_bounds(
-        #                 0, 0, self.dx_play_cells, self.dy_play_cells
-        #             ):
-        #                 shape.move_it(0, -1)
-        #             # <-
-        #             self.add_shape_to_play_cells(shape)
-        #             create_shape = pygame.event.Event(
-        #                 GEvent.ENGINE, subtype=GEvent.CREATE, source=None
-        #             )
-        #             pygame.event.post(create_shape)
-        #
-        # # Check all cells for collisions, between cells or with play cells.
-        # for shape in self.gobjects:
-        #     if self.get_play_collision_box().collision_with(shape.get_collision_box()):
-        #         result = shape.back_it()
-        #         log.GravityBoard().Shape(f"{shape}").BackIt(f"{result}").call()
-        #         backx, backy = result[-1]
-        #         if backy:
-        #             # Check if the last piece is out of the threshold level.
-        #             self.add_shape_to_play_cells(shape)
-        #             if self.check_threshold_level():
-        #                 pygame.time.set_timer(GEvent.T_GRAVITY, 0)
-        #                 end_event = pygame.event.Event(
-        #                     GEvent.ENGINE, subtype=GEvent.END, source=None
-        #                 )
-        #                 pygame.event.post(end_event)
-        #                 self.running = False
-        #             else:
-        #                 create_shape = pygame.event.Event(
-        #                     GEvent.ENGINE, subtype=GEvent.CREATE, source=None
-        #                 )
-        #                 pygame.event.post(create_shape)
 
         # After all shapes have been checked against out of bounds and
         # collisions, it is time to process if there is a line completed.
