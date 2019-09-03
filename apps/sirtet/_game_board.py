@@ -109,3 +109,18 @@ class GameBoard(GravityBoard):
         elif event.type == GEvent.ENGINE and event.subtype == GEvent.DELETE:
             pass
         super(GameBoard, self).handle_custom_event(event)
+
+    def render(self, surface, **kwargs):
+        """render should draws the instance on the given surface.
+        """
+        width = 20
+        pygame.draw.rect(surface, Color.BLACK, (self.x - width, self.y, width, self.dy))
+        pygame.draw.rect(
+            surface, Color.BLACK, (self.x + self.dx, self.y, width, self.dy)
+        )
+        pygame.draw.rect(
+            surface,
+            Color.BLACK,
+            (self.x - width, self.y + self.dy, self.dx + 2 * width, width),
+        )
+        super(GameBoard, self).render(surface, **kwargs)

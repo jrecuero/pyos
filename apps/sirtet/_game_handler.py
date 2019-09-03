@@ -3,6 +3,7 @@ from pyplay import GHandler, Color, GEvent
 from pyplay.gobject import GText
 from _game_stat import GameStat
 from _game_actor import GameActor
+from _game_skill import GameSkillHeal
 
 
 class Actor(GameActor):
@@ -13,15 +14,16 @@ class Actor(GameActor):
         self.max_defense = 1
         self.max_skill = 1
         self.set_play_damage(Color.RED)
-        self.set_play_defense(Color.GREEN)
-        self.set_play_skill(Color.BLUE)
+        self.set_play_defense(Color.BLUE)
+        self.set_play_skill(Color.GREEN)
+        self.skill_skills.append(GameSkillHeal(Color.GREEN))
 
 
 class Target(GameActor):
     def __init__(self, name, **kwargs):
         super(Target, self).__init__(name, **kwargs)
         self.max_health = 50
-        self.max_damage = 1
+        self.max_damage = 2
         self.set_play_damage(Color.BLACK)
         self.set_play_defense(Color.BLACK)
         self.set_play_skill(Color.BLACK)
@@ -69,14 +71,16 @@ class GameHandler(GHandler):
         """handle_completed_lines handles lines that have been completed in the
         play cells area.
         """
-        color_dict = self.gstat.get_color_dict()
+        color_dict = GameStat.new_play_colors()
         for cell in [c for _, line in lines for c in line]:
             color_dict[Color.color_to_str(cell.color)] += 1
         self.gstat.add_color_dict(color_dict)
         self.gstat.add_to_lines(len(lines))
+        self.actor.add_color_dict(color_dict)
         actor_damage = self.get_actor_damage(self.actor, color_dict)
         actor_defense = self.get_actor_defense(self.actor, color_dict)
         target = self.targets[0]
+        target.add_color_dict(color_dict)
         t_damage = self.get_actor_damage(target, color_dict)
         target.health = target.health - actor_damage
         target_damage = t_damage - actor_defense
@@ -98,6 +102,14 @@ class GameHandler(GHandler):
                 GEvent.ENGINE, subtype=GEvent.END, winner="actor"
             )
             pygame.event.post(end_event)
+
+    def handle_keyboard_event(self, event):
+        """handle_keyboard_event should process the keyboard event given.
+        """
+        if event.key == pygame.K_1:
+            if self.actor.skill_skills[0].can_run(self.actor):
+                self.actor.skill_skills[0].action(self.actor, self.actor)
+        super(GameHandler, self).handle_keyboard_event(event)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
@@ -124,16 +136,4 @@ class GameHandler(GHandler):
     def update(self, **kwargs):
         """update calls update method for all scenes and  graphical objects.
         """
-        # actor_event = pygame.event.Event(
-        #     GEvent.ENGINE, subtype=GEvent.DISPLAY, source=self.actor, actor="actor"
-        # )
-        # pygame.event.post(actor_event)
-
-        # targets_event = pygame.event.Event(
-        #     GEvent.ENGINE,
-        #     subtype=GEvent.DISPLAY,
-        #     source=self.targets[0] if len(self.targets) else None,
-        #     actor="target",
-        # )
-        # pygame.event.post(targets_event)
         super(GameHandler, self).update(**kwargs)

@@ -6,14 +6,22 @@ class GameStat:
     """GameStat implements all stats values handled by the game.
     """
 
+    COLORS = [Color.BLACK, Color.BLUE, Color.RED, Color.GREEN]
+
+    @staticmethod
+    def new_play_colors():
+        """new_play_colors generates a new dictionary that containes cells
+        being matched in a completed line.
+        """
+        return {Color.color_to_str(color): 0 for color in GameStat.COLORS}
+
     def __init__(self):
         self.total_lines = 0
-        self.colors = [Color.BLACK, Color.BLUE, Color.RED, Color.GREEN]
         # self.color_cells = {Color.color_to_str(color): 0 for color in self.colors}
-        self.color_cells = self.get_color_dict()
+        self.color_cells = GameStat.new_play_colors()
         self.gtext_colors = {}
         row = 300
-        for color in self.colors:
+        for color in GameStat.COLORS:
             color_str = Color.color_to_str(color)
             self.gtext_colors[color_str] = GText(
                 color_str,
@@ -28,9 +36,6 @@ class GameStat:
         self.gtext_total_lines = GText(
             "total lines", 550, 250, f"Lines Completed : 0 {' ' * 50}"
         )
-
-    def get_color_dict(self):
-        return {Color.color_to_str(color): 0 for color in self.colors}
 
     def add_to_color(self, color, value=1):
         """add_color adds the given value to the given color.

@@ -1,57 +1,9 @@
-import pygame
-from pyplay import Gid, GObject, Color
+# import pygame
+from pyplay import Gid
+from _game_stat import GameStat
 from _game_actor_attr import GameActorAttr
 from _game_actor_stats import GameActorStats
-
-
-class GameDisplayActor(GObject):
-    def __init__(self, actor, x, y, dx, dy, **kwargs):
-        super(GameDisplayActor, self).__init__("display-actor", x, y, dx, dy, **kwargs)
-        self.actor = actor
-        self.font = pygame.font.SysFont("Courier", 18)
-        self.health_surface = pygame.surface.Surface((50, 50))
-        self.damage_surface = pygame.Surface((50, 50))
-        self.defense_surface = pygame.Surface((50, 50))
-        self.skill_surface = pygame.Surface((50, 50))
-        self.text_actor = self.font.render(f"{self.actor.name}", True, self.color)
-        self.text_health = self.font.render(f"{self.actor.health}", True, Color.BLACK)
-        self.text_damage = self.font.render(f"{self.actor.damage}", True, Color.WHITE)
-        self.text_defense = self.font.render(f"{self.actor.defense}", True, Color.WHITE)
-        self.text_skill = self.font.render(f"{self.actor.skill}", True, Color.WHITE)
-        # self.health_surface.fill((0, 255, 0, 0))
-        # health_delta = (self.actor.health / self.actor.max_health) * 50
-        # pygame.draw.rect(
-        #     self.health_surface, (0, 255, 0, 0), (0, 0, 50, int(health_delta))
-        # )
-        # self.health_surface.blit(self.text_health, (0, 0, 50, 50))
-        self.damage_surface.fill(self.actor.get_damage_color())
-        self.damage_surface.blit(self.text_damage, (0, 0, 50, 50))
-        self.defense_surface.fill(self.actor.get_defense_color())
-        self.defense_surface.blit(self.text_defense, (0, 0, 50, 50))
-        self.skill_surface.fill(self.actor.get_skill_color())
-        self.skill_surface.blit(self.text_skill, (0, 0, 50, 50))
-        # self.image.blit(self.health_surface, (0, 0, 50, 50))
-        # self.image.blit(self.damage_surface, (50, 0, 50, 50))
-        # self.image.blit(self.defense_surface, (100, 0, 50, 50))
-        # self.image.blit(self.skill_surface, (150, 0, 50, 50))
-        # self.image.blit(self.text_actor, (225, 20, self.dx, 100))
-
-    def update(self, surface, **kwargs):
-        self.text_actor = self.font.render(f"{self.actor.name}", True, self.color)
-        self.image.fill((255, 255, 255, 0))
-        self.text_health = self.font.render(f"{self.actor.health}", True, Color.BLACK)
-        health_delta = (self.actor.health / self.actor.max_health) * 50
-        self.health_surface.fill(Color.WHITE)
-        pygame.draw.rect(
-            self.health_surface, (0, 255, 0, 0), (0, 0, 50, int(health_delta))
-        )
-        pygame.draw.rect(self.health_surface, Color.BLACK, (0, 0, 50, 50), 1)
-        self.health_surface.blit(self.text_health, (0, 0, 50, 50))
-        self.image.blit(self.health_surface, (0, 0, 50, 50))
-        self.image.blit(self.damage_surface, (50, 0, 50, 50))
-        self.image.blit(self.defense_surface, (100, 0, 50, 50))
-        self.image.blit(self.skill_surface, (150, 0, 50, 50))
-        self.image.blit(self.text_actor, (225, 20, self.dx, 100))
+from _game_actor_display import GameActorDisplay
 
 
 class GameActor(Gid):
@@ -66,7 +18,11 @@ class GameActor(Gid):
         self._defense = GameActorAttr("defense", kwargs.get("defense", 0))
         self._skill = GameActorAttr("skill", kwargs.get("skill", 0))
         self.stats = GameActorStats()
+        self.play_colors = GameStat.new_play_colors()
         self.play_stats = {"damage": None, "defense": None, "skill": None}
+        self.damage_skills = []
+        self.defense_skills = []
+        self.skill_skills = []
 
     @property
     def health(self):
@@ -140,31 +96,72 @@ class GameActor(Gid):
         return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.health.real} {self.damage.real} {self.defense.real} {self.skill.real}"
 
     def gdisplay(self):
-        return GameDisplayActor(self, 0, 0, 600, 200)
+        """gdisplay returns the graphical sprite object to be added to a scene
+        in order to display actor information.
+        """
+        return GameActorDisplay(self, 0, 0, 600, 200)
+
+    def add_color_dict(self, color_dict=None):
+        """add_color_dict adds the given color dictionary to the total colors
+        for the actual game.
+        """
+        if color_dict:
+            self.stats.add_color_dict(color_dict)
+            for k, v in color_dict.items():
+                self.play_colors[k] += v
+        else:
+            self.play_colors = GameStat.new_play_colors()
 
     def set_play_damage(self, color):
+        """set_play_damage sets the color to be used by the actor as damage
+        color.
+        """
         self.play_stats["damage"] = color
 
     def set_play_defense(self, color):
+        """set_play_defense sets the color to be used by the actor as defense
+        color.
+        """
         self.play_stats["defense"] = color
 
     def set_play_skill(self, color):
+        """set_play_skill sets the color to be used by the actor as skill
+        color.
+        """
         self.play_stats["skill"] = color
 
     def get_damage_color(self):
+        """get_damage_color returns the color used by the actor as damage
+        color.
+        """
         return self.play_stats["damage"]
 
     def get_defense_color(self):
+        """get_defense_color returns the color used by the actor as defense
+        color.
+        """
         return self.play_stats["defense"]
 
     def get_skill_color(self):
+        """get_skill_color returns the color used by the actor as skill
+        color.
+        """
         return self.play_stats["skill"]
 
     def damage_for(self, value):
+        """damage_for returns the damage caused for the given number of cells
+        of the actor damage color.
+        """
         return self.damage.real * value
 
     def defense_for(self, value):
+        """defense_for returns the defense caused for the given number of cells
+        of the actor defense color.
+        """
         return self.defense.real * value
 
     def skill_for(self, value):
+        """skill_for returns the skill caused for the given number of cells of
+        the actor skill color.
+        """
         return self.skill.real * value
