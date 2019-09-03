@@ -39,5 +39,23 @@ class CollisionBox:
                 return True
         return False
 
+    def check_out_of_width_bounds(self, x, dx):
+        """check_out_of_width_bounds returns if the collision box is out of
+        bounds in the X axis.
+        """
+        for (px, _) in self.box:
+            if not (x <= px < (x + dx)):
+                return True
+        return False
+
+    def check_out_of_heigh_bounds(self, y, dy):
+        """check_out_of_heigh_bounds returns if the collision box is out of
+        bounds in the Y axis.
+        """
+        for (_, py) in self.box:
+            if not (y <= py < (y + dy)):
+                return True
+        return False
+
     def __str__(self):
         return str(self.box)

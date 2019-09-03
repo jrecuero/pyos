@@ -82,15 +82,18 @@ class GravityBoard(GridBoard):
             for ma in shape.move_actions:
                 ma["call"](*ma["args"])
                 shape_collision_box = shape.get_collision_box()
-                if shape_collision_box.check_out_of_bounds(
-                    0, 0, self.dx_play_cells, self.dy_play_cells
-                ):
+                if shape_collision_box.check_out_of_width_bounds(0, self.dx_play_cells):
+                    shape.back_it()
+
+                shape_collision_box = shape.get_collision_box()
+                if shape_collision_box.check_out_of_heigh_bounds(0, self.dy_play_cells):
                     shape.back_it()
                     if shape.gravity_step:
                         self.add_shape_to_play_cells(shape)
                         self.handle_add_shape_to_play_cells()
                         break
 
+                shape_collision_box = shape.get_collision_box()
                 if self.get_play_collision_box().collision_with(shape_collision_box):
                     result = shape.back_it()
                     log.GravityBoard().Shape(f"{shape}").BackIt(f"{result}").call()

@@ -8,10 +8,10 @@ from _game_actor import GameActor
 class Actor(GameActor):
     def __init__(self, **kwargs):
         super(Actor, self).__init__("actor")
-        self.health = 1000
-        self.damage = 4
-        self.defense = 1
-        self.skill = 1
+        self.max_health = 1000
+        self.max_damage = 2
+        self.max_defense = 1
+        self.max_skill = 1
         self.set_play_damage(Color.RED)
         self.set_play_defense(Color.GREEN)
         self.set_play_skill(Color.BLUE)
@@ -20,9 +20,11 @@ class Actor(GameActor):
 class Target(GameActor):
     def __init__(self, name, **kwargs):
         super(Target, self).__init__(name, **kwargs)
-        self.health = 50
-        self.damage = 1
+        self.max_health = 50
+        self.max_damage = 1
         self.set_play_damage(Color.BLACK)
+        self.set_play_defense(Color.BLACK)
+        self.set_play_skill(Color.BLACK)
 
 
 class GameHandler(GHandler):
@@ -37,13 +39,31 @@ class GameHandler(GHandler):
         self.targets = [Target("t1"), Target("t2"), Target("t3")]
 
     def get_actor_damage(self, actor, color_dict):
-        """get_actor_damage returns the damage deal for any actor with the
-        pieces being completed.
+        """get_actor_damage returns the damage deal for the given actor with
+        the pieces being completed.
         """
         damage_color = Color.color_to_str(actor.get_damage_color())
         damage_value = color_dict[damage_color]
         damage = actor.damage_for(damage_value)
         return damage
+
+    def get_actor_defense(self, actor, color_dict):
+        """get_actor_defense returns the defense for the given actor with
+        the pieces being completed.
+        """
+        defense_color = Color.color_to_str(actor.get_defense_color())
+        defense_value = color_dict[defense_color]
+        defense = actor.defense_for(defense_value)
+        return defense
+
+    def get_actor_skill(self, actor, color_dict):
+        """get_actor_skill returns the skill for the given actor with the
+        pieces completed.
+        """
+        skill_color = Color.color_to_str(actor.get_skill_color())
+        skill_value = color_dict[skill_color]
+        skill = actor.skill_for(skill_value)
+        return skill
 
     def handle_completed_lines(self, lines):
         """handle_completed_lines handles lines that have been completed in the
@@ -55,13 +75,14 @@ class GameHandler(GHandler):
         self.gstat.add_color_dict(color_dict)
         self.gstat.add_to_lines(len(lines))
         actor_damage = self.get_actor_damage(self.actor, color_dict)
+        actor_defense = self.get_actor_defense(self.actor, color_dict)
         target = self.targets[0]
-        target_damage = self.get_actor_damage(target, color_dict)
-        target.health -= actor_damage
-        self.actor.health -= target_damage
-        self.console.message = (
-            f"> Actor Damage {actor_damage}. Target Damage {target_damage}"
-        )
+        t_damage = self.get_actor_damage(target, color_dict)
+        target.health = target.health - actor_damage
+        target_damage = t_damage - actor_defense
+        target_damage = target_damage if target_damage > 0 else 0
+        self.actor.health = self.actor.health - target_damage
+        self.console.message = f"> Actor Damage {actor_damage} Defense {actor_defense}. Target Damage {t_damage} {target_damage}"
         if target.health <= 0:
             self.targets.remove(target)
             if len(self.targets):
