@@ -61,10 +61,14 @@ class GameBoard(GravityBoard):
         else:
             self.add_gobject(next_piece())
         self.the_next_piece = next_piece()
-        next_piece_event = pygame.event.Event(
-            GEvent.ENGINE, subtype=GEvent.NEXT, source=self.get_next_piece_at()
-        )
-        pygame.event.post(next_piece_event)
+        # next_piece_event = pygame.event.Event(
+        #     GEvent.ENGINE,
+        #     subtype=GEvent.NEXT,
+        #     dest=GEvent.SCENE,
+        #     source=self.get_next_piece_at(),
+        # )
+        # pygame.event.post(next_piece_event)
+        GEvent.scene_event(GEvent.NEXT, source=self.get_next_piece_at())
 
     def get_next_piece_at(self, x=0, y=0):
         sprite = GObject("next", x, y, 150, 150)
@@ -82,17 +86,19 @@ class GameBoard(GravityBoard):
             pygame.time.set_timer(GEvent.T_GRAVITY, self.pause_timer)
             if self.pause_timer:
                 self.pause_timer = 0
-                pause_event = pygame.event.Event(
-                    GEvent.ENGINE, subtype=GEvent.PAUSE, source=False
-                )
+                # pause_event = pygame.event.Event(
+                #     GEvent.ENGINE, subtype=GEvent.PAUSE, source=False
+                # )
+                GEvent.engine_event(GEvent.PAUSE, source=False)
                 self.running = True
             else:
                 self.pause_timer = self.gravity_timer
-                pause_event = pygame.event.Event(
-                    GEvent.ENGINE, subtype=GEvent.PAUSE, source=True
-                )
+                # pause_event = pygame.event.Event(
+                #     GEvent.ENGINE, subtype=GEvent.PAUSE, source=True
+                # )
+                GEvent.engine_event(GEvent.PAUSE, source=True)
                 self.running = False
-            pygame.event.post(pause_event)
+            # pygame.event.post(pause_event)
         super(GameBoard, self).handle_keyboard_event(event)
 
     def handle_custom_event(self, event):
@@ -103,11 +109,12 @@ class GameBoard(GravityBoard):
         # First we have to handle the event before calling the super, because
         # some object could be added or created at this time.
         if event.type == GEvent.ENGINE:
-            if event.subtype == GEvent.CREATE and event.dest == GEvent.BOARD:
-                # self.add_gobject(next_piece())
+            if event.subtype == GEvent.CREATE and GEvent.check_destination(
+                event, GEvent.BOARD
+            ):
                 self.next_piece()
-        elif event.type == GEvent.ENGINE and event.subtype == GEvent.DELETE:
-            pass
+            elif event.subtype == GEvent.DELETE:
+                pass
         super(GameBoard, self).handle_custom_event(event)
 
     def render(self, surface, **kwargs):

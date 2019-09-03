@@ -3,19 +3,21 @@ from pyplay import GHandler, Color, GEvent
 from pyplay.gobject import GText
 from _game_stat import GameStat
 from _game_actor import GameActor
-from _game_skill import GameSkillHeal
+from _game_skill import GameSkillHeal, GameSkillDefenseUp, GameSkillDamageUp
 
 
 class Actor(GameActor):
     def __init__(self, **kwargs):
         super(Actor, self).__init__("actor")
         self.max_health = 1000
-        self.max_damage = 2
+        self.max_damage = 1
         self.max_defense = 1
         self.max_skill = 1
         self.set_play_damage(Color.RED)
         self.set_play_defense(Color.BLUE)
         self.set_play_skill(Color.GREEN)
+        self.damage_skills.append(GameSkillDamageUp(Color.RED))
+        self.defense_skills.append(GameSkillDefenseUp(Color.BLUE))
         self.skill_skills.append(GameSkillHeal(Color.GREEN))
 
 
@@ -39,6 +41,7 @@ class GameHandler(GHandler):
         self.console = GText("console", 10, 800, f"> {' ' * 50}")
         self.actor = Actor()
         self.targets = [Target("t1"), Target("t2"), Target("t3")]
+        self.skill_actions = {"lines": [], "timer": [], "pieces": []}
 
     def get_actor_damage(self, actor, color_dict):
         """get_actor_damage returns the damage deal for the given actor with
@@ -67,6 +70,16 @@ class GameHandler(GHandler):
         skill = actor.skill_for(skill_value)
         return skill
 
+    def check_skill_actions_for_lines(self, lines, color_dict):
+        """check_skill_actions check for any skill action to be triggered when
+        lines are being completed.
+        """
+        for sa in self.skill_actions["lines"][:]:
+            sa["tick"] -= lines
+            if sa["tick"] <= 0:
+                sa["action"](*sa["args"])
+                self.skill_actions["lines"].remove(sa)
+
     def handle_completed_lines(self, lines):
         """handle_completed_lines handles lines that have been completed in the
         play cells area.
@@ -90,23 +103,32 @@ class GameHandler(GHandler):
         if target.health <= 0:
             self.targets.remove(target)
             if len(self.targets):
-                new_target = pygame.event.Event(
-                    GEvent.ENGINE,
-                    subtype=GEvent.CREATE,
-                    dest=GEvent.SCENE,
-                    source=self.targets[0].gdisplay(),
-                )
-                pygame.event.post(new_target)
+                # new_target = pygame.event.Event(
+                #     GEvent.ENGINE,
+                #     subtype=GEvent.CREATE,
+                #     dest=GEvent.SCENE,
+                #     source=self.targets[0].gdisplay(),
+                # )
+                # pygame.event.post(new_target)
+                GEvent.scene_event(GEvent.CREATE, source=self.targets[0].gdisplay())
         if len(self.targets) == 0:
-            end_event = pygame.event.Event(
-                GEvent.ENGINE, subtype=GEvent.END, winner="actor"
-            )
-            pygame.event.post(end_event)
+            # end_event = pygame.event.Event(
+            #     GEvent.ENGINE, subtype=GEvent.END, winner="actor"
+            # )
+            # pygame.event.post(end_event)
+            GEvent.engine_event(GEvent.END, winner="actor")
+        self.check_skill_actions_for_lines(len(lines), color_dict)
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
         if event.key == pygame.K_1:
+            if self.actor.damage_skills[0].can_run(self.actor):
+                self.actor.damage_skills[0].action(self.actor, self.actor)
+        if event.key == pygame.K_2:
+            if self.actor.defense_skills[0].can_run(self.actor):
+                self.actor.defense_skills[0].action(self.actor, self.actor)
+        if event.key == pygame.K_3:
             if self.actor.skill_skills[0].can_run(self.actor):
                 self.actor.skill_skills[0].action(self.actor, self.actor)
         super(GameHandler, self).handle_keyboard_event(event)
@@ -116,21 +138,32 @@ class GameHandler(GHandler):
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        if event.type == GEvent.ENGINE and event.subtype == GEvent.COMPLETED:
-            self.handle_completed_lines(event.source)
-        elif event.type == GEvent.ENGINE and event.subtype == GEvent.END:
-            if event.winner == "actor":
-                self.console.message = f"> GAME OVER. You WON!!!"
-            else:
-                self.console.message = f"> GAME OVER. You LOST!!!"
-            self.running = False
-        elif event.type == GEvent.ENGINE and event.subtype == GEvent.PAUSE:
-            if event.source:
-                self.console.message = f"> PAUSED"
+        if event.type == GEvent.ENGINE:
+            if event.subtype == GEvent.COMPLETED:
+                self.handle_completed_lines(event.source)
+            elif event.subtype == GEvent.END:
+                if event.winner == "actor":
+                    self.console.message = f"> GAME OVER. You WON!!!"
+                else:
+                    self.console.message = f"> GAME OVER. You LOST!!!"
                 self.running = False
-            else:
-                self.console.message = f">"
-                self.running = True
+            elif event.subtype == GEvent.PAUSE:
+                if event.source:
+                    self.console.message = f"> PAUSED"
+                    self.running = False
+                else:
+                    self.console.message = f">"
+                    self.running = True
+            elif event.subtype == GEvent.SKILL:
+                if "lines" in event.tick.keys():
+                    self.skill_actions["lines"].append(
+                        {
+                            "tick": event.tick["lines"],
+                            "action": event.action,
+                            "args": event.args,
+                        }
+                    )
+                pass
         super(GameHandler, self).handle_custom_event(event)
 
     def update(self, **kwargs):

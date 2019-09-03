@@ -25,3 +25,6 @@ class GameActorAttr:
 
     def add_buff(self, buff):
         self._buffs.append(buff)
+
+    def del_buff(self, buff):
+        self._buffs.remove(buff)

@@ -19,6 +19,7 @@ class GameActor(Gid):
         self._skill = GameActorAttr("skill", kwargs.get("skill", 0))
         self.stats = GameActorStats()
         self.play_colors = GameStat.new_play_colors()
+        self.skill_colors = GameStat.new_play_colors()
         self.play_stats = {"damage": None, "defense": None, "skill": None}
         self.damage_skills = []
         self.defense_skills = []
@@ -109,8 +110,10 @@ class GameActor(Gid):
             self.stats.add_color_dict(color_dict)
             for k, v in color_dict.items():
                 self.play_colors[k] += v
+                self.skill_colors[k] += v
         else:
             self.play_colors = GameStat.new_play_colors()
+            self.skill_colors = GameStat.new_play_colors()
 
     def set_play_damage(self, color):
         """set_play_damage sets the color to be used by the actor as damage

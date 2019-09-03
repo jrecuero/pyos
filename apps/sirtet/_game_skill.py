@@ -1,4 +1,5 @@
-from pyplay import Color
+import pygame
+from pyplay import Color, GEvent
 
 
 class GameSkillType:
@@ -36,13 +37,20 @@ class GameSkill:
     def can_run(self, source):
         """can_run checks if the skill is available to be executed.
         """
-        colors = source.play_colors[self.color_str]
+        colors = source.skill_colors[self.color_str]
         return colors > self.threshold
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
         pass
+
+    def clean_up_event(self, source, target, **kwargs):
+        """cleaun_up_event sends the clean up event to the handler.
+        """
+        GEvent.handler_event(
+            GEvent.SKILL, action=self.clean_up(source, target), args=(), **kwargs
+        )
 
 
 class GameSkillHeal(GameSkill):
@@ -52,4 +60,63 @@ class GameSkillHeal(GameSkill):
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
-        target.health += 50
+        if self.can_run(source):
+            target.health += 50
+            source.skill_colors[self.color_str] -= self.threshold
+
+
+class GameSkillDefenseUp(GameSkill):
+    def __init__(self, color, **kwargs):
+        super(GameSkillDefenseUp, self).__init__("defense-up", color, 50, **kwargs)
+
+    def action(self, source, target):
+        """can_run checks if the skill is available to be executed.
+        """
+        if self.can_run(source):
+            target._defense.add_buff(1)
+            source.skill_colors[self.color_str] -= self.threshold
+            # clean_event = pygame.event.Event(
+            #     GEvent.ENGINE,
+            #     subtype=GEvent.SKILL,
+            #     dest=GEvent.HANDLER,
+            #     action=self.clean_up(source, target),
+            #     args=(),
+            #     tick={"lines": 5},
+            # )
+            # pygame.event.post(clean_event)
+            self.clean_up_event(source, target, tick={"lines": 5})
+
+    def clean_up(self, source, target):
+        def _clean_up():
+            target._defense.del_buff(1)
+
+        return _clean_up
+
+
+class GameSkillDamageUp(GameSkill):
+    def __init__(self, color, **kwargs):
+        super(GameSkillDamageUp, self).__init__("damage-up", color, 10, **kwargs)
+
+    def action(self, source, target):
+        """can_run checks if the skill is available to be executed.
+        """
+        if self.can_run(source):
+            target._damage.add_buff(1)
+            source.skill_colors[self.color_str] -= self.threshold
+            # clean_event = pygame.event.Event(
+            #     GEvent.ENGINE,
+            #     subtype=GEvent.SKILL,
+            #     dest=GEvent.HANDLER,
+            #     action=self.clean_up(source, target),
+            #     args=(),
+            #     tick={"lines": 5},
+            # )
+            # pygame.event.post(clean_event)
+            self.clean_up_event(source, target, tick={"lines": 5})
+
+    def clean_up(self, source, target):
+        def _clean_up():
+            target._damage.del_buff(1)
+            print("clean up")
+
+        return _clean_up

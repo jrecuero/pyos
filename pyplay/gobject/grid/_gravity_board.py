@@ -43,10 +43,11 @@ class GravityBoard(GridBoard):
                 for cell in [c for c in row if c]:
                     cell.move_it(0, len(completed_lines))
         if completed_lines:
-            completed_event = pygame.event.Event(
-                GEvent.ENGINE, subtype=GEvent.COMPLETED, source=completed_lines
-            )
-            pygame.event.post(completed_event)
+            # completed_event = pygame.event.Event(
+            #     GEvent.ENGINE, subtype=GEvent.COMPLETED, source=completed_lines
+            # )
+            # pygame.event.post(completed_event)
+            GEvent.engine_event(GEvent.COMPLETED, source=completed_lines)
         return completed_lines
 
     def handle_custom_event(self, event):
@@ -63,16 +64,18 @@ class GravityBoard(GridBoard):
         if self.check_threshold_level():
             # pygame.time.set_timer(GEvent.T_GRAVITY, 0)
             # self.running = False
-            end_event = pygame.event.Event(
-                GEvent.ENGINE, subtype=GEvent.END, winner="target"
-            )
-            pygame.event.post(end_event)
+            # end_event = pygame.event.Event(
+            #     GEvent.ENGINE, subtype=GEvent.END, winner="target"
+            # )
+            # pygame.event.post(end_event)
+            GEvent.engine_event(GEvent.END, winner="target")
         else:
-            create_shape = pygame.event.Event(
-                GEvent.ENGINE, subtype=GEvent.CREATE, dest=GEvent.BOARD, source=None
-            )
-            pygame.event.post(create_shape)
-            log.Post(create_shape).call()
+            # create_shape = pygame.event.Event(
+            #     GEvent.ENGINE, subtype=GEvent.CREATE, dest=GEvent.BOARD, source=None
+            # )
+            # pygame.event.post(create_shape)
+            # log.Post(create_shape).call()
+            GEvent.board_event(GEvent.CREATE, source=None)
 
     def update(self, surface, **kwargs):
         """update provides any functionality to be done every tick.
