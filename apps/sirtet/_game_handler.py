@@ -18,9 +18,10 @@ class Actor(GameActor):
         self.set_play_skill(Color.GREEN)
         self.damage_skills.append(gs.GameSkillDamageUp(Color.RED))
         self.defense_skills.append(gs.GameSkillDefenseUp(Color.BLUE))
+        self.skill_skills.append(gs.GameSkillBlowEmpty(Color.GREEN))
         self.skill_skills.append(gs.GameSkillHeal(Color.GREEN))
         self.skill_skills.append(gs.GameSkillGreatHeal(Color.GREEN))
-        self.skill_skills.append(gs.GameSkillMegaHeal(Color.GREEN))
+        # self.skill_skills.append(gs.GameSkillMegaHeal(Color.GREEN))
 
 
 class Target(GameActor):
@@ -145,7 +146,9 @@ class GameHandler(GHandler):
                 else:
                     self.console.message = f">"
                     self.running = True
-            elif event.subtype == GEvent.SKILL:
+            elif event.subtype == GEvent.SKILL and GEvent.check_destination(
+                event, GEvent.HANDLER
+            ):
                 if "lines" in event.tick.keys():
                     self.skill_actions["lines"].append(
                         {

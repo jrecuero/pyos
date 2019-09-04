@@ -50,25 +50,6 @@ class Scene:
         """
         pass
 
-    # def handle_custom_events(self):
-    #     """handle_custom_events should process all pygame custom events. Any
-    #     object in the game, like, scene, graphic objects, ... can post
-    #     customs events, and those should be handled at this time.
-    #     """
-    #     pass
-    #
-    # def handle_these_events(self, events):
-    #     """handle_these_events should process the given list of events. That
-    #     list can contains custom or pygame events.
-    #     """
-    #     pass
-    #
-    # def handle_these_custom_events(self, events):
-    #     """handle_these_custom_events should process the given list of custom
-    #     events.
-    #     """
-    #     pass
-
     def start_tick(self):
         """start_tick should set all elements ready for a new tick.
         """
@@ -87,6 +68,13 @@ class Scene:
         """
         for gobj in self.gobjects:
             gobj.handle_keyboard_event(event)
+
+    def handle_mouse_event(self, event):
+        """handle_mouse_event should process the mouse event given.
+        Mouse events are passed to the active scene to be handle.
+        """
+        for gobj in self.gobjects:
+            gobj.handle_mouse_event(event)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.

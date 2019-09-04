@@ -74,6 +74,12 @@ class GHandler:
         """
         self.hscene.handle_keyboard_event(event)
 
+    def handle_mouse_event(self, event):
+        """handle_mouse_event should process the mouse event given.
+        Mouse events are passed to the active scene to be handle.
+        """
+        self.hscene.handle_mouse_event(event)
+
     def update(self, **kwargs):
         """update calls update method for all scenes and  graphical objects.
         """

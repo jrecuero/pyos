@@ -105,6 +105,15 @@ class GameBoard(GravityBoard):
                 self.next_piece()
             elif event.subtype == GEvent.DELETE:
                 pass
+            elif event.subtype == GEvent.SKILL and GEvent.check_destination(
+                event, GEvent.BOARD
+            ):
+                if event.action == "blow-color":
+                    self.blow_color(*event.args)
+                elif event.action == "blow-empty":
+                    self.blow_empty()
+                elif event.action == "copy-color":
+                    self.copy_color(*event.args)
         super(GameBoard, self).handle_custom_event(event)
 
     def render(self, surface, **kwargs):

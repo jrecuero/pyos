@@ -53,6 +53,49 @@ class GameSkill:
         )
 
 
+class GameSkillBlowColor(GameSkill):
+    def __init__(self, color, blow_color, **kwargs):
+        super(GameSkillBlowColor, self).__init__("blow-color", color, 10, **kwargs)
+        self.blow_color = blow_color
+
+    def action(self, source, target):
+        """can_run checks if the skill is available to be executed.
+        """
+        if self.can_run(source):
+            source.skill_colors[self.color_str] -= self.threshold
+            GEvent.board_event(
+                GEvent.SKILL, action="blow-color", args=(self.blow_color)
+            )
+
+
+class GameSkillBlowEmpty(GameSkill):
+    def __init__(self, color, **kwargs):
+        super(GameSkillBlowEmpty, self).__init__("blow-color", color, 10, **kwargs)
+
+    def action(self, source, target):
+        """can_run checks if the skill is available to be executed.
+        """
+        if self.can_run(source):
+            source.skill_colors[self.color_str] -= self.threshold
+            GEvent.board_event(GEvent.SKILL, action="blow-empty", args=())
+
+
+class GameSkillCopyColor(GameSkill):
+    def __init__(self, color, from_color, to_color, **kwargs):
+        super(GameSkillCopyColor, self).__init__("blow-color", color, 10, **kwargs)
+        self.from_color = from_color
+        self.to_color = to_color
+
+    def action(self, source, target):
+        """can_run checks if the skill is available to be executed.
+        """
+        if self.can_run(source):
+            source.skill_colors[self.color_str] -= self.threshold
+            GEvent.board_event(
+                GEvent.SKILL, action="copy-color", args=(self.from_color, self.to_color)
+            )
+
+
 class GameSkillHeal(GameSkill):
     def __init__(self, color, **kwargs):
         super(GameSkillHeal, self).__init__("heal", color, 25, **kwargs)

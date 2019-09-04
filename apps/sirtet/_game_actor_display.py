@@ -107,3 +107,11 @@ class GameActorDisplay(GObject):
         self.image.blit(self.damage_skills_surface, (350, 0, 50, 50))
         self.image.blit(self.defense_skills_surface, (400, 0, 50, 50))
         self.image.blit(self.skill_skills_surface, (450, 0, 50, 50))
+
+    def handle_mouse_event(self, event):
+        """handle_mouse_event should process the mouse event given.
+        Mouse events are passed to the active scene to be handle.
+        """
+        # if self.rect.collidepoint(pygame.mouse.get_pos()):
+        #     print(f"mouse {pygame.mouse.get_pos()} is over me {self}")
+        pass

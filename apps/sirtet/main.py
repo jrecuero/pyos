@@ -70,6 +70,8 @@ def main():
                 sys.exit(0)
             elif event.type == pygame.KEYDOWN:
                 gh.handle_keyboard_event(event)
+            elif event.type == pygame.MOUSEMOTION:
+                gh.handle_mouse_event(event)
             elif event.type >= pygame.USEREVENT:
                 gh.handle_custom_event(event)
 

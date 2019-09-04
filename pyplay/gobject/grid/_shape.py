@@ -142,6 +142,12 @@ class Shape:
         if event.key == pygame.K_SPACE:
             self.rotate_clockwise()
 
+    def handle_mouse_event(self, event):
+        """handle_mouse_event should process the mouse event given.
+        Mouse events are passed to the active scene to be handle.
+        """
+        pass
+
     def gravity_move(self, steps):
         """gravity_move represents a gravity movement down the board for the
         given number of steps. This movement can be called only one time for

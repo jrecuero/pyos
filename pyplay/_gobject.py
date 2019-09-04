@@ -152,6 +152,12 @@ class GObject(pygame.sprite.Sprite):
         self.bounce_x()
         return False
 
+    def handle_mouse_event(self, event):
+        """handle_mouse_event should process the mouse event given.
+        Mouse events are passed to the active scene to be handle.
+        """
+        pass
+
     def out_of_bounds_y_response(self):
         """out_of_bounds_x_response takes action when the graphical object is
         out of bound at the X-axis.
@@ -165,6 +171,11 @@ class GObject(pygame.sprite.Sprite):
         """collide_with processes a collision with other object.
         """
         pass
+
+    def mouse_over(self, mouse_pos):
+        """mouse_over is called when mouse is over the graphical object.
+        """
+        print(f"mouse {mouse_pos} is over me {self}")
 
     def update(self, surface, **kwargs):
         """update updates x and y compoments based on the move attribute
