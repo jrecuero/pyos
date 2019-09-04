@@ -46,6 +46,23 @@ class GravityBoard(GridBoard):
             GEvent.engine_event(GEvent.COMPLETED, source=completed_lines)
         return completed_lines
 
+    def blow_color(self, color):
+        """blow_color removes all cells with the given color.
+        """
+        blows = [0 for _ in range(len(self.play_cells[0]))]
+        for index, row in enumerate(self.play_cells[::-1]):
+            rindex = len(self.play_cells) - index - 1
+            for cindex, cell in enumerate(row):
+                if cell and cell.color == color:
+                    self.play_cells[rindex][cindex] = None
+                    blows[cindex] += 1
+                elif blows[cindex]:
+                    self.play_cells[rindex][cindex] = None
+                    if cell:
+                        cell.move_it(0, blows[cindex])
+                    self.play_cells[rindex + blows[cindex]][cindex] = cell
+        return sum(blows)
+
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
