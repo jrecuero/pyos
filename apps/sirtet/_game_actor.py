@@ -4,6 +4,7 @@ from _game_stat import GameStat
 from _game_actor_attr import GameActorAttr
 from _game_actor_stats import GameActorStats
 from _game_actor_display import GameActorDisplay
+from _game_level import GameLevel
 
 
 class GameActor(Gid):
@@ -24,74 +25,124 @@ class GameActor(Gid):
         self.damage_skills = []
         self.defense_skills = []
         self.skill_skills = []
+        self.damage_buffs = []
+        self.defense_buffs = []
+        self.skill_buffs = []
+        self.glevel = GameLevel()
 
     @property
     def health(self):
+        """health property returns the real/actual value for the _health
+        attribute.
+        """
         return self._health.real
 
     @health.setter
     def health(self, value):
+        """health setter sets the value for real health.
+        """
         self._health.real = value
 
     @property
     def damage(self):
+        """damage property returns the real/actual value for the _damage
+        attribute.
+        """
         return self._damage.real
 
     @damage.setter
     def damage(self, value):
+        """damage setter sets the value for real damage.
+        """
         self._damage.real = value
 
     @property
     def defense(self):
+        """defense property returns the real/actual value for the _defense
+        attribute.
+        """
         return self._defense.real
 
     @defense.setter
     def defense(self, value):
+        """defense setter sets the value for real defense.
+        """
         self._defense.real = value
 
     @property
     def skill(self):
+        """skill property returns the real/actual value for the _skill
+        attribute.
+        """
         return self._skill.real
 
     @skill.setter
     def skill(self, value):
+        """skill setter sets the value for real skill.
+        """
         self._skill.real = value
 
     @property
     def max_health(self):
+        """max_health returns the maximum health for the actor. It is
+        found as max attribute for _health.
+        """
         return self._health.max
 
     @max_health.setter
     def max_health(self, value):
+        """max_health setter updates the maximum and real health.
+        """
         self._health.max = value
         self._health.real = value
 
     @property
     def max_damage(self):
+        """max_damage returns the maximum health for the actor. It is
+        found as max attribute for _damage.
+        """
         return self._damage.max
 
     @max_damage.setter
     def max_damage(self, value):
+        """max_damage setter updates the maximum and real damage.
+        """
         self._damage.max = value
         self._damage.real = value
 
     @property
     def max_defense(self):
+        """max_defense returns the maximum health for the actor. It is
+        found as max attribute for _defense.
+        """
         return self._defense.max
 
     @max_defense.setter
     def max_defense(self, value):
+        """max_defense setter updates the maximum and real defense.
+        """
         self._defense.max = value
         self._defense.real = value
 
     @property
     def max_skill(self):
+        """max_skill returns the maximum health for the actor. It is
+        found as max attribute for _skill.
+        """
         return self._skill.max
 
     @max_skill.setter
     def max_skill(self, value):
+        """max_skill setter updates the maximum and real skill.
+        """
         self._skill.max = value
         self._skill.real = value
+
+    @property
+    def level(self):
+        """level return the level attribute for glevel.
+        """
+        return self.glevel.level
 
     def __str__(self):
         return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.health.real} {self.damage.real} {self.defense.real} {self.skill.real}"
@@ -155,16 +206,16 @@ class GameActor(Gid):
         """damage_for returns the damage caused for the given number of cells
         of the actor damage color.
         """
-        return self.damage.real * value
+        return self.damage.real * value + sum(self.damage_buffs)
 
     def defense_for(self, value):
         """defense_for returns the defense caused for the given number of cells
         of the actor defense color.
         """
-        return self.defense.real * value
+        return self.defense.real * value + sum(self.defense_buffs)
 
     def skill_for(self, value):
         """skill_for returns the skill caused for the given number of cells of
         the actor skill color.
         """
-        return self.skill.real * value
+        return self.skill.real * value + sum(self.skill_buffs)

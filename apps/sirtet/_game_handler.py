@@ -16,7 +16,7 @@ class Actor(GameActor):
         self.set_play_damage(Color.RED)
         self.set_play_defense(Color.BLUE)
         self.set_play_skill(Color.GREEN)
-        self.damage_skills.append(gs.GameSkillDamageUp(Color.RED))
+        self.damage_skills.append(gs.GameSkillRawDamage(Color.RED))
         self.defense_skills.append(gs.GameSkillDefenseUp(Color.BLUE))
         self.skill_skills.append(gs.GameSkillBlowEmpty(Color.GREEN))
         self.skill_skills.append(gs.GameSkillHeal(Color.GREEN))
@@ -45,6 +45,15 @@ class GameHandler(GHandler):
         self.actor = Actor()
         self.targets = [Target("t1"), Target("t2"), Target("t3")]
         self.skill_actions = {"lines": [], "timer": [], "pieces": []}
+
+    @property
+    def target(self):
+        """target property returns the first entry in the targets attribute.
+        It returns None if targets list is empty.
+        """
+        if len(self.targets):
+            return self.targets[0]
+        return None
 
     def get_actor_damage(self, actor, color_dict):
         """get_actor_damage returns the damage deal for the given actor with
@@ -83,6 +92,12 @@ class GameHandler(GHandler):
                 sa["action"](*sa["args"])
                 self.skill_actions["lines"].remove(sa)
 
+    def check_target_skills(self, lines, color_dict):
+        """check_target_skills checks if the target can trigger any skill.
+        """
+        if self.target:
+            pass
+
     def handle_completed_lines(self, lines):
         """handle_completed_lines handles lines that have been completed in the
         play cells area.
@@ -95,34 +110,46 @@ class GameHandler(GHandler):
         self.actor.add_color_dict(color_dict)
         actor_damage = self.get_actor_damage(self.actor, color_dict)
         actor_defense = self.get_actor_defense(self.actor, color_dict)
-        target = self.targets[0]
-        target.add_color_dict(color_dict)
-        t_damage = self.get_actor_damage(target, color_dict)
-        target.health = target.health - actor_damage
+        self.target.add_color_dict(color_dict)
+        t_damage = self.get_actor_damage(self.target, color_dict)
+        self.target.health = self.target.health - actor_damage
         target_damage = t_damage - actor_defense
         target_damage = target_damage if target_damage > 0 else 0
         self.actor.health = self.actor.health - target_damage
         self.console.message = f"> Actor Damage {actor_damage} Defense {actor_defense}. Target Damage {t_damage} {target_damage}"
-        if target.health <= 0:
-            self.targets.remove(target)
+        if self.target.health <= 0:
+            self.targets.remove(self.target)
             if len(self.targets):
-                GEvent.scene_event(GEvent.CREATE, source=self.targets[0].gdisplay())
+                GEvent.scene_event(GEvent.CREATE, source=self.target.gdisplay())
         if len(self.targets) == 0:
             GEvent.engine_event(GEvent.END, winner="actor")
         self.check_skill_actions_for_lines(len(lines), color_dict)
+        self.check_target_skills(len(lines), color_dict)
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
+        # Handle all keyboard inputs that trigger skills.
         if event.key == pygame.K_1:
-            if self.actor.damage_skills[0].can_run(self.actor):
-                self.actor.damage_skills[0].action(self.actor, self.actor)
+            if len(self.actor.damage_skills):
+                skill = self.actor.damage_skills[0]
+                skill.action(self.actor, skill.target(self.actor, self.target))
         if event.key == pygame.K_2:
-            if self.actor.defense_skills[0].can_run(self.actor):
-                self.actor.defense_skills[0].action(self.actor, self.actor)
+            if len(self.actor.defense_skills):
+                skill = self.actor.defense_skills[0]
+                skill.action(self.actor, skill.target(self.actor, self.target))
         if event.key == pygame.K_3:
-            if self.actor.skill_skills[0].can_run(self.actor):
-                self.actor.skill_skills[0].action(self.actor, self.actor)
+            if len(self.actor.skill_skills):
+                skill = self.actor.skill_skills[0]
+                skill.action(self.actor, skill.target(self.actor, self.target))
+        if event.key == pygame.K_4:
+            if len(self.actor.skill_skills) > 1:
+                skill = self.actor.skill_skills[1]
+                skill.action(self.actor, skill.target(self.actor, self.target))
+        if event.key == pygame.K_5:
+            if len(self.actor.skill_skills) > 2:
+                skill = self.actor.skill_skills[2]
+                skill.action(self.actor, skill.target(self.actor, self.target))
         super(GameHandler, self).handle_keyboard_event(event)
 
     def handle_custom_event(self, event):

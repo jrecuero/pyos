@@ -82,10 +82,24 @@ class GravityBoard(GridBoard):
         """copy_color copies the first color for all cells in the second
         color.
         """
+        result = 0
         for cell in [
             c for row in self.play_cells for c in row if c and c.color == from_color
         ]:
+            result += 1
             cell.color = to_color
+        return result
+
+    def color_to_empty(self, color):
+        """color_to_move changes all cells with the given color to empty cells.
+        """
+        result = 0
+        for rindex, row in enumerate(self.play_cells):
+            for cindex, cell in enumerate(row):
+                if cell and cell.color == color:
+                    result += 1
+                    self.play_cells[rindex][cindex] = None
+        return result
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.

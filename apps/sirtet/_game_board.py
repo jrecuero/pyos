@@ -65,6 +65,8 @@ class GameBoard(GravityBoard):
         GEvent.scene_event(GEvent.NEXT, source=self.get_next_piece_at())
 
     def get_next_piece_at(self, x=0, y=0):
+        """get_next_piece_at adds a new actor/piece at the given position.
+        """
         sprite = GObject("next", x, y, CELL_SIZE * 3, CELL_SIZE * 3)
         pygame.draw.rect(
             sprite.image, Color.BLACK, (0, 0, CELL_SIZE * 3, CELL_SIZE * 3), 1
@@ -114,6 +116,8 @@ class GameBoard(GravityBoard):
                     self.blow_empty()
                 elif event.action == "copy-color":
                     self.copy_color(*event.args)
+                elif event.action == "color-to-empty":
+                    self.color_to_empty(*event.args)
         super(GameBoard, self).handle_custom_event(event)
 
     def render(self, surface, **kwargs):

@@ -3,6 +3,10 @@ from pyplay import GObject, Color
 
 
 class GameActorDisplay(GObject):
+    """GameActorDisplay implements the graphical object that displays all
+    actor information in any scene.
+    """
+
     def __init__(self, actor, x, y, dx, dy, **kwargs):
         super(GameActorDisplay, self).__init__("display-actor", x, y, dx, dy, **kwargs)
         self.actor = actor
@@ -19,8 +23,12 @@ class GameActorDisplay(GObject):
         self.skill_skills_surface = pygame.Surface((150, 50))
 
     def update(self, surface, **kwargs):
+        """update calls update method for all scenes and  graphical objects.
+        """
         text_pos = (10, 10, 50, 50)
-        self.text_actor = self.font.render(f"{self.actor.name}", True, self.color)
+        self.text_actor = self.font.render(
+            f"[{self.actor.level}] {self.actor.name}", True, self.color
+        )
         self.image.fill((255, 255, 255, 0))
         self.text_health = self.font.render(f"{self.actor.health}", True, Color.BLACK)
         self.damage_surface.fill(self.actor.get_damage_color())
