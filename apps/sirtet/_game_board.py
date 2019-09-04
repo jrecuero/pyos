@@ -2,6 +2,7 @@ import random
 import pygame
 from pyplay import Color, GObject, GEvent
 from pyplay.gobject.grid import GravityBoard, TriShape
+from _game_tools import CELL_SIZE
 
 pieces = []
 pieces.append({"piece": [[0, 1, 1], [0, 1, 0], [0, 1, 0]], "rotation": True})
@@ -36,8 +37,8 @@ def next_piece():
         4,
         0,
         next_one["piece"],
-        50,
-        50,
+        CELL_SIZE,
+        CELL_SIZE,
         color=next_color(),
         rotation=next_one["rotation"],
     )
@@ -61,18 +62,13 @@ class GameBoard(GravityBoard):
         else:
             self.add_gobject(next_piece())
         self.the_next_piece = next_piece()
-        # next_piece_event = pygame.event.Event(
-        #     GEvent.ENGINE,
-        #     subtype=GEvent.NEXT,
-        #     dest=GEvent.SCENE,
-        #     source=self.get_next_piece_at(),
-        # )
-        # pygame.event.post(next_piece_event)
         GEvent.scene_event(GEvent.NEXT, source=self.get_next_piece_at())
 
     def get_next_piece_at(self, x=0, y=0):
-        sprite = GObject("next", x, y, 150, 150)
-        pygame.draw.rect(sprite.image, Color.BLACK, (0, 0, 150, 150), 1)
+        sprite = GObject("next", x, y, CELL_SIZE * 3, CELL_SIZE * 3)
+        pygame.draw.rect(
+            sprite.image, Color.BLACK, (0, 0, CELL_SIZE * 3, CELL_SIZE * 3), 1
+        )
         for cell in self.the_next_piece.cells:
             x = (cell.x - 4) * cell.dx
             y = cell.y * cell.dy
@@ -86,16 +82,10 @@ class GameBoard(GravityBoard):
             pygame.time.set_timer(GEvent.T_GRAVITY, self.pause_timer)
             if self.pause_timer:
                 self.pause_timer = 0
-                # pause_event = pygame.event.Event(
-                #     GEvent.ENGINE, subtype=GEvent.PAUSE, source=False
-                # )
                 GEvent.engine_event(GEvent.PAUSE, source=False)
                 self.running = True
             else:
                 self.pause_timer = self.gravity_timer
-                # pause_event = pygame.event.Event(
-                #     GEvent.ENGINE, subtype=GEvent.PAUSE, source=True
-                # )
                 GEvent.engine_event(GEvent.PAUSE, source=True)
                 self.running = False
             # pygame.event.post(pause_event)

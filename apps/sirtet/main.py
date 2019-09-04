@@ -3,6 +3,7 @@ import os
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
+from _game_tools import CELL_SIZE, XSIZE_CELLS, YSIZE_CELLS, YSIZE_THRESHOLD
 from _game_board import GameBoard
 from _game_scene import GameScene
 from _game_handler import GameHandler
@@ -10,8 +11,7 @@ from _game_handler import GameHandler
 
 SCREEN_SIZE = (1200, 850)
 BOARD_ORIGIN = {"x": 50, "y": 50}
-BOARD_SIZE = {"dx": 450, "dy": 700}
-CSIZE = 50
+BOARD_SIZE = {"dx": CELL_SIZE * XSIZE_CELLS, "dy": CELL_SIZE * YSIZE_CELLS}
 
 
 def _create_game(surface):
@@ -26,14 +26,13 @@ def _create_game(surface):
         BOARD_ORIGIN["y"],
         BOARD_SIZE["dx"],
         BOARD_SIZE["dy"],
-        CSIZE,
+        CELL_SIZE,
         outline=1,
+        threshold=YSIZE_THRESHOLD,
         gravity_timer=400,
     )
     board.next_piece()
     scene.add_gobject(board)
-    # scene.next_piece = board.get_next_piece_at(550, 50)
-    # scene.add_gobject(scene.next_piece)
     scene.add_gobject(gh.console)
     scene.add_gobject(gh.gstat.gtext_total_lines)
     display_actor = gh.actor.gdisplay()

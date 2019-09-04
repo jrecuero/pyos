@@ -3,7 +3,7 @@ from pyplay import GHandler, Color, GEvent
 from pyplay.gobject import GText
 from _game_stat import GameStat
 from _game_actor import GameActor
-from _game_skill import GameSkillHeal, GameSkillDefenseUp, GameSkillDamageUp
+import _game_skill as gs
 
 
 class Actor(GameActor):
@@ -16,9 +16,11 @@ class Actor(GameActor):
         self.set_play_damage(Color.RED)
         self.set_play_defense(Color.BLUE)
         self.set_play_skill(Color.GREEN)
-        self.damage_skills.append(GameSkillDamageUp(Color.RED))
-        self.defense_skills.append(GameSkillDefenseUp(Color.BLUE))
-        self.skill_skills.append(GameSkillHeal(Color.GREEN))
+        self.damage_skills.append(gs.GameSkillDamageUp(Color.RED))
+        self.defense_skills.append(gs.GameSkillDefenseUp(Color.BLUE))
+        self.skill_skills.append(gs.GameSkillHeal(Color.GREEN))
+        self.skill_skills.append(gs.GameSkillGreatHeal(Color.GREEN))
+        self.skill_skills.append(gs.GameSkillMegaHeal(Color.GREEN))
 
 
 class Target(GameActor):
@@ -103,19 +105,8 @@ class GameHandler(GHandler):
         if target.health <= 0:
             self.targets.remove(target)
             if len(self.targets):
-                # new_target = pygame.event.Event(
-                #     GEvent.ENGINE,
-                #     subtype=GEvent.CREATE,
-                #     dest=GEvent.SCENE,
-                #     source=self.targets[0].gdisplay(),
-                # )
-                # pygame.event.post(new_target)
                 GEvent.scene_event(GEvent.CREATE, source=self.targets[0].gdisplay())
         if len(self.targets) == 0:
-            # end_event = pygame.event.Event(
-            #     GEvent.ENGINE, subtype=GEvent.END, winner="actor"
-            # )
-            # pygame.event.post(end_event)
             GEvent.engine_event(GEvent.END, winner="actor")
         self.check_skill_actions_for_lines(len(lines), color_dict)
 
