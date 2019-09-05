@@ -26,10 +26,16 @@ class GText(GObject):
 
     @property
     def message(self):
+        """message property returns the string to be displayed by the graphical
+        text object.
+        """
         return self._message
 
     @message.setter
     def message(self, val):
+        """message setters sets the string to be displayed, it cleans any
+        previous text from the surface and update surface instance.
+        """
         self._message = val
         self.gtext = self.font.render(self._message, True, self.color)
         self.rect = self.gtext.get_rect()

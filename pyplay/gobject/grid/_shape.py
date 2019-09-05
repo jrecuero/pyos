@@ -1,17 +1,17 @@
 import pygame
-from ..._gid import new_gid
+from ..._gid import Gid
 from ..._gevent import GEvent
 from ..._color import Color
 from ..._move import Move
 from ._collision_box import CollisionBox
 
 
-class Shape:
+class Shape(Gid):
     """Shape represents a collection of cells to be displayed in a grid board.
     """
 
     def __init__(self, name, x, y, xcells, ycells, xsize, ysize, cells=None, **kwargs):
-        self.__gid = new_gid()
+        super(Shape, self).__init__()
         self.name = name
         self.gridx = x
         self.gridy = y
@@ -40,10 +40,6 @@ class Shape:
         for cell in self.cells:
             cell.incr_xy(self.gridx, self.gridy)
             cell.move = self.move
-
-    @property
-    def gid(self):
-        return self.__gid
 
     def __str__(self):
         return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.gridx} {self.gridy} {self.cells}"

@@ -46,35 +46,54 @@ class GObject(pygame.sprite.Sprite):
 
     @property
     def gid(self):
+        """gid property returns the graphical id.
+        """
         return self.__gid
 
     @property
     def x(self):
+        """x property returns the graphical object position in the X-axis.
+        """
         return self._x
 
     @x.setter
     def x(self, val):
+        """x setter sets the graphical object position in the X-axis and sync
+        that with the rectangle that contains the object.
+        """
         self._x = int(val)
         self.rect.x = self._x
 
     @property
     def y(self):
+        """y property returns the graphical object position in the y-axis.
+        """
         return self._y
 
     @y.setter
     def y(self, val):
+        """y setter sets the graphical object position in the Y-axis and sync
+        that with the rectangle that contains the object.
+        """
         self._y = int(val)
         self.rect.y = self._y
 
     @property
     def dx(self):
+        """dx property returns the graphical object width or X-axis size.
+        """
         return self._dx
 
     @property
     def dy(self):
+        """dy property returns the graphical object height or Y-axis size.
+        """
         return self._dy
 
     def dxdy(self, dx=None, dy=None):
+        """dxdy allows to set the graphical object width and height at the
+        same time, X-axis and Y-axis dimensions.
+        """
         self._dx = int(dx) if dx is not None else self._dx
         self._dy = int(dy) if dy is not None else self._dy
         self.image = pygame.transform.scale(self.image, (self._dx, self._dy))

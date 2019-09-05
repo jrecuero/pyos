@@ -1,7 +1,6 @@
 import pygame
 
 # from ..._loggar import log
-from ..._gevent import GEvent
 from ._cell import Cell
 from ._shape import Shape
 
@@ -23,7 +22,6 @@ class TriShape(Shape):
         one in the matrix provided.
         """
         self.cells = []
-        # r, c = y, x
         r, c = 0, 0
         for row in self._matrix:
             for col in row:
@@ -33,7 +31,6 @@ class TriShape(Shape):
                     )
                 c += 1
             r += 1
-            # c = x
             c = 0
 
     def handle_keyboard_event(self, event):
@@ -54,5 +51,3 @@ class TriShape(Shape):
             self.move_actions.append({"call": self.rotate_anticlockwise, "args": ()})
         elif event.key == pygame.K_SPACE:
             self.gravity_move(1)
-            # gravity_event = pygame.event.Event(GEvent.T_GRAVITY)
-            # pygame.event.post(gravity_event)

@@ -87,6 +87,9 @@ class Cell:
     def update(self, surface, **kwargs):
         """update provides any functionality to be done every tick.
         """
+        # dx_move and dy_move are required in order to sync non-grid
+        # movement with grid positioning. That allows objects to move any
+        # distance but keep proper position in the grid.
         if self.move.x:
             self.x += self.move.x
             self.dx_move += abs(self.move.x)

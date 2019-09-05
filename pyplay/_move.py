@@ -20,14 +20,21 @@ class Move:
 
     @property
     def x(self):
+        """x property returns the X-axis movement component.
+        """
         return self.vector.x
 
     @property
     def y(self):
+        """y property returns the Y-axis movement component.
+        """
         return self.vector.y
 
     @property
     def speed(self):
+        """speed property returns the value for _speed attribute. This is the
+        measure for the movement.
+        """
         return self.__speed
 
     @speed.setter
@@ -70,9 +77,6 @@ class Move:
     def reverse(self):
         """reverse changes the vector to the oposite direction and sense.
         """
-        # vector = self.vector.reflect(self.vector)
-        # self.vector.x = round(vector.x)
-        # self.vector.y = round(vector.y)
         self.vector.x = self.vector.x * (-1)
         self.vector.y = self.vector.y * (-1)
         return self.vector

@@ -1,28 +1,22 @@
 import pygame
+from ._gid import Gid
 
 
-class Scene:
+class Scene(Gid):
     """Scene class identifies a pyplay scene. A scene can contain multiple
     elements like boards, objects, ...
     Scene will handle all those instances, calling proper update and render
     for each of them.
     """
 
-    __GID = 0
-
     def __init__(self, name, surface, **kwargs):
-        Scene.__GID += 1
-        self.__gid = Scene.__GID
+        super(Scene, self).__init__()
         self.name = name
         self.surface = surface
         self.gobjects = pygame.sprite.Group()
         self.timers = []
         self.enable = kwargs.get("enable", True)
         self.visible = kwargs.get("visible", True)
-
-    @property
-    def gid(self):
-        return self.__gid
 
     def __str__(self):
         return f"[{self.gid}] : {self.__class__.__name__}@{self.name}"

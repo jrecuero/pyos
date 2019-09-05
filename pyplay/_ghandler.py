@@ -56,18 +56,6 @@ class GHandler:
         """
         self.hscene.handle_custom_event(event)
 
-    # def handle_these_events(self, events):
-    #     """handle_these_events should process the given list of events. That
-    #     list can contains custom or pygame events.
-    #     """
-    #     pass
-    #
-    # def handle_these_custom_events(self, events):
-    #     """handle_these_custom_events should process the given list of custom
-    #     events.
-    #     """
-    #     pass
-
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         Keyboard events are passed to the active scene to be handle.

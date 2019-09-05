@@ -53,6 +53,7 @@ class GameBoard(GravityBoard):
         super(GameBoard, self).__init__(name, x, y, dx, dy, xsize, ysize, **kwargs)
         self.pause_timer = 0
         self.the_next_piece = None
+        self.total_pieces = 0
 
     def next_piece(self):
         """next_piece adds a new actor/piece to the board.
@@ -105,6 +106,7 @@ class GameBoard(GravityBoard):
                 event, GEvent.BOARD
             ):
                 self.next_piece()
+                self.total_pieces += 1
             elif event.subtype == GEvent.DELETE:
                 pass
             elif event.subtype == GEvent.SKILL and GEvent.check_destination(

@@ -15,4 +15,6 @@ class Gid:
 
     @property
     def gid(self):
+        """gid property returns the graphical id.
+        """
         return self.__gid
