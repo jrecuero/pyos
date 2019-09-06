@@ -128,7 +128,9 @@ class GameHandler(GHandler):
                     available_skills.append(skill)
             call_skill = random.choice(available_skills)
             if call_skill:
-                call_skill(self.target, call_skill.target(self.targer, self.actor))
+                call_skill.action(
+                    self.target, call_skill.target(self.target, self.actor)
+                )
                 self.gobj_console.message = f"> target calls {call_skill}"
 
     def handle_completed_lines(self, lines):

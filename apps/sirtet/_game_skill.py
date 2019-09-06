@@ -159,16 +159,16 @@ class GameSkillHeal(GameSkill):
 
 class GameSkillGreatHeal(GameSkillHeal):
     def __init__(self, color, **kwargs):
-        super(GameSkillGreatHeal, self).__init__(
-            "great-heal", color, 100, heal=50, **kwargs
-        )
+        super(GameSkillGreatHeal, self).__init__(color, heal=50, **kwargs)
+        self.name = "great-heal"
+        self.threshold = 100
 
 
 class GameSkillMegaHeal(GameSkill):
     def __init__(self, color, **kwargs):
-        super(GameSkillMegaHeal, self).__init__(
-            "mega-heal", color, 250, heal=500, **kwargs
-        )
+        super(GameSkillMegaHeal, self).__init__(color, heal=500, **kwargs)
+        self.name = "mega-heal"
+        self.threshold = 250
 
 
 class GameSkillDefenseUp(GameSkill):

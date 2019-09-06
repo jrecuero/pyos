@@ -1,6 +1,8 @@
 import pygame
 from pyplay import GObject, Color
 
+BLACKY = (64, 64, 64)
+
 
 class GameActorDisplay(GObject):
     """GameActorDisplay implements the graphical object that displays all
@@ -33,19 +35,19 @@ class GameActorDisplay(GObject):
         self.text_health = self.font.render(f"{self.actor.health}", True, Color.BLACK)
         self.surface_damage.fill(self.actor.get_damage_color())
         self.text_damage = self.font.render(
-            f"{self.actor.damage}/{self.actor.skill_colors[self.damage_color]}",
+            f"{self.actor.damage}/{self.actor.counter_colors_available[self.damage_color]}",
             True,
             Color.WHITE,
         )
         self.surface_defense.fill(self.actor.get_defense_color())
         self.text_defense = self.font.render(
-            f"{self.actor.defense}/{self.actor.skill_colors[self.defense_color]}",
+            f"{self.actor.defense}/{self.actor.counter_colors_available[self.defense_color]}",
             True,
             Color.WHITE,
         )
         self.surface_mind.fill(self.actor.get_mind_color())
         self.text_mind = self.font.render(
-            f"{self.actor.mind}/{self.actor.skill_colors[self.mind_color]}",
+            f"{self.actor.mind}/{self.actor.counter_colors_available[self.mind_color]}",
             True,
             Color.WHITE,
         )
@@ -54,7 +56,7 @@ class GameActorDisplay(GObject):
         pygame.draw.rect(
             self.surface_health, (0, 255, 0, 0), (0, 0, 50, int(health_delta))
         )
-        pygame.draw.rect(self.surface_health, Color.BLACK, (0, 0, 50, 50), 1)
+        pygame.draw.rect(self.surface_health, BLACKY, (0, 0, 50, 50), 1)
 
         for skill in self.actor.damage_skills:
             color = skill.color
@@ -68,9 +70,7 @@ class GameActorDisplay(GObject):
                     self.surface_damage_skills, (0, 255, 0), (0, 0, 50, 50), 5
                 )
             else:
-                pygame.draw.rect(
-                    self.surface_damage_skills, Color.BLACK, (0, 0, 50, 50), 5
-                )
+                pygame.draw.rect(self.surface_damage_skills, BLACKY, (0, 0, 50, 50), 5)
         for skill in self.actor.defense_skills:
             color = skill.color
             self.surface_defense_skills.fill(color)
@@ -83,9 +83,7 @@ class GameActorDisplay(GObject):
                     self.surface_defense_skills, (0, 255, 0), (0, 0, 50, 50), 5
                 )
             else:
-                pygame.draw.rect(
-                    self.surface_defense_skills, Color.BLACK, (0, 0, 50, 50), 5
-                )
+                pygame.draw.rect(self.surface_defense_skills, BLACKY, (0, 0, 50, 50), 5)
         start_x = 0
         for index, skill in enumerate(self.actor.mind_skills):
             color = skill.color
@@ -99,7 +97,7 @@ class GameActorDisplay(GObject):
                 )
             else:
                 pygame.draw.rect(
-                    self.surface_mind_skills, Color.BLACK, (start_x, 0, 50, 50), 5
+                    self.surface_mind_skills, BLACKY, (start_x, 0, 50, 50), 5
                 )
             start_x += 50
 
