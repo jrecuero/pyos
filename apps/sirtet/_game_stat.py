@@ -17,7 +17,6 @@ class GameStat:
 
     def __init__(self):
         self.total_lines = 0
-        # self.color_cells = {Color.color_to_str(color): 0 for color in self.colors}
         self.color_cells = GameStat.new_play_colors()
         self.gtext_colors = {}
         row = 300

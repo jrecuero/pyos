@@ -39,29 +39,30 @@ class GameSkill:
         self.threshold = threshold
         self.glevel = GameLevel()
         self._target = "self"
+        self.expire = kwargs.get("expire", None)
+
+    def __str__(self):
+        return f"{self.name} {self.color_str} {self.threshold} {self._target}"
 
     def target(self, source, target):
         """target returns if skill target is 'self' or 'target'.
         """
-        if self.target == "self":
-            return source
-        else:
-            return target
+        return source if self.target == "self" else target
 
     def can_run(self, source):
         """can_run checks if the skill is available to be executed.
         """
-        colors = source.skill_colors[self.color_str]
+        colors = source.counter_colors_available[self.color_str]
         return colors > self.threshold
 
-    def start(self, source=None):
-        """start sets up the skill to be used in a match.
+    def start_match(self, source=None):
+        """start_match sets up the skill to be used in a match.
         """
         pass
 
-    def end(self, source=None):
-        """end cleans up anything related with the skill at the end of the
-        match.
+    def end_match(self, source=None):
+        """end_match cleans up anything related with the skill at the end of
+        the match.
         """
         pass
 
@@ -92,7 +93,7 @@ class GameSkillBlowColor(GameSkill):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            source.skill_colors[self.color_str] -= self.threshold
+            source.counter_colors_available[self.color_str] -= self.threshold
             GEvent.board_event(
                 GEvent.SKILL, action="blow-color", args=(self.blow_color,)
             )
@@ -106,7 +107,7 @@ class GameSkillBlowEmpty(GameSkill):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            source.skill_colors[self.color_str] -= self.threshold
+            source.counter_colors_available[self.color_str] -= self.threshold
             GEvent.board_event(GEvent.SKILL, action="blow-empty", args=())
 
 
@@ -120,7 +121,7 @@ class GameSkillCopyColor(GameSkill):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            source.skill_colors[self.color_str] -= self.threshold
+            source.counter_colors_available[self.color_str] -= self.threshold
             GEvent.board_event(
                 GEvent.SKILL, action="copy-color", args=(self.from_color, self.to_color)
             )
@@ -137,7 +138,7 @@ class GameSkillColorToEmpty(GameSkill):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            source.skill_colors[self.color_str] -= self.threshold
+            source.counter_colors_available[self.color_str] -= self.threshold
             GEvent.board_event(
                 GEvent.SKILL, action="color-to-empty", args=(self.from_color,)
             )
@@ -146,101 +147,101 @@ class GameSkillColorToEmpty(GameSkill):
 class GameSkillHeal(GameSkill):
     def __init__(self, color, **kwargs):
         super(GameSkillHeal, self).__init__("heal", color, 25, **kwargs)
+        self.heal_value = kwargs.get("heal", 10)
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            target.health += 10
-            source.skill_colors[self.color_str] -= self.threshold
+            target.health += self.heal_value
+            source.counter_colors_available[self.color_str] -= self.threshold
 
 
-class GameSkillGreatHeal(GameSkill):
+class GameSkillGreatHeal(GameSkillHeal):
     def __init__(self, color, **kwargs):
-        super(GameSkillGreatHeal, self).__init__("great-heal", color, 100, **kwargs)
-
-    def action(self, source, target):
-        """can_run checks if the skill is available to be executed.
-        """
-        if self.can_run(source):
-            target.health += 50
-            source.skill_colors[self.color_str] -= self.threshold
+        super(GameSkillGreatHeal, self).__init__(
+            "great-heal", color, 100, heal=50, **kwargs
+        )
 
 
 class GameSkillMegaHeal(GameSkill):
     def __init__(self, color, **kwargs):
-        super(GameSkillMegaHeal, self).__init__("mega-heal", color, 250, **kwargs)
-
-    def action(self, source, target):
-        """can_run checks if the skill is available to be executed.
-        """
-        if self.can_run(source):
-            target.health += 500
-            source.skill_colors[self.color_str] -= self.threshold
+        super(GameSkillMegaHeal, self).__init__(
+            "mega-heal", color, 250, heal=500, **kwargs
+        )
 
 
 class GameSkillDefenseUp(GameSkill):
     def __init__(self, color, **kwargs):
-        super(GameSkillDefenseUp, self).__init__("defense-up", color, 50, **kwargs)
+        super(GameSkillDefenseUp, self).__init__(
+            "defense-up", color, 50, expire=5, **kwargs
+        )
+        self.defense_value = kwargs.get("defense", 1)
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            target._defense.add_buff(1)
-            source.skill_colors[self.color_str] -= self.threshold
-            self.clean_up_event(source, target, tick={"lines": 5})
+            target._defense.add_buff(self.defense_value)
+            source.counter_colors_available[self.color_str] -= self.threshold
+            self.clean_up_event(source, target, expire={"lines": self.expire})
 
     def clean_up(self, source, target):
         """clean_up proceeds to reverse any action triggered by the skill.
         """
 
         def _clean_up():
-            target._defense.del_buff(1)
+            target._defense.del_buff(self.defense_value)
 
         return _clean_up
 
 
 class GameSkillDamageUp(GameSkill):
     def __init__(self, color, **kwargs):
-        super(GameSkillDamageUp, self).__init__("damage-up", color, 100, **kwargs)
+        super(GameSkillDamageUp, self).__init__(
+            "damage-up", color, 100, expire=5, **kwargs
+        )
+        self.damage_value = kwargs.get("damage", 1)
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            target._damage.add_buff(1)
-            source.skill_colors[self.color_str] -= self.threshold
-            self.clean_up_event(source, target, tick={"lines": 5})
+            target._damage.add_buff(self.damage_value)
+            source.counter_colors_available[self.color_str] -= self.threshold
+            self.clean_up_event(source, target, expire={"lines": self.expire})
 
     def clean_up(self, source, target):
         """clean_up proceeds to reverse any action triggered by the skill.
         """
 
         def _clean_up():
-            target._damage.del_buff(1)
+            target._damage.del_buff(self.damave_value)
 
         return _clean_up
 
 
-class GameSkillSkillUp(GameSkill):
+class GameSkillMindUp(GameSkill):
     def __init__(self, color, **kwargs):
-        super(GameSkillSkillUp, self).__init__("skill-up", color, 100, **kwargs)
+        super(GameSkillMindUp, self).__init__(
+            "skill-up", color, 100, expire=5, **kwargs
+        )
+        self.mind_value = kwargs.get("mind", 1)
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            target._skill.add_buff(1)
-            source.skill_colors[self.color_str] -= self.threshold
-            self.clean_up_event(source, target, tick={"lines": 5})
+            target._skill.add_buff(self.mind_value)
+            source.counter_colors_available[self.color_str] -= self.threshold
+            self.clean_up_event(source, target, expire={"lines": self.expire})
 
     def clean_up(self, source, target):
         """clean_up proceeds to reverse any action triggered by the skill.
         """
 
         def _clean_up():
-            target._skill.del_buff(1)
+            target._skill.del_buff(self.mind_value)
 
         return _clean_up
 
@@ -248,23 +249,24 @@ class GameSkillSkillUp(GameSkill):
 class GameSkillDamageBuffUp(GameSkill):
     def __init__(self, color, **kwargs):
         super(GameSkillDamageBuffUp, self).__init__(
-            "damage-buff-up", color, 50, **kwargs
+            "damage-buff-up", color, 50, expire=5, **kwargs
         )
+        self.damage_value = kwargs.get("damage", 1)
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            target.damage_buffs.append(1)
-            source.skill_colors[self.color_str] -= self.threshold
-            self.clean_up_event(source, target, tick={"lines": 5})
+            target.damage_buffs.append(self.damage_value)
+            source.counter_colors_available[self.color_str] -= self.threshold
+            self.clean_up_event(source, target, expire={"lines": self.expire})
 
     def clean_up(self, source, target):
         """clean_up proceeds to reverse any action triggered by the skill.
         """
 
         def _clean_up():
-            target.damage_buffs.remove(1)
+            target.damage_buffs.remove(self.damage_value)
 
         return _clean_up
 
@@ -272,45 +274,49 @@ class GameSkillDamageBuffUp(GameSkill):
 class GameSkillDefenseBuffUp(GameSkill):
     def __init__(self, color, **kwargs):
         super(GameSkillDefenseBuffUp, self).__init__(
-            "defense-buff-up", color, 50, **kwargs
+            "defense-buff-up", color, 50, expire=5, **kwargs
         )
+        self.defense_value = kwargs.get("defense", 1)
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            target.defense_buffs.append(1)
-            source.skill_colors[self.color_str] -= self.threshold
-            self.clean_up_event(source, target, tick={"lines": 5})
+            target.defense_buffs.append(self.defense_value)
+            source.counter_colors_available[self.color_str] -= self.threshold
+            self.clean_up_event(source, target, expire={"lines": self.expire})
 
     def clean_up(self, source, target):
         """clean_up proceeds to reverse any action triggered by the skill.
         """
 
         def _clean_up():
-            target.defense_buffs.remove(1)
+            target.defense_buffs.remove(self.defense_value)
 
         return _clean_up
 
 
-class GameSkillSkillBuffUp(GameSkill):
+class GameSkillMindBuffUp(GameSkill):
     def __init__(self, color, **kwargs):
-        super(GameSkillSkillBuffUp, self).__init__("skill-buff-up", color, 50, **kwargs)
+        super(GameSkillMindBuffUp, self).__init__(
+            "skill-buff-up", color, 50, expire=5, **kwargs
+        )
+        self.mind_value = kwargs.get("mind", 1)
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            target.skill_buffs.append(1)
-            source.skill_colors[self.color_str] -= self.threshold
-            self.clean_up_event(source, target, tick={"lines": 5})
+            target.mind_buffs.append(self.mind_value)
+            source.counter_colors_available[self.color_str] -= self.threshold
+            self.clean_up_event(source, target, expire={"lines": self.expire})
 
     def clean_up(self, source, target):
         """clean_up proceeds to reverse any action triggered by the skill.
         """
 
         def _clean_up():
-            target.skill_buffs.remove(1)
+            target.mind_buffs.remove(self.mind_value)
 
         return _clean_up
 
@@ -319,10 +325,11 @@ class GameSkillRawDamage(GameSkill):
     def __init__(self, color, **kwargs):
         super(GameSkillRawDamage, self).__init__("raw-damage", color, 25, **kwargs)
         self._target = "target"
+        self.damage_value = kwargs.get("damage", 10)
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
-            target.health -= 10
-            source.skill_colors[self.color_str] -= self.threshold
+            target.health -= self.damage_value
+            source.counter_colors_available[self.color_str] -= self.threshold

@@ -1,4 +1,5 @@
 import pygame
+import random
 from pyplay import GHandler, Color, GEvent
 from pyplay.gobject import GText
 from _game_stat import GameStat
@@ -15,13 +16,13 @@ class Actor(GameActor):
         self.max_skill = 1
         self.set_play_damage(Color.RED)
         self.set_play_defense(Color.BLUE)
-        self.set_play_skill(Color.GREEN)
+        self.set_play_mind(Color.GREEN)
         self.damage_skills.append(gs.GameSkillRawDamage(Color.RED))
         self.defense_skills.append(gs.GameSkillDefenseUp(Color.BLUE))
-        self.skill_skills.append(gs.GameSkillBlowEmpty(Color.GREEN))
-        self.skill_skills.append(gs.GameSkillHeal(Color.GREEN))
-        self.skill_skills.append(gs.GameSkillGreatHeal(Color.GREEN))
-        # self.skill_skills.append(gs.GameSkillMegaHeal(Color.GREEN))
+        self.mind_skills.append(gs.GameSkillBlowEmpty(Color.GREEN))
+        self.mind_skills.append(gs.GameSkillHeal(Color.GREEN))
+        self.mind_skills.append(gs.GameSkillGreatHeal(Color.GREEN))
+        # self.mind_skills.append(gs.GameSkillMegaHeal(Color.GREEN))
 
 
 class Target(GameActor):
@@ -31,7 +32,10 @@ class Target(GameActor):
         self.max_damage = 2
         self.set_play_damage(Color.BLACK)
         self.set_play_defense(Color.BLACK)
-        self.set_play_skill(Color.BLACK)
+        self.set_play_mind(Color.BLACK)
+        self.damage_skills.append(gs.GameSkillRawDamage(Color.BLACK))
+        self.defense_skills.append(gs.GameSkillDefenseUp(Color.BLACK))
+        self.mind_skills.append(gs.GameSkillHeal(Color.BLACK))
 
 
 class GameHandler(GHandler):
@@ -41,7 +45,7 @@ class GameHandler(GHandler):
     def __init__(self, name, surface, **kwargs):
         super(GameHandler, self).__init__(name, surface, **kwargs)
         self.gstat = GameStat()
-        self.console = GText("console", 10, 800, f"> {' ' * 50}")
+        self.gobj_console = GText("console", 10, 800, f"> {' ' * 50}")
         self.actor = Actor()
         self.targets = [Target("t1"), Target("t2"), Target("t3")]
         self.skill_actions = {"lines": [], "timer": [], "pieces": []}
@@ -54,6 +58,22 @@ class GameHandler(GHandler):
         if len(self.targets):
             return self.targets[0]
         return None
+
+    def start_match(self):
+        """start_match proceeds to start a match and it will call all
+        objects involved in the match like skills, ...
+        """
+        self.actor.start_match()
+        for target in self.targets:
+            target.start_match()
+
+    def end_match(self):
+        """end_match proceeds to end a match and it will call all objects
+        that were involved in the match like skills.
+        """
+        self.actor.end_match()
+        for target in self.targets:
+            target.end_match()
 
     def get_actor_damage(self, actor, color_dict):
         """get_actor_damage returns the damage deal for the given actor with
@@ -73,22 +93,22 @@ class GameHandler(GHandler):
         defense = actor.defense_for(defense_value)
         return defense
 
-    def get_actor_skill(self, actor, color_dict):
-        """get_actor_skill returns the skill for the given actor with the
+    def get_actor_mind(self, actor, color_dict):
+        """get_actor_mind returns the mind for the given actor with the
         pieces completed.
         """
-        skill_color = Color.color_to_str(actor.get_skill_color())
-        skill_value = color_dict[skill_color]
-        skill = actor.skill_for(skill_value)
-        return skill
+        mind_color = Color.color_to_str(actor.get_mind_color())
+        mind_value = color_dict[mind_color]
+        mind = actor.mind_for(mind_value)
+        return mind
 
     def check_skill_actions_for_lines(self, lines, color_dict):
         """check_skill_actions check for any skill action to be triggered when
         lines are being completed.
         """
         for sa in self.skill_actions["lines"][:]:
-            sa["tick"] -= lines
-            if sa["tick"] <= 0:
+            sa["expire"] -= lines
+            if sa["expire"] <= 0:
                 sa["action"](*sa["args"])
                 self.skill_actions["lines"].remove(sa)
 
@@ -96,7 +116,20 @@ class GameHandler(GHandler):
         """check_target_skills checks if the target can trigger any skill.
         """
         if self.target:
-            pass
+            available_skills = [None]
+            for skill in self.target.damage_skills:
+                if skill.can_run(self.target):
+                    available_skills.append(skill)
+            for skill in self.target.defense_skills:
+                if skill.can_run(self.target):
+                    available_skills.append(skill)
+            for skill in self.target.mind_skills:
+                if skill.can_run(self.target):
+                    available_skills.append(skill)
+            call_skill = random.choice(available_skills)
+            if call_skill:
+                call_skill(self.target, call_skill.target(self.targer, self.actor))
+                self.gobj_console.message = f"> target calls {call_skill}"
 
     def handle_completed_lines(self, lines):
         """handle_completed_lines handles lines that have been completed in the
@@ -116,7 +149,7 @@ class GameHandler(GHandler):
         target_damage = t_damage - actor_defense
         target_damage = target_damage if target_damage > 0 else 0
         self.actor.health = self.actor.health - target_damage
-        self.console.message = f"> Actor Damage {actor_damage} Defense {actor_defense}. Target Damage {t_damage} {target_damage}"
+        self.gobj_console.message = f"> Actor Damage {actor_damage} Defense {actor_defense}. Target Damage {t_damage} {target_damage}"
         if self.target.health <= 0:
             self.targets.remove(self.target)
             if len(self.targets):
@@ -139,16 +172,16 @@ class GameHandler(GHandler):
                 skill = self.actor.defense_skills[0]
                 skill.action(self.actor, skill.target(self.actor, self.target))
         if event.key == pygame.K_3:
-            if len(self.actor.skill_skills):
-                skill = self.actor.skill_skills[0]
+            if len(self.actor.mind_skills):
+                skill = self.actor.mind_skills[0]
                 skill.action(self.actor, skill.target(self.actor, self.target))
         if event.key == pygame.K_4:
-            if len(self.actor.skill_skills) > 1:
-                skill = self.actor.skill_skills[1]
+            if len(self.actor.mind_skills) > 1:
+                skill = self.actor.mind_skills[1]
                 skill.action(self.actor, skill.target(self.actor, self.target))
         if event.key == pygame.K_5:
-            if len(self.actor.skill_skills) > 2:
-                skill = self.actor.skill_skills[2]
+            if len(self.actor.mind_skills) > 2:
+                skill = self.actor.mind_skills[2]
                 skill.action(self.actor, skill.target(self.actor, self.target))
         super(GameHandler, self).handle_keyboard_event(event)
 
@@ -162,24 +195,24 @@ class GameHandler(GHandler):
                 self.handle_completed_lines(event.source)
             elif event.subtype == GEvent.END:
                 if event.winner == "actor":
-                    self.console.message = f"> GAME OVER. You WON!!!"
+                    self.gobj_console.message = f"> GAME OVER. You WON!!!"
                 else:
-                    self.console.message = f"> GAME OVER. You LOST!!!"
+                    self.gobj_console.message = f"> GAME OVER. You LOST!!!"
                 self.running = False
             elif event.subtype == GEvent.PAUSE:
                 if event.source:
-                    self.console.message = f"> PAUSED"
+                    self.gobj_console.message = f"> PAUSED"
                     self.running = False
                 else:
-                    self.console.message = f">"
+                    self.gobj_console.message = f">"
                     self.running = True
             elif event.subtype == GEvent.SKILL and GEvent.check_destination(
                 event, GEvent.HANDLER
             ):
-                if "lines" in event.tick.keys():
+                if "lines" in event.expire.keys():
                     self.skill_actions["lines"].append(
                         {
-                            "tick": event.tick["lines"],
+                            "expire": event.expire["lines"],
                             "action": event.action,
                             "args": event.args,
                         }

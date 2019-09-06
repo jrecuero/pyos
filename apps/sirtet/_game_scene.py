@@ -8,7 +8,7 @@ class GameScene(Scene):
 
     def __init__(self, surface, **kwargs):
         super(GameScene, self).__init__("game scene", surface, **kwargs)
-        self.next_piece = None
+        self.gobj_next_piece = None
         self.gtext_actor = None
         self.gtext_target = None
 
@@ -20,19 +20,19 @@ class GameScene(Scene):
         super(GameScene, self).handle_custom_event(event)
         if event.type == GEvent.ENGINE:
             if event.subtype == GEvent.NEXT:
-                if self.next_piece:
-                    self.del_gobject(self.next_piece)
-                self.next_piece = event.source
-                self.next_piece.x = 550
-                self.next_piece.y = 50
-                self.add_gobject(self.next_piece)
+                if self.gobj_next_piece:
+                    self.del_gobject(self.gobj_next_piece)
+                self.gobj_next_piece = event.source
+                self.gobj_next_piece.x = 550
+                self.gobj_next_piece.y = 50
+                self.add_gobject(self.gobj_next_piece)
             elif event.subtype == GEvent.CREATE:
                 if getattr(event, "dest", None) == GEvent.SCENE:
-                    self.del_gobject(self.display_target)
-                    self.display_target = event.source
-                    self.display_target.x = 550
-                    self.display_target.y = 550
-                    self.add_gobject(self.display_target)
+                    self.del_gobject(self.gobj_target)
+                    self.gobj_target = event.source
+                    self.gobj_target.x = 550
+                    self.gobj_target.y = 550
+                    self.add_gobject(self.gobj_target)
 
     def render(self, **kwargs):
         """render calls render method for all scene graphical objects.

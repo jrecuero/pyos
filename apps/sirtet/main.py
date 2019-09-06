@@ -3,7 +3,13 @@ import os
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
-from _game_tools import CELL_SIZE, XSIZE_CELLS, YSIZE_CELLS, YSIZE_THRESHOLD
+from _game_tools import (
+    CELL_SIZE,
+    XSIZE_CELLS,
+    YSIZE_CELLS,
+    YSIZE_THRESHOLD,
+    GRAVITY_TIMER,
+)
 from _game_board import GameBoard
 from _game_scene import GameScene
 from _game_handler import GameHandler
@@ -29,20 +35,20 @@ def _create_game(surface):
         CELL_SIZE,
         outline=1,
         threshold=YSIZE_THRESHOLD,
-        gravity_timer=400,
+        gravity_timer=GRAVITY_TIMER,
     )
     board.next_piece()
     scene.add_gobject(board)
-    scene.add_gobject(gh.console)
+    scene.add_gobject(gh.gobj_console)
     scene.add_gobject(gh.gstat.gtext_total_lines)
-    display_actor = gh.actor.gdisplay()
-    display_actor.x = 550
-    display_actor.y = 500
-    scene.add_gobject(display_actor)
-    scene.display_target = gh.targets[0].gdisplay()
-    scene.display_target.x = 550
-    scene.display_target.y = 550
-    scene.add_gobject(scene.display_target)
+    gobj_actor = gh.actor.gdisplay()
+    gobj_actor.x = 550
+    gobj_actor.y = 500
+    scene.add_gobject(gobj_actor)
+    scene.gobj_target = gh.targets[0].gdisplay()
+    scene.gobj_target.x = 550
+    scene.gobj_target.y = 550
+    scene.add_gobject(scene.gobj_target)
     for gtext in gh.gstat.gtext_colors.values():
         scene.add_gobject(gtext)
     gh.add_scene(scene)
@@ -58,9 +64,16 @@ def main():
     pygame.display.set_caption("SIRTET")
     surface = pygame.display.set_mode(SCREEN_SIZE)
     clock = pygame.time.Clock()
+
     # -> Create game handler, scenes and graphical objects.
     gh = _create_game(surface)
     # <-
+
+    # ->
+    # TODO: This should be called when a new match starts.
+    gh.start_match()
+    # <-
+
     while True:
         clock.tick(30)
         gh.start_tick()
@@ -85,6 +98,11 @@ def main():
         pygame.display.flip()
         # <-
         gh.end_tick()
+
+    # ->
+    # TODO: This should be called when a match ends.
+    gh.end_match()
+    # <-
 
 
 if __name__ == "__main__":

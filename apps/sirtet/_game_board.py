@@ -113,13 +113,13 @@ class GameBoard(GravityBoard):
                 event, GEvent.BOARD
             ):
                 if event.action == "blow-color":
-                    self.blow_color(*event.args)
+                    self.transform_blow_color(*event.args)
                 elif event.action == "blow-empty":
-                    self.blow_empty()
+                    self.transform_blow_empty()
                 elif event.action == "copy-color":
-                    self.copy_color(*event.args)
+                    self.transform_copy_color(*event.args)
                 elif event.action == "color-to-empty":
-                    self.color_to_empty(*event.args)
+                    self.transform_color_to_empty(*event.args)
         super(GameBoard, self).handle_custom_event(event)
 
     def render(self, surface, **kwargs):

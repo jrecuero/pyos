@@ -5,6 +5,9 @@ class GameActorAttr:
         self._real = max
         self._buffs = []
 
+    def __str__(self):
+        return f"{self.name} : {self._real} / {self._max} @ {self._buffs}"
+
     @property
     def real(self):
         """real property returns the actual value for the attribute at any

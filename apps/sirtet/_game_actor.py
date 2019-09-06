@@ -17,17 +17,17 @@ class GameActor(Gid):
         self._health = GameActorAttr("health", kwargs.get("health", 0))
         self._damage = GameActorAttr("damage", kwargs.get("damage", 0))
         self._defense = GameActorAttr("defense", kwargs.get("defense", 0))
-        self._skill = GameActorAttr("skill", kwargs.get("skill", 0))
+        self._mind = GameActorAttr("mind", kwargs.get("mind", 0))
         self.stats = GameActorStats()
-        self.play_colors = GameStat.new_play_colors()
-        self.skill_colors = GameStat.new_play_colors()
-        self.play_stats = {"damage": None, "defense": None, "skill": None}
+        self.counter_colors_all = GameStat.new_play_colors()
+        self.counter_colors_available = GameStat.new_play_colors()
+        self.attr_to_color = {"damage": None, "defense": None, "mind": None}
         self.damage_skills = []
         self.defense_skills = []
-        self.skill_skills = []
+        self.mind_skills = []
         self.damage_buffs = []
         self.defense_buffs = []
-        self.skill_buffs = []
+        self.mind_buffs = []
         self.glevel = GameLevel()
 
     @property
@@ -70,17 +70,17 @@ class GameActor(Gid):
         self._defense.real = value
 
     @property
-    def skill(self):
-        """skill property returns the real/actual value for the _skill
+    def mind(self):
+        """mind property returns the real/actual value for the _mind
         attribute.
         """
-        return self._skill.real
+        return self._mind.real
 
-    @skill.setter
-    def skill(self, value):
-        """skill setter sets the value for real skill.
+    @mind.setter
+    def mind(self, value):
+        """mind setter sets the value for real mind.
         """
-        self._skill.real = value
+        self._mind.real = value
 
     @property
     def max_health(self):
@@ -125,18 +125,18 @@ class GameActor(Gid):
         self._defense.real = value
 
     @property
-    def max_skill(self):
-        """max_skill returns the maximum health for the actor. It is
-        found as max attribute for _skill.
+    def max_mind(self):
+        """max_mind returns the maximum health for the actor. It is
+        found as max attribute for _mind.
         """
-        return self._skill.max
+        return self._mind.max
 
-    @max_skill.setter
-    def max_skill(self, value):
-        """max_skill setter updates the maximum and real skill.
+    @max_mind.setter
+    def max_mind(self, value):
+        """max_mind setter updates the maximum and real mind.
         """
-        self._skill.max = value
-        self._skill.real = value
+        self._mind.max = value
+        self._mind.real = value
 
     @property
     def level(self):
@@ -144,8 +144,17 @@ class GameActor(Gid):
         """
         return self.glevel.level
 
+    @property
+    def all_skills(self):
+        """all_skills property returns a list with all skills put together.
+        """
+        skills = self.damage_skills[:]
+        skills.extend(self.defense_skills)
+        skills.extend(self.mind_skills)
+        return skills
+
     def __str__(self):
-        return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.health.real} {self.damage.real} {self.defense.real} {self.skill.real}"
+        return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.health.real} {self.damage.real} {self.defense.real} {self.mind.real}"
 
     def gdisplay(self):
         """gdisplay returns the graphical sprite object to be added to a scene
@@ -160,47 +169,47 @@ class GameActor(Gid):
         if color_dict:
             self.stats.add_color_dict(color_dict)
             for k, v in color_dict.items():
-                self.play_colors[k] += v
-                self.skill_colors[k] += v
+                self.counter_colors_all[k] += v
+                self.counter_colors_available[k] += v
         else:
-            self.play_colors = GameStat.new_play_colors()
-            self.skill_colors = GameStat.new_play_colors()
+            self.counter_colors_all = GameStat.new_play_colors()
+            self.counter_colors_available = GameStat.new_play_colors()
 
     def set_play_damage(self, color):
         """set_play_damage sets the color to be used by the actor as damage
         color.
         """
-        self.play_stats["damage"] = color
+        self.attr_to_color["damage"] = color
 
     def set_play_defense(self, color):
         """set_play_defense sets the color to be used by the actor as defense
         color.
         """
-        self.play_stats["defense"] = color
+        self.attr_to_color["defense"] = color
 
-    def set_play_skill(self, color):
-        """set_play_skill sets the color to be used by the actor as skill
+    def set_play_mind(self, color):
+        """set_play_mind sets the color to be used by the actor as mind
         color.
         """
-        self.play_stats["skill"] = color
+        self.attr_to_color["mind"] = color
 
     def get_damage_color(self):
         """get_damage_color returns the color used by the actor as damage
         color.
         """
-        return self.play_stats["damage"]
+        return self.attr_to_color["damage"]
 
     def get_defense_color(self):
         """get_defense_color returns the color used by the actor as defense
         color.
         """
-        return self.play_stats["defense"]
+        return self.attr_to_color["defense"]
 
-    def get_skill_color(self):
-        """get_skill_color returns the color used by the actor as skill
+    def get_mind_color(self):
+        """get_mind_color returns the color used by the actor as mind
         color.
         """
-        return self.play_stats["skill"]
+        return self.attr_to_color["mind"]
 
     def damage_for(self, value):
         """damage_for returns the damage caused for the given number of cells
@@ -214,8 +223,22 @@ class GameActor(Gid):
         """
         return self.defense.real * value + sum(self.defense_buffs)
 
-    def skill_for(self, value):
-        """skill_for returns the skill caused for the given number of cells of
-        the actor skill color.
+    def mind_for(self, value):
+        """mind_for returns the mind caused for the given number of cells of
+        the actor mind color.
         """
-        return self.skill.real * value + sum(self.skill_buffs)
+        return self.mind.real * value + sum(self.mind_buffs)
+
+    def start_match(self):
+        """start_match proceeds to start a match and it will call all
+        objects involved in the match like skills, ...
+        """
+        for skill in self.all_skills:
+            skill.start_match(self)
+
+    def end_match(self):
+        """end_match proceeds to end a match and it will call all objects
+        that were involved in the match like skills.
+        """
+        for skill in self.all_skills:
+            skill.end_match(self)

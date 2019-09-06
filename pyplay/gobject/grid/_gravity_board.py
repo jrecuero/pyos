@@ -46,8 +46,8 @@ class GravityBoard(GridBoard):
             GEvent.engine_event(GEvent.COMPLETED, source=completed_lines)
         return completed_lines
 
-    def blow_color(self, color):
-        """blow_color removes all cells with the given color.
+    def transform_blow_color(self, color):
+        """transform_blow_color removes all cells with the given color.
         """
         blows = [0 for _ in range(len(self.play_cells[0]))]
         for index, row in enumerate(self.play_cells[::-1]):
@@ -63,8 +63,8 @@ class GravityBoard(GridBoard):
                     self.play_cells[rindex + blows[cindex]][cindex] = cell
         return sum(blows)
 
-    def blow_empty(self):
-        """blow_empty removes all empty cells.
+    def transform_blow_empty(self):
+        """transform_blow_empty removes all empty cells.
         """
         blows = [0 for _ in range(len(self.play_cells[0]))]
         for index, row in enumerate(self.play_cells[::-1]):
@@ -78,9 +78,9 @@ class GravityBoard(GridBoard):
                     self.play_cells[rindex + blows[cindex]][cindex] = cell
         return sum(blows)
 
-    def copy_color(self, from_color, to_color):
-        """copy_color copies the first color for all cells in the second
-        color.
+    def transform_copy_color(self, from_color, to_color):
+        """transform_copy_color copies the first color for all cells in the
+        second color.
         """
         result = 0
         for cell in [
@@ -90,8 +90,9 @@ class GravityBoard(GridBoard):
             cell.color = to_color
         return result
 
-    def color_to_empty(self, color):
-        """color_to_move changes all cells with the given color to empty cells.
+    def transform_color_to_empty(self, color):
+        """transform_color_to_empty changes all cells with the given color to
+        empty cells.
         """
         result = 0
         for rindex, row in enumerate(self.play_cells):
