@@ -131,7 +131,7 @@ class GameHandler(GHandler):
                 call_skill.action(
                     self.target, call_skill.target(self.target, self.actor)
                 )
-                self.gobj_console.message = f"> target calls {call_skill}"
+                self.gobj_console.message = f"> {skill}"
 
     def handle_completed_lines(self, lines):
         """handle_completed_lines handles lines that have been completed in the
@@ -169,22 +169,33 @@ class GameHandler(GHandler):
             if len(self.actor.damage_skills):
                 skill = self.actor.damage_skills[0]
                 skill.action(self.actor, skill.target(self.actor, self.target))
+                self.gobj_console.message = f"> {skill}"
         if event.key == pygame.K_2:
             if len(self.actor.defense_skills):
                 skill = self.actor.defense_skills[0]
                 skill.action(self.actor, skill.target(self.actor, self.target))
+                self.gobj_console.message = f"> {skill}"
         if event.key == pygame.K_3:
             if len(self.actor.mind_skills):
                 skill = self.actor.mind_skills[0]
                 skill.action(self.actor, skill.target(self.actor, self.target))
+                self.gobj_console.message = f"> {skill}"
         if event.key == pygame.K_4:
             if len(self.actor.mind_skills) > 1:
                 skill = self.actor.mind_skills[1]
                 skill.action(self.actor, skill.target(self.actor, self.target))
+                self.gobj_console.message = f"> {skill}"
         if event.key == pygame.K_5:
             if len(self.actor.mind_skills) > 2:
                 skill = self.actor.mind_skills[2]
                 skill.action(self.actor, skill.target(self.actor, self.target))
+                self.gobj_console.message = f"> {skill}"
+        if self.target.health <= 0:
+            self.targets.remove(self.target)
+            if len(self.targets):
+                GEvent.scene_event(GEvent.CREATE, source=self.target.gdisplay())
+        if len(self.targets) == 0:
+            GEvent.engine_event(GEvent.END, winner="actor")
         super(GameHandler, self).handle_keyboard_event(event)
 
     def handle_custom_event(self, event):

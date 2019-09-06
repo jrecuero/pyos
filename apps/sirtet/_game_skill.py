@@ -47,7 +47,7 @@ class GameSkill:
     def target(self, source, target):
         """target returns if skill target is 'self' or 'target'.
         """
-        return source if self.target == "self" else target
+        return source if self._target == "self" else target
 
     def can_run(self, source):
         """can_run checks if the skill is available to be executed.
@@ -153,6 +153,7 @@ class GameSkillHeal(GameSkill):
         """can_run checks if the skill is available to be executed.
         """
         if self.can_run(source):
+            print(f"heal {target} fpr {self.heal_value}")
             target.health += self.heal_value
             source.counter_colors_available[self.color_str] -= self.threshold
 
