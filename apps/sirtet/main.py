@@ -40,7 +40,9 @@ def _create_game(surface):
     board.next_piece()
     scene.add_gobject(board)
     scene.add_gobject(gh.gobj_console)
-    scene.add_gobject(gh.gstat.gtext_total_lines)
+    gh.gstat.x = 550
+    gh.gstat.y = 200
+    scene.add_gobject(gh.gstat)
     gobj_actor = gh.actor.gdisplay()
     gobj_actor.x = 550
     gobj_actor.y = 500
@@ -49,8 +51,6 @@ def _create_game(surface):
     scene.gobj_target.x = 550
     scene.gobj_target.y = 550
     scene.add_gobject(scene.gobj_target)
-    for gtext in gh.gstat.gtext_colors.values():
-        scene.add_gobject(gtext)
     gh.add_scene(scene)
     gh.hscene.active()
     return gh
