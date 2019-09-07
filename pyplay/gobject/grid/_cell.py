@@ -1,26 +1,25 @@
 import pygame
-from ..._gid import new_gid
 from ..._move import Move
 from ..._color import Color
 from ._collision_box import CollisionBox
 
 
-class Cell:
+class Cell(pygame.rect.Rect):
     """Cell represents every entry in the graphical grid.
     """
 
     def __init__(self, name, x, y, dx, dy, **kwargs):
-        self.__gid = new_gid()
+        super(Cell, self).__init__(x, y, dx, dy)
         self.name = name
-        self.x = x
-        self.y = y
+        # self.x = x
+        # self.y = y
         self.z = kwargs.get("z", 0)
-        self.dx = dx
-        self.dy = dy
+        # self.dx = dx
+        # self.dy = dy
         self.gridx = x
         self.gridy = y
         self.image = None
-        self.rect = None
+        # self.rect = pygame.rect.Rect(x, y, dx, dy)
         self.move = kwargs.get("move", Move())
         self.pushed = kwargs.get("pushed", None)
         self.enable = kwargs.get("enable", True)
@@ -34,12 +33,32 @@ class Cell:
         self.dx_move = dx
         self.dy_move = dy
 
-    @property
-    def gid(self):
-        return self.__gid
+    # @property
+    # def x(self):
+    #     return self.rect.x
+    #
+    # @x.setter
+    # def x(self, val):
+    #     self.rect.x = val
+    #
+    # @property
+    # def y(self):
+    #     return self.rect.y
+    #
+    # @y.setter
+    # def y(self, val):
+    #     self.rect.y = val
+    #
+    # @property
+    # def dx(self):
+    #     return self.rect.width
+    #
+    # @property
+    # def dy(self):
+    #     return self.rect.height
 
     def __str__(self):
-        return f"[{self.gid}] : {self.__class__.__name__} | {self.x} {self.y} {self.dx} {self.dy} {self.gridx} {self.gridy}"
+        return f"{self.__class__.__name__} | {self.x} {self.y} {self.width} {self.height} {self.gridx} {self.gridy}"
 
     def incr_xy(self, dx=0, dy=0):
         """incr_xy increases values properly for x and gridx, y and gridy with
@@ -64,8 +83,8 @@ class Cell:
         """
         self.gridx += dx
         self.gridy += dy
-        self.x += dx * self.dx
-        self.y += dy * self.dy
+        self.x += dx * self.width
+        self.y += dy * self.height
         self.stepx = dx
         self.stepy = dy
 
@@ -77,8 +96,8 @@ class Cell:
             result = self.stepx, self.stepy
             self.gridx -= self.stepx
             self.gridy -= self.stepy
-            self.x -= self.stepx * self.dx
-            self.y -= self.stepy * self.dy
+            self.x -= self.stepx * self.width
+            self.y -= self.stepy * self.height
             self.stepx = None
             self.stepy = None
             return result
@@ -93,8 +112,8 @@ class Cell:
         if self.move.x:
             self.x += self.move.x
             self.dx_move += abs(self.move.x)
-            if self.dx_move > self.dx:
-                self.dx_move -= self.dx
+            if self.dx_move > self.width:
+                self.dx_move -= self.width
                 if self.move.is_right():
                     self.gridx += 1
                 if self.move.is_left():
@@ -102,8 +121,8 @@ class Cell:
         if self.move.y:
             self.y += self.move.y
             self.dy_move += abs(self.move.y)
-            if self.dy_move > self.dy:
-                self.dy_move -= self.dy
+            if self.dy_move > self.height:
+                self.dy_move -= self.height
                 if self.move.is_down():
                     self.gridy += 1
                 if self.move.is_up():
@@ -112,4 +131,7 @@ class Cell:
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.
         """
-        pygame.draw.rect(surface, self.color, (self.x, self.y, self.dx, self.dy))
+        # pygame.draw.rect(
+        #     surface, self.color, (self.x, self.y, self.rect.width, self.rect.height)
+        # )
+        pygame.draw.rect(surface, self.color, self)

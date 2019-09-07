@@ -73,9 +73,9 @@ class GameBoard(GravityBoard):
             sprite.image, Color.BLACK, (0, 0, CELL_SIZE * 3, CELL_SIZE * 3), 1
         )
         for cell in self.the_next_piece.cells:
-            x = (cell.x - 4) * cell.dx
-            y = cell.y * cell.dy
-            pygame.draw.rect(sprite.image, cell.color, (x, y, cell.dx, cell.dy))
+            x = (cell.x - 4) * cell.width
+            y = cell.y * cell.height
+            pygame.draw.rect(sprite.image, cell.color, (x, y, cell.width, cell.height))
         return sprite
 
     def handle_keyboard_event(self, event):
