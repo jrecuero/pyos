@@ -1,13 +1,13 @@
 from pyplay import Scene, GEvent
 
 
-class GameScene(Scene):
-    """GameScene implements all functionality for the scene that contains
+class GameBoardScene(Scene):
+    """GameBoardScene implements all functionality for the scene that contains
     the board.
     """
 
     def __init__(self, surface, **kwargs):
-        super(GameScene, self).__init__("game scene", surface, **kwargs)
+        super(GameBoardScene, self).__init__("game scene", surface, **kwargs)
         self.gobj_next_piece = None
         self.gtext_actor = None
         self.gtext_target = None
@@ -17,7 +17,7 @@ class GameScene(Scene):
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        super(GameScene, self).handle_custom_event(event)
+        super(GameBoardScene, self).handle_custom_event(event)
         if event.type == GEvent.ENGINE:
             if event.subtype == GEvent.NEXT:
                 if self.gobj_next_piece:
@@ -37,4 +37,4 @@ class GameScene(Scene):
     def render(self, **kwargs):
         """render calls render method for all scene graphical objects.
         """
-        super(GameScene, self).render(**kwargs)
+        super(GameBoardScene, self).render(**kwargs)

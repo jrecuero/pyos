@@ -11,7 +11,7 @@ from _game_tools import (
     GRAVITY_TIMER,
 )
 from _game_board import GameBoard
-from _game_scene import GameScene
+from _game_board_scene import GameBoardScene
 from _game_handler import GameHandler
 
 
@@ -25,7 +25,7 @@ def _create_game(surface):
     actual game implementation.
     """
     gh = GameHandler("app", surface)
-    scene = GameScene(surface)
+    scene = GameBoardScene(surface)
     board = GameBoard(
         "gravity-board",
         BOARD_ORIGIN["x"],
