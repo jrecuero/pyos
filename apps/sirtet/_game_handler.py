@@ -204,6 +204,8 @@ class GameHandler(GHandler):
         customs events, and those should be handled at this time.
         """
         if event.type == GEvent.ENGINE:
+            if event.subtype == GEvent.HSCENE and event.source == "next":
+                self.hscene.next()
             if event.subtype == GEvent.COMPLETED:
                 self.handle_completed_lines(event.source)
             elif event.subtype == GEvent.END:

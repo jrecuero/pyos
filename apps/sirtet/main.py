@@ -12,6 +12,7 @@ from _game_tools import (
 )
 from _game_board import GameBoard
 from _game_board_scene import GameBoardScene
+from _game_title_scene import GameTitleScene
 from _game_handler import GameHandler
 
 
@@ -51,8 +52,10 @@ def _create_game(surface):
     scene.gobj_target.x = 550
     scene.gobj_target.y = 550
     scene.add_gobject(scene.gobj_target)
+    title_scene = GameTitleScene(surface)
+    gh.add_scene(title_scene)
     gh.add_scene(scene)
-    gh.hscene.active()
+    gh.hscene.active(title_scene)
     return gh
 
 

@@ -22,6 +22,7 @@ class GEvent:
     NEXT = 6
     DISPLAY = 7
     SKILL = 8
+    HSCENE = 9
 
     # GEvent destination
     HANDLER = 1
