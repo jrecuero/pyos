@@ -1,5 +1,5 @@
 import os
-from pyplay import Scene, GEvent
+from pyplay import Scene, GEvent, Color
 from pyplay.gobject import GText, GImage
 
 
@@ -19,7 +19,11 @@ class GameTitleScene(Scene):
                 850,
             )
         )
-        self.add_gobject(GText("press", 500, 700, f"press any key to continue..."))
+        self.add_gobject(
+            GText(
+                "press", 500, 700, f"press any key to continue...", bcolor=Color.ALPHA
+            )
+        )
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.

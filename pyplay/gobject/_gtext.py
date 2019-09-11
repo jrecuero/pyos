@@ -14,12 +14,11 @@ class GText(GObject):
             self.font_name, self.font_size, bold=self.font_bold, italic=self.font_italic
         )
         self.color = kwargs.get("color", Color.BLACK)
-        self.background_color = kwargs.get("bcolor", None)
+        self.background_color = kwargs.get("bcolor", Color.WHITE)
         self.gtext = self.font.render(self._message, True, self.color)
         rect = self.gtext.get_rect()
         super(GText, self).__init__(name, x, y, rect.w, rect.h, **kwargs)
-        if self.background_color:
-            self.image.fill(self.background_color)
+        self.image.fill(self.background_color)
         self.image.blit(self.gtext, (0, 0, self.dx, self.dy))
 
     def __str__(self):

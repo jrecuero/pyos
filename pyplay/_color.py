@@ -11,6 +11,7 @@ class Color:
     RED = pygame.Color(255, 0, 0)
     GREEN = pygame.Color(0, 128, 0)
     BLUE = pygame.Color(0, 0, 255)
+    ALPHA = pygame.Color(255, 255, 255, 0)
 
     @staticmethod
     def color_to_str(color):

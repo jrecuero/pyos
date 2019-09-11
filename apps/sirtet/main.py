@@ -41,15 +41,15 @@ def _create_game(surface):
     board.next_piece()
     scene.add_gobject(board)
     scene.add_gobject(gh.gobj_console)
-    gh.gstat.x = 550
+    gh.gstat.x = 450
     gh.gstat.y = 200
     scene.add_gobject(gh.gstat)
     gobj_actor = gh.actor.gdisplay()
-    gobj_actor.x = 550
+    gobj_actor.x = 450
     gobj_actor.y = 500
     scene.add_gobject(gobj_actor)
     scene.gobj_target = gh.targets[0].gdisplay()
-    scene.gobj_target.x = 550
+    scene.gobj_target.x = 450
     scene.gobj_target.y = 550
     scene.add_gobject(scene.gobj_target)
     title_scene = GameTitleScene(surface)

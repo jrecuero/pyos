@@ -160,7 +160,7 @@ class GameActor(Gid):
         """gdisplay returns the graphical sprite object to be added to a scene
         in order to display actor information.
         """
-        return GameActorDisplay(self, 0, 0, 600, 200)
+        return GameActorDisplay(self, 0, 0, 700, 200)
 
     def add_color_dict(self, color_dict=None):
         """add_color_dict adds the given color dictionary to the total colors
