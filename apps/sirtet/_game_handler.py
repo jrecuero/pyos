@@ -190,7 +190,7 @@ class GameHandler(GHandler):
                 skill = self.actor.mind_skills[2]
                 skill.action(self.actor, skill.target(self.actor, self.target))
                 self.gobj_console.message = f"> {skill}"
-        if self.target.health <= 0:
+        if self.target and self.target.health <= 0:
             self.targets.remove(self.target)
             if len(self.targets):
                 GEvent.scene_event(GEvent.CREATE, source=self.target.gdisplay())
@@ -205,7 +205,7 @@ class GameHandler(GHandler):
         """
         if event.type == GEvent.ENGINE:
             if event.subtype == GEvent.HSCENE and event.source == "next":
-                self.hscene.next()
+                self.hscene.next(console=self.gobj_console, stats=self.gstat)
             if event.subtype == GEvent.COMPLETED:
                 self.handle_completed_lines(event.source)
             elif event.subtype == GEvent.END:

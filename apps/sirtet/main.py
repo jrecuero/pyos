@@ -3,22 +3,23 @@ import os
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
-from _game_tools import (
-    CELL_SIZE,
-    XSIZE_CELLS,
-    YSIZE_CELLS,
-    YSIZE_THRESHOLD,
-    GRAVITY_TIMER,
-)
-from _game_board import GameBoard
+
+# from _game_tools import (
+#     CELL_SIZE,
+#     XSIZE_CELLS,
+#     YSIZE_CELLS,
+#     YSIZE_THRESHOLD,
+#     GRAVITY_TIMER,
+# )
+# from _game_board import GameBoard
 from _game_board_scene import GameBoardScene
 from _game_title_scene import GameTitleScene
 from _game_handler import GameHandler
 
 
 SCREEN_SIZE = (1200, 850)
-BOARD_ORIGIN = {"x": 50, "y": 50}
-BOARD_SIZE = {"dx": CELL_SIZE * XSIZE_CELLS, "dy": CELL_SIZE * YSIZE_CELLS}
+# BOARD_ORIGIN = {"x": 50, "y": 50}
+# BOARD_SIZE = {"dx": CELL_SIZE * XSIZE_CELLS, "dy": CELL_SIZE * YSIZE_CELLS}
 
 
 def _create_game(surface):
@@ -27,23 +28,23 @@ def _create_game(surface):
     """
     gh = GameHandler("app", surface)
     scene = GameBoardScene(surface)
-    board = GameBoard(
-        "gravity-board",
-        BOARD_ORIGIN["x"],
-        BOARD_ORIGIN["y"],
-        BOARD_SIZE["dx"],
-        BOARD_SIZE["dy"],
-        CELL_SIZE,
-        outline=1,
-        threshold=YSIZE_THRESHOLD,
-        gravity_timer=GRAVITY_TIMER,
-    )
-    board.next_piece()
-    scene.add_gobject(board)
-    scene.add_gobject(gh.gobj_console)
-    gh.gstat.x = 450
-    gh.gstat.y = 200
-    scene.add_gobject(gh.gstat)
+    # board = GameBoard(
+    #     "gravity-board",
+    #     BOARD_ORIGIN["x"],
+    #     BOARD_ORIGIN["y"],
+    #     BOARD_SIZE["dx"],
+    #     BOARD_SIZE["dy"],
+    #     CELL_SIZE,
+    #     outline=1,
+    #     threshold=YSIZE_THRESHOLD,
+    #     gravity_timer=GRAVITY_TIMER,
+    # )
+    # board.next_piece()
+    # scene.add_gobject(board)
+    # scene.add_gobject(gh.gobj_console)
+    # gh.gstat.x = 450
+    # gh.gstat.y = 200
+    # scene.add_gobject(gh.gstat)
     gobj_actor = gh.actor.gdisplay()
     gobj_actor.x = 450
     gobj_actor.y = 500

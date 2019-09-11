@@ -1,4 +1,16 @@
 from pyplay import Scene, GEvent
+from _game_tools import (
+    CELL_SIZE,
+    XSIZE_CELLS,
+    YSIZE_CELLS,
+    YSIZE_THRESHOLD,
+    GRAVITY_TIMER,
+)
+from _game_board import GameBoard
+
+SCREEN_SIZE = (1200, 850)
+BOARD_ORIGIN = {"x": 50, "y": 50}
+BOARD_SIZE = {"dx": CELL_SIZE * XSIZE_CELLS, "dy": CELL_SIZE * YSIZE_CELLS}
 
 
 class GameBoardScene(Scene):
@@ -11,6 +23,32 @@ class GameBoardScene(Scene):
         self.gobj_next_piece = None
         self.gtext_actor = None
         self.gtext_target = None
+        self.board = None
+
+    def open(self, **kwargs):
+        """open is called when transitioning into the scene.
+        """
+        self.board = GameBoard(
+            "gravity-board",
+            BOARD_ORIGIN["x"],
+            BOARD_ORIGIN["y"],
+            BOARD_SIZE["dx"],
+            BOARD_SIZE["dy"],
+            CELL_SIZE,
+            outline=1,
+            threshold=YSIZE_THRESHOLD,
+            gravity_timer=GRAVITY_TIMER,
+        )
+        self.board.next_piece()
+        self.add_gobject(self.board)
+        self.gobj_console = kwargs.get("console", None)
+        if self.gobj_console:
+            self.add_gobject(self.gobj_console)
+        self.gobj_stats = kwargs.get("stats", None)
+        if self.gobj_stats:
+            self.gobj_stats.x = 450
+            self.gobj_stats.y = 200
+            self.add_gobject(self.gobj_stats)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
@@ -30,7 +68,7 @@ class GameBoardScene(Scene):
                 if getattr(event, "dest", None) == GEvent.SCENE:
                     self.del_gobject(self.gobj_target)
                     self.gobj_target = event.source
-                    self.gobj_target.x = 550
+                    self.gobj_target.x = 450
                     self.gobj_target.y = 550
                     self.add_gobject(self.gobj_target)
 

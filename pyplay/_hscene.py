@@ -9,14 +9,17 @@ class SceneHandler:
         self.scenes = []
         self.iactive = None
 
-    def active(self, scene=None):
+    def active(self, scene=None, **kwargs):
         """active sets the given scene as the active one. If no scene is given
         sets the first scene as the active one.
         """
+        if self.iactive is not None:
+            self.scenes[self.iactive].close(**kwargs)
         if scene is None:
             self.iactive = 0
         elif scene in self.scenes:
             self.iactive = self.scenes.index(scene)
+        self.scenes[self.iactive].open(**kwargs)
 
     def enable(self, scene=None):
         """enable sets the given scene as enable. If no scene is given sets
@@ -76,45 +79,45 @@ class SceneHandler:
             return self.scenes[self.iactive]
         return None
 
-    def next(self):
+    def next(self, **kwargs):
         """next moves to the next available scene. close will be called for
         the old active  scene and open will be called for the new active
         scene.
         """
         if self.iactive is not None and self.scenes:
-            self.scenes[self.iactive].close()
+            self.scenes[self.iactive].close(**kwargs)
             self.iactive = (self.iactive + 1) % len(self.scenes)
-            self.scenes[self.iactive].open()
+            self.scenes[self.iactive].open(**kwargs)
 
-    def prev(self):
+    def prev(self, **kwargs):
         """prev moves to the previous available scene. close will be called for
         the old active  scene and open will be called for the new active
         scene.
         """
         if self.iactive is not None and self.scenes:
-            self.scenes[self.iactive].close()
+            self.scenes[self.iactive].close(**kwargs)
             self.iactive = abs(self.iactive - 1) % len(self.scenes)
-            self.scenes[self.iactive].open()
+            self.scenes[self.iactive].open(**kwargs)
 
-    def first(self):
+    def first(self, **kwargs):
         """first moves to the first available scene. close will be called for
         the old active  scene and open will be called for the new active
         scene.
         """
         if self.iactive is not None and self.scenes:
-            self.scenes[self.iactive].close()
+            self.scenes[self.iactive].close(**kwargs)
             self.iactive = 0
-            self.scenes[self.iactive].open()
+            self.scenes[self.iactive].open(**kwargs)
 
-    def last(self):
+    def last(self, **kwargs):
         """last moves to the last available scene. close will be called for
         the old active  scene and open will be called for the new active
         scene.
         """
         if self.iactive is not None and self.scenes:
-            self.scenes[self.iactive].close()
+            self.scenes[self.iactive].close(**kwargs)
             self.iactive = len(self.scences) - 1
-            self.scenes[self.iactive].open()
+            self.scenes[self.iactive].open(**kwargs)
 
     def start_tick(self):
         """start_tick should set all elements ready for a new tick.
