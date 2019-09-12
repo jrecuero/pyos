@@ -49,6 +49,8 @@ class GameBoardScene(Scene):
             self.gobj_stats.x = 450
             self.gobj_stats.y = 200
             self.add_gobject(self.gobj_stats)
+        self.actor = kwargs.get("actor", None)
+        self.target = kwargd.get("target", None)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.

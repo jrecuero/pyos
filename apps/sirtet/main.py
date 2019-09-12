@@ -45,10 +45,12 @@ def _create_game(surface):
     # gh.gstat.x = 450
     # gh.gstat.y = 200
     # scene.add_gobject(gh.gstat)
+    # TODO: Actor shoould be passed at the start of the scene
     gobj_actor = gh.actor.gdisplay()
     gobj_actor.x = 450
     gobj_actor.y = 500
     scene.add_gobject(gobj_actor)
+    # TODO: Target should be passed at the start of the scene
     scene.gobj_target = gh.targets[0].gdisplay()
     scene.gobj_target.x = 450
     scene.gobj_target.y = 550

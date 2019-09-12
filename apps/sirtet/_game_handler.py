@@ -205,7 +205,13 @@ class GameHandler(GHandler):
         """
         if event.type == GEvent.ENGINE:
             if event.subtype == GEvent.HSCENE and event.source == "next":
-                self.hscene.next(console=self.gobj_console, stats=self.gstat)
+                # TODO: Pass actor and target at this point.
+                target = self.targets[0] if self.targets else None
+                self.hscene.next(
+                    console=self.gobj_console, 
+                    stats=self.gstat,
+                    actor=self.actor,
+                    target=target)
             if event.subtype == GEvent.COMPLETED:
                 self.handle_completed_lines(event.source)
             elif event.subtype == GEvent.END:
