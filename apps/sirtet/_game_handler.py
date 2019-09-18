@@ -18,7 +18,7 @@ class Actor(GameActor):
         self.set_play_defense(Color.BLUE)
         self.set_play_mind(Color.GREEN)
         self.damage_skills.append(gs.GameSkillRawDamage(Color.RED))
-        self.defense_skills.append(gs.GameSkillDefenseUp(Color.BLUE))
+        self.defense_skills.append(gs.GameSkillDamageUp(Color.BLUE))
         self.mind_skills.append(gs.GameSkillBlowEmpty(Color.GREEN))
         self.mind_skills.append(gs.GameSkillHeal(Color.GREEN))
         self.mind_skills.append(gs.GameSkillGreatHeal(Color.GREEN))
@@ -208,10 +208,11 @@ class GameHandler(GHandler):
                 # TODO: Pass actor and target at this point.
                 target = self.targets[0] if self.targets else None
                 self.hscene.next(
-                    console=self.gobj_console, 
+                    console=self.gobj_console,
                     stats=self.gstat,
                     actor=self.actor,
-                    target=target)
+                    target=target,
+                )
             if event.subtype == GEvent.COMPLETED:
                 self.handle_completed_lines(event.source)
             elif event.subtype == GEvent.END:

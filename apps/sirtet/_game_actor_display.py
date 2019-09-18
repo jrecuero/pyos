@@ -61,6 +61,8 @@ class GameActorDisplay(GObject):
         for skill in self.actor.damage_skills:
             color = skill.color
             self.surface_damage_skills.fill((color))
+            if skill.image:
+                self.surface_damage_skills.blit(skill.image, (0, 0, 64, 64))
             damage_skill_text = self.font.render(
                 f"{skill.threshold}", True, Color.WHITE
             )
@@ -74,6 +76,8 @@ class GameActorDisplay(GObject):
         for skill in self.actor.defense_skills:
             color = skill.color
             self.surface_defense_skills.fill(color)
+            if skill.image:
+                self.surface_defense_skills.blit(skill.image, (0, 0, 64, 64))
             defense_skill_text = self.font.render(
                 f"{skill.threshold}", True, Color.WHITE
             )

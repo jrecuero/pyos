@@ -208,6 +208,9 @@ class GameSkillDamageUp(GameSkill):
             "damage-up", color, 100, expire=5, **kwargs
         )
         self.damage_value = kwargs.get("damage", 1)
+        self.image = pygame.image.load(
+            os.path.join("apps/sirtet/images", "damage_up.jpg")
+        )
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
