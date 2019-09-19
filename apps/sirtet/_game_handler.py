@@ -22,7 +22,6 @@ class Actor(GameActor):
         self.mind_skills.append(gs.GameSkillBlowEmpty(Color.GREEN))
         self.mind_skills.append(gs.GameSkillHeal(Color.GREEN))
         self.mind_skills.append(gs.GameSkillGreatHeal(Color.GREEN))
-        # self.mind_skills.append(gs.GameSkillMegaHeal(Color.GREEN))
 
 
 class Target(GameActor):

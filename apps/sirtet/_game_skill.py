@@ -4,28 +4,6 @@ from pyplay import Color, GEvent
 from _game_level import GameLevel
 
 
-# class GameSkillType:
-#     """GameSkillType represents the type of skill action to be executed.
-#     """
-#
-#     NONE = 0
-#     DAMAGE = 1
-#     HEAL = 1
-#     DEFENSE = 2
-
-
-# class GameSkillAction:
-#     """GameSkillAction represents attributes for a game skill.
-#     """
-#
-#     def __init__(self, name, source, target, damage, type, **kwargs):
-#         self.name = name
-#         self.source = source
-#         self.target = target
-#         self.damage = damage
-#         self.type = type
-
-
 class GameSkill:
     """GameSkill implements any skill usable by any actor in the game.
     Skills are available for any actor for any match. There is start() method
