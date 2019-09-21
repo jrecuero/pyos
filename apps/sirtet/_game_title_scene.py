@@ -1,4 +1,5 @@
 import os
+import pygame
 from pyplay import Scene, GEvent, Color
 from pyplay.gobject import GText, GImage
 
@@ -24,6 +25,13 @@ class GameTitleScene(Scene):
                 "press", 500, 700, f"press any key to continue...", bcolor=Color.ALPHA
             )
         )
+
+    def open(self, **kwargs):
+        """open is called when transitioning into the scene.
+        """
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load(os.path.join("apps/sirtet/music", "bensound-epic.mp3"))
+        pygame.mixer.music.play(-1)
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.

@@ -81,7 +81,7 @@ class GameSkillBlowColor(GameSkill):
 
 class GameSkillBlowEmpty(GameSkill):
     def __init__(self, color, **kwargs):
-        super(GameSkillBlowEmpty, self).__init__("blow-color", color, 10, **kwargs)
+        super(GameSkillBlowEmpty, self).__init__("blow-color", color, 250, **kwargs)
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
@@ -203,7 +203,7 @@ class GameSkillDamageUp(GameSkill):
         """
 
         def _clean_up():
-            target._damage.del_buff(self.damave_value)
+            target._damage.del_buff(self.damage_value)
 
         return _clean_up
 

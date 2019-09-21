@@ -1,3 +1,5 @@
+import os
+import pygame
 from pyplay import Scene, GEvent
 from _game_tools import (
     CELL_SIZE,
@@ -51,6 +53,11 @@ class GameBoardScene(Scene):
             self.add_gobject(self.gobj_stats)
         self.actor = kwargs.get("actor", None)
         self.target = kwargs.get("target", None)
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load(
+            os.path.join("apps/sirtet/music", "bensound-elevate.mp3")
+        )
+        pygame.mixer.music.play(-1)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.

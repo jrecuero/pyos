@@ -1,3 +1,4 @@
+import os
 import pygame
 import random
 from pyplay import GHandler, Color, GEvent
@@ -220,6 +221,11 @@ class GameHandler(GHandler):
                 else:
                     self.gobj_console.message = f"> GAME OVER. You LOST!!!"
                 self.running = False
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load(
+                    os.path.join("apps/sirtet/music", "bensound-ukulele.mp3")
+                )
+                pygame.mixer.music.play(-1)
             elif event.subtype == GEvent.PAUSE:
                 if event.source:
                     self.gobj_console.message = f"> PAUSED"
