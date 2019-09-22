@@ -28,7 +28,7 @@ class Actor(GameActor):
 class Target(GameActor):
     def __init__(self, name, **kwargs):
         super(Target, self).__init__(name, **kwargs)
-        self.max_health = 50
+        self.max_health = 10
         self.max_damage = 2
         self.set_play_damage(Color.BLACK)
         self.set_play_defense(Color.BLACK)
@@ -47,7 +47,8 @@ class GameHandler(GHandler):
         self.gstat = GameStat()
         self.gobj_console = GText("console", 10, 800, f"> {' ' * 50}")
         self.actor = Actor()
-        self.targets = [Target("t1"), Target("t2"), Target("t3")]
+        # self.targets = [Target("t1"), Target("t2"), Target("t3")]
+        self.targets = [Target("t1")]
         self.skill_actions = {"lines": [], "timer": [], "pieces": []}
 
     @property
@@ -165,37 +166,38 @@ class GameHandler(GHandler):
         """handle_keyboard_event should process the keyboard event given.
         """
         # Handle all keyboard inputs that trigger skills.
-        if event.key == pygame.K_1:
-            if len(self.actor.damage_skills):
-                skill = self.actor.damage_skills[0]
-                skill.action(self.actor, skill.target(self.actor, self.target))
-                self.gobj_console.message = f"> {skill}"
-        if event.key == pygame.K_2:
-            if len(self.actor.defense_skills):
-                skill = self.actor.defense_skills[0]
-                skill.action(self.actor, skill.target(self.actor, self.target))
-                self.gobj_console.message = f"> {skill}"
-        if event.key == pygame.K_3:
-            if len(self.actor.mind_skills):
-                skill = self.actor.mind_skills[0]
-                skill.action(self.actor, skill.target(self.actor, self.target))
-                self.gobj_console.message = f"> {skill}"
-        if event.key == pygame.K_4:
-            if len(self.actor.mind_skills) > 1:
-                skill = self.actor.mind_skills[1]
-                skill.action(self.actor, skill.target(self.actor, self.target))
-                self.gobj_console.message = f"> {skill}"
-        if event.key == pygame.K_5:
-            if len(self.actor.mind_skills) > 2:
-                skill = self.actor.mind_skills[2]
-                skill.action(self.actor, skill.target(self.actor, self.target))
-                self.gobj_console.message = f"> {skill}"
-        if self.target and self.target.health <= 0:
-            self.targets.remove(self.target)
-            if len(self.targets):
-                GEvent.scene_event(GEvent.CREATE, source=self.target.gdisplay())
-        if len(self.targets) == 0:
-            GEvent.engine_event(GEvent.END, winner="actor")
+        if self.running:
+            if event.key == pygame.K_1:
+                if len(self.actor.damage_skills):
+                    skill = self.actor.damage_skills[0]
+                    skill.action(self.actor, skill.target(self.actor, self.target))
+                    self.gobj_console.message = f"> {skill}"
+            if event.key == pygame.K_2:
+                if len(self.actor.defense_skills):
+                    skill = self.actor.defense_skills[0]
+                    skill.action(self.actor, skill.target(self.actor, self.target))
+                    self.gobj_console.message = f"> {skill}"
+            if event.key == pygame.K_3:
+                if len(self.actor.mind_skills):
+                    skill = self.actor.mind_skills[0]
+                    skill.action(self.actor, skill.target(self.actor, self.target))
+                    self.gobj_console.message = f"> {skill}"
+            if event.key == pygame.K_4:
+                if len(self.actor.mind_skills) > 1:
+                    skill = self.actor.mind_skills[1]
+                    skill.action(self.actor, skill.target(self.actor, self.target))
+                    self.gobj_console.message = f"> {skill}"
+            if event.key == pygame.K_5:
+                if len(self.actor.mind_skills) > 2:
+                    skill = self.actor.mind_skills[2]
+                    skill.action(self.actor, skill.target(self.actor, self.target))
+                    self.gobj_console.message = f"> {skill}"
+            if self.target and self.target.health <= 0:
+                self.targets.remove(self.target)
+                if len(self.targets):
+                    GEvent.scene_event(GEvent.CREATE, source=self.target.gdisplay())
+            if len(self.targets) == 0:
+                GEvent.engine_event(GEvent.END, winner="actor")
         super(GameHandler, self).handle_keyboard_event(event)
 
     def handle_custom_event(self, event):
@@ -204,7 +206,7 @@ class GameHandler(GHandler):
         customs events, and those should be handled at this time.
         """
         if event.type == GEvent.ENGINE:
-            if event.subtype == GEvent.HSCENE and event.source == "next":
+            if event.subtype == GEvent.HSCENE and event.source == "board":
                 # TODO: Pass actor and target at this point.
                 target = self.targets[0] if self.targets else None
                 self.hscene.next(
@@ -212,6 +214,7 @@ class GameHandler(GHandler):
                     stats=self.gstat,
                     actor=self.actor,
                     target=target,
+                    music=event.music,
                 )
             if event.subtype == GEvent.COMPLETED:
                 self.handle_completed_lines(event.source)
@@ -221,11 +224,9 @@ class GameHandler(GHandler):
                 else:
                     self.gobj_console.message = f"> GAME OVER. You LOST!!!"
                 self.running = False
-                pygame.mixer.music.stop()
-                pygame.mixer.music.load(
-                    os.path.join("apps/sirtet/music", "bensound-ukulele.mp3")
-                )
-                pygame.mixer.music.play(-1)
+                self.hscene.next()
+                print("This is the end")
+
             elif event.subtype == GEvent.PAUSE:
                 if event.source:
                     self.gobj_console.message = f"> PAUSED"

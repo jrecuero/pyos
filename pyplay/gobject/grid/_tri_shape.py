@@ -36,18 +36,21 @@ class TriShape(Shape):
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
-        self.gravity_step = False
-        if event.key == pygame.K_LEFT:
-            # self.move_it(-1, 0)
-            self.move_actions.append({"call": self.move_it, "args": (-1, 0)})
-        elif event.key == pygame.K_RIGHT:
-            # self.move_it(1, 0)
-            self.move_actions.append({"call": self.move_it, "args": (1, 0)})
-        elif event.key == pygame.K_UP:
-            # self.rotate_clockwise()
-            self.move_actions.append({"call": self.rotate_clockwise, "args": ()})
-        elif event.key == pygame.K_DOWN:
-            # self.rotate_anticlockwise()
-            self.move_actions.append({"call": self.rotate_anticlockwise, "args": ()})
-        elif event.key == pygame.K_SPACE:
-            self.gravity_move(1)
+        if event.type == pygame.KEYDOWN:
+            self.gravity_step = False
+            if event.key == pygame.K_LEFT:
+                # self.move_it(-1, 0)
+                self.move_actions.append({"call": self.move_it, "args": (-1, 0)})
+            elif event.key == pygame.K_RIGHT:
+                # self.move_it(1, 0)
+                self.move_actions.append({"call": self.move_it, "args": (1, 0)})
+            elif event.key == pygame.K_UP:
+                # self.rotate_clockwise()
+                self.move_actions.append({"call": self.rotate_clockwise, "args": ()})
+            elif event.key == pygame.K_DOWN:
+                # self.rotate_anticlockwise()
+                self.move_actions.append(
+                    {"call": self.rotate_anticlockwise, "args": ()}
+                )
+            elif event.key == pygame.K_SPACE:
+                self.gravity_move(1)

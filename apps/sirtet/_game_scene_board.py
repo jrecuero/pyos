@@ -15,13 +15,13 @@ BOARD_ORIGIN = {"x": 50, "y": 50}
 BOARD_SIZE = {"dx": CELL_SIZE * XSIZE_CELLS, "dy": CELL_SIZE * YSIZE_CELLS}
 
 
-class GameBoardScene(Scene):
-    """GameBoardScene implements all functionality for the scene that contains
+class GameSceneBoard(Scene):
+    """GameSceneBoard implements all functionality for the scene that contains
     the board.
     """
 
     def __init__(self, surface, **kwargs):
-        super(GameBoardScene, self).__init__("game scene", surface, **kwargs)
+        super(GameSceneBoard, self).__init__("game scene", surface, **kwargs)
         self.gobj_next_piece = None
         self.gtext_actor = None
         self.gtext_target = None
@@ -53,18 +53,19 @@ class GameBoardScene(Scene):
             self.add_gobject(self.gobj_stats)
         self.actor = kwargs.get("actor", None)
         self.target = kwargs.get("target", None)
-        pygame.mixer.music.stop()
-        pygame.mixer.music.load(
-            os.path.join("apps/sirtet/music", "bensound-elevate.mp3")
-        )
-        pygame.mixer.music.play(-1)
+        if kwargs.get("music", True):
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(
+                os.path.join("apps/sirtet/music", "bensound-elevate.mp3")
+            )
+            pygame.mixer.music.play(-1)
 
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        super(GameBoardScene, self).handle_custom_event(event)
+        super(GameSceneBoard, self).handle_custom_event(event)
         if event.type == GEvent.ENGINE:
             if event.subtype == GEvent.NEXT:
                 if self.gobj_next_piece:
@@ -84,4 +85,4 @@ class GameBoardScene(Scene):
     def render(self, **kwargs):
         """render calls render method for all scene graphical objects.
         """
-        super(GameBoardScene, self).render(**kwargs)
+        super(GameSceneBoard, self).render(**kwargs)

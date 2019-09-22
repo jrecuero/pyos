@@ -4,8 +4,9 @@ import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 
-from _game_board_scene import GameBoardScene
-from _game_title_scene import GameTitleScene
+from _game_scene_board import GameSceneBoard
+from _game_scene_title import GameSceneTitle
+from _game_scene_end import GameSceneEnd
 from _game_handler import GameHandler
 
 
@@ -17,22 +18,24 @@ def _create_game(surface):
     actual game implementation.
     """
     gh = GameHandler("app", surface)
-    scene = GameBoardScene(surface)
+    scene_board = GameSceneBoard(surface)
 
     gobj_actor = gh.actor.gdisplay()
     gobj_actor.x = 450
     gobj_actor.y = 500
-    scene.add_gobject(gobj_actor)
+    scene_board.add_gobject(gobj_actor)
 
-    scene.gobj_target = gh.targets[0].gdisplay()
-    scene.gobj_target.x = 450
-    scene.gobj_target.y = 564
-    scene.add_gobject(scene.gobj_target)
+    scene_board.gobj_target = gh.targets[0].gdisplay()
+    scene_board.gobj_target.x = 450
+    scene_board.gobj_target.y = 564
+    scene_board.add_gobject(scene_board.gobj_target)
 
-    title_scene = GameTitleScene(surface)
-    gh.add_scene(title_scene)
-    gh.add_scene(scene)
-    gh.hscene.active(title_scene)
+    scene_title = GameSceneTitle(surface)
+    scene_end = GameSceneEnd(surface)
+    gh.add_scene(scene_title)
+    gh.add_scene(scene_board)
+    gh.add_scene(scene_end)
+    gh.hscene.active(scene_title)
     return gh
 
 
@@ -61,9 +64,13 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
-            elif event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
                 gh.handle_keyboard_event(event)
-            elif event.type == pygame.MOUSEMOTION:
+            elif event.type in [
+                pygame.MOUSEMOTION,
+                pygame.MOUSEBUTTONDOWN,
+                pygame.MOUSEBUTTONUP,
+            ]:
                 gh.handle_mouse_event(event)
             elif event.type >= pygame.USEREVENT:
                 gh.handle_custom_event(event)
