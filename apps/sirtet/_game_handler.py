@@ -1,4 +1,4 @@
-import os
+# import os
 import pygame
 import random
 from pyplay import GHandler, Color, GEvent
@@ -20,7 +20,7 @@ class Actor(GameActor):
         self.set_play_mind(Color.GREEN)
         self.damage_skills.append(gs.GameSkillRawDamage(Color.RED))
         self.defense_skills.append(gs.GameSkillDamageUp(Color.BLUE))
-        self.mind_skills.append(gs.GameSkillBlowEmpty(Color.GREEN))
+        self.mind_skills.append(gs.GameSkillDefenseUp(Color.GREEN))
         self.mind_skills.append(gs.GameSkillHeal(Color.GREEN))
         self.mind_skills.append(gs.GameSkillGreatHeal(Color.GREEN))
 
@@ -104,17 +104,20 @@ class GameHandler(GHandler):
         return mind
 
     def check_skill_actions_for_lines(self, lines, color_dict):
-        """check_skill_actions check for any skill action to be triggered when
-        lines are being completed.
+        """check_skill_actions checks all active skills if any of them has
+        reached expiration threshold. In that case call the skill action
+        clean up and removed it from the list of active skills.
         """
         for sa in self.skill_actions["lines"][:]:
             sa["expire"] -= lines
             if sa["expire"] <= 0:
+                # execute skill clean up action.
                 sa["action"](*sa["args"])
                 self.skill_actions["lines"].remove(sa)
 
     def check_target_skills(self, lines, color_dict):
-        """check_target_skills checks if the target can trigger any skill.
+        """check_target_skills checks if the target can trigger any skill
+        and trigger any possible skill by a random behavior.
         """
         if self.target:
             available_skills = [None]

@@ -85,9 +85,10 @@ class SceneHandler:
         scene.
         """
         if self.iactive is not None and self.scenes:
-            self.scenes[self.iactive].close(**kwargs)
-            self.iactive = (self.iactive + 1) % len(self.scenes)
-            self.scenes[self.iactive].open(**kwargs)
+            if (self.iactive + 1) < len(self.scenes):
+                self.scenes[self.iactive].close(**kwargs)
+                self.iactive = (self.iactive + 1) % len(self.scenes)
+                self.scenes[self.iactive].open(**kwargs)
 
     def prev(self, **kwargs):
         """prev moves to the previous available scene. close will be called for
@@ -95,9 +96,10 @@ class SceneHandler:
         scene.
         """
         if self.iactive is not None and self.scenes:
-            self.scenes[self.iactive].close(**kwargs)
-            self.iactive = abs(self.iactive - 1) % len(self.scenes)
-            self.scenes[self.iactive].open(**kwargs)
+            if (self.iactive - 1) >= 0:
+                self.scenes[self.iactive].close(**kwargs)
+                self.iactive = abs(self.iactive - 1) % len(self.scenes)
+                self.scenes[self.iactive].open(**kwargs)
 
     def first(self, **kwargs):
         """first moves to the first available scene. close will be called for
