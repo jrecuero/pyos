@@ -40,7 +40,8 @@ class GameSceneTitle(Scene):
         """handle_keyboard_event should process the keyboard event given.
         Keyboard events are passed to the active scene to be handle.
         """
-        pygame.mixer.music.stop()
-        GEvent.handler_event(
-            GEvent.HSCENE, source="board", music=self.gobj_play_sound.selected
-        )
+        if event.type == pygame.KEYUP:
+            pygame.mixer.music.stop()
+            GEvent.handler_event(
+                GEvent.HSCENE, source="board", music=self.gobj_play_sound.selected
+            )

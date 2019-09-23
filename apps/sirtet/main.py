@@ -4,92 +4,120 @@ import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 
+from pyplay import Color
 from _game_scene_board import GameSceneBoard
 from _game_scene_title import GameSceneTitle
 from _game_scene_end import GameSceneEnd
 from _game_handler import GameHandler
+from _game_actor import GameActor
+import _game_skill as gs
 
 
-SCREEN_SIZE = (1200, 850)
+class Actor(GameActor):
+    def __init__(self, **kwargs):
+        super(Actor, self).__init__("actor")
+        self.max_health = 1000
+        self.max_damage = 1
+        self.max_defense = 1
+        self.max_skill = 1
+        self.set_play_damage(Color.RED)
+        self.set_play_defense(Color.BLUE)
+        self.set_play_mind(Color.GREEN)
+        self.damage_skills.append(gs.GameSkillRawDamage(Color.RED))
+        self.defense_skills.append(gs.GameSkillDamageUp(Color.BLUE))
+        self.mind_skills.append(gs.GameSkillDefenseUp(Color.GREEN))
+        self.mind_skills.append(gs.GameSkillHeal(Color.GREEN))
+        self.mind_skills.append(gs.GameSkillGreatHeal(Color.GREEN))
 
 
-def _create_game(surface):
-    """_create_game creates all custom instances required for handling the
-    actual game implementation.
+class Target(GameActor):
+    def __init__(self, name, **kwargs):
+        super(Target, self).__init__(name, **kwargs)
+        self.max_health = 10
+        self.max_damage = 2
+        self.set_play_damage(Color.BLACK)
+        self.set_play_defense(Color.BLACK)
+        self.set_play_mind(Color.BLACK)
+        self.damage_skills.append(gs.GameSkillRawDamage(Color.BLACK))
+        self.defense_skills.append(gs.GameSkillDefenseUp(Color.BLACK))
+        self.mind_skills.append(gs.GameSkillHeal(Color.BLACK))
+
+
+class TheGame:
+    """TheGame class implements game functionality.
     """
-    gh = GameHandler("app", surface)
-    scene_board = GameSceneBoard(surface)
 
-    gobj_actor = gh.actor.gdisplay()
-    gobj_actor.x = 450
-    gobj_actor.y = 500
-    scene_board.add_gobject(gobj_actor)
+    SCREEN_SIZE = (1200, 850)
 
-    scene_board.gobj_target = gh.targets[0].gdisplay()
-    scene_board.gobj_target.x = 450
-    scene_board.gobj_target.y = 564
-    scene_board.add_gobject(scene_board.gobj_target)
+    def __init__(self):
+        pygame.init()
+        pygame.mixer.init()
+        pygame.display.set_caption("SIRTET")
+        self.surface = pygame.display.set_mode(TheGame.SCREEN_SIZE)
+        self.clock = pygame.time.Clock()
 
-    scene_title = GameSceneTitle(surface)
-    scene_end = GameSceneEnd(surface)
-    gh.add_scene(scene_title)
-    gh.add_scene(scene_board)
-    gh.add_scene(scene_end)
-    gh.hscene.active(scene_title)
-    return gh
+    def create(self):
+        """create creates all custom instances required for handling the
+        actual game implementation.
+        """
+        self.gh = GameHandler("app", self.surface)
+        self.scene_board = GameSceneBoard(self.surface)
+        self.scene_title = GameSceneTitle(self.surface)
+        self.scene_end = GameSceneEnd(self.surface)
+        self.gh.add_scene(self.scene_title)
+        self.gh.add_scene(self.scene_board)
+        self.gh.add_scene(self.scene_end)
+        self.gh.hscene.active(self.scene_title)
+
+    def play(self):
+        """play runs and plays the game.
+        """
+        # ->
+        # TODO: This should be called when a new match starts.
+        self.gh.start_match()
+        # <-
+
+        while True:
+            self.clock.tick(30)
+            self.gh.start_tick()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit(0)
+                elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
+                    self.gh.handle_keyboard_event(event)
+                elif event.type in [
+                    pygame.MOUSEMOTION,
+                    pygame.MOUSEBUTTONDOWN,
+                    pygame.MOUSEBUTTONUP,
+                ]:
+                    self.gh.handle_mouse_event(event)
+                elif event.type >= pygame.USEREVENT:
+                    self.gh.handle_custom_event(event)
+
+            # -> update objects
+            self.gh.update()
+            # <-
+
+            # -> render objects
+            self.surface.fill((255, 255, 255))
+            self.gh.render()
+            pygame.display.flip()
+            # <-
+            self.gh.end_tick()
+
+        # ->
+        # TODO: This should be called when a match ends.
+        self.gh.end_match()
+        # <-
 
 
 def main():
     """main implements the full game application.
     """
-    pygame.init()
-    pygame.mixer.init()
-    pygame.display.set_caption("SIRTET")
-    surface = pygame.display.set_mode(SCREEN_SIZE)
-    clock = pygame.time.Clock()
-
-    # -> Create game handler, scenes and graphical objects.
-    gh = _create_game(surface)
-    # <-
-
-    # ->
-    # TODO: This should be called when a new match starts.
-    gh.start_match()
-    # <-
-
-    while True:
-        clock.tick(30)
-        gh.start_tick()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit(0)
-            elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
-                gh.handle_keyboard_event(event)
-            elif event.type in [
-                pygame.MOUSEMOTION,
-                pygame.MOUSEBUTTONDOWN,
-                pygame.MOUSEBUTTONUP,
-            ]:
-                gh.handle_mouse_event(event)
-            elif event.type >= pygame.USEREVENT:
-                gh.handle_custom_event(event)
-
-        # -> update objects
-        gh.update()
-        # <-
-
-        # -> render objects
-        surface.fill((255, 255, 255))
-        gh.render()
-        pygame.display.flip()
-        # <-
-        gh.end_tick()
-
-    # ->
-    # TODO: This should be called when a match ends.
-    gh.end_match()
-    # <-
+    game = TheGame()
+    game.create()
+    game.play()
 
 
 if __name__ == "__main__":

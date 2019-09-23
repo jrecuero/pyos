@@ -52,7 +52,17 @@ class GameSceneBoard(Scene):
             self.gobj_stats.y = 200
             self.add_gobject(self.gobj_stats)
         self.actor = kwargs.get("actor", None)
+        gobj_actor = self.actor.gdisplay()
+        gobj_actor.x = 450
+        gobj_actor.y = 500
+        self.add_gobject(gobj_actor)
+
         self.target = kwargs.get("target", None)
+        self.gobj_target = self.target.gdisplay()
+        self.gobj_target.x = 450
+        self.gobj_target.y = 564
+        self.add_gobject(self.gobj_target)
+
         if kwargs.get("music", True):
             pygame.mixer.music.stop()
             pygame.mixer.music.load(

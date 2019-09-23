@@ -76,6 +76,17 @@ class GameHandler(GHandler):
         for target in self.targets:
             target.end_match()
 
+    def start(self, actor, targets, **kwargs):
+        """start starts the game handler.
+        """
+        self.actor = actor
+        self.targets = targets
+
+    def stop(self, **kwargs):
+        """stop stops the game handler.
+        """
+        pass
+
     def get_actor_damage(self, actor, color_dict):
         """get_actor_damage returns the damage deal for the given actor with
         the pieces being completed.
@@ -203,6 +214,17 @@ class GameHandler(GHandler):
                 GEvent.engine_event(GEvent.END, winner="actor")
         super(GameHandler, self).handle_keyboard_event(event)
 
+    def launch_scene_board(self, event):
+        """launch_scene_board moves to the scene board.
+        """
+        self.hscene.next(
+            console=self.gobj_console,
+            stats=self.gstat,
+            actor=self.actor,
+            target=self.target,
+            music=event.music,
+        )
+
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
@@ -210,15 +232,7 @@ class GameHandler(GHandler):
         """
         if event.type == GEvent.ENGINE:
             if event.subtype == GEvent.HSCENE and event.source == "board":
-                # TODO: Pass actor and target at this point.
-                target = self.targets[0] if self.targets else None
-                self.hscene.next(
-                    console=self.gobj_console,
-                    stats=self.gstat,
-                    actor=self.actor,
-                    target=target,
-                    music=event.music,
-                )
+                self.launch_scene_board(event)
             if event.subtype == GEvent.COMPLETED:
                 self.handle_completed_lines(event.source)
             elif event.subtype == GEvent.END:

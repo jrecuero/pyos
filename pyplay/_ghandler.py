@@ -49,6 +49,33 @@ class GHandler:
         """
         self.hscene.end_tick()
 
+    def start_match(self):
+        """start_match proceeds to start a match and it will call all
+        objects involved in the match like skills, ...
+        """
+        pass
+
+    def end_match(self):
+        """end_match proceeds to end a match and it will call all objects
+        that were involved in the match like skills.
+        """
+        pass
+
+    def start(self, **kwargs):
+        """start starts the game handler.
+        """
+        pass
+
+    def stop(self, **kwargs):
+        """stop stops the game handler.
+        """
+        pass
+
+    def reset(self, **kwargs):
+        """reset resets and reinitializes the game handler.
+        """
+        pass
+
     def handle_custom_event(self, event):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
