@@ -28,7 +28,7 @@ class Actor(GameActor):
 class Target(GameActor):
     def __init__(self, name, **kwargs):
         super(Target, self).__init__(name, **kwargs)
-        self.max_health = 10
+        self.max_health = 50
         self.max_damage = 2
         self.set_play_damage(Color.BLACK)
         self.set_play_defense(Color.BLACK)
