@@ -1,4 +1,4 @@
-import os
+# import os
 import pygame
 from pyplay import Scene, GEvent
 from _game_tools import (
@@ -9,6 +9,7 @@ from _game_tools import (
     GRAVITY_TIMER,
 )
 from _game_board import GameBoard
+from _game_loader import load_music
 
 SCREEN_SIZE = (1200, 850)
 BOARD_ORIGIN = {"x": 50, "y": 50}
@@ -65,9 +66,10 @@ class GameSceneBoard(Scene):
 
         if kwargs.get("music", True):
             pygame.mixer.music.stop()
-            pygame.mixer.music.load(
-                os.path.join("apps/sirtet/music", "bensound-elevate.mp3")
-            )
+            # pygame.mixer.music.load(
+            #     os.path.join("apps/sirtet/music", "bensound-elevate.mp3")
+            # )
+            load_music("apps/sirtet/music", "bensound-elevate.mp3")
             pygame.mixer.music.play(-1)
 
     def handle_custom_event(self, event):

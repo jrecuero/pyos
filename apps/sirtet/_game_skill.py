@@ -2,6 +2,7 @@ import os
 import pygame
 from pyplay import Color, GEvent
 from _game_level import GameLevel
+from _game_loader import load_image
 
 
 class GameSkill:
@@ -128,7 +129,8 @@ class GameSkillHeal(GameSkill):
     def __init__(self, color, **kwargs):
         super(GameSkillHeal, self).__init__("heal", color, 25, **kwargs)
         self.heal_value = kwargs.get("heal", 10)
-        self.image = pygame.image.load(os.path.join("apps/sirtet/images", "heal.jpg"))
+        # self.image = pygame.image.load(os.path.join("apps/sirtet/images", "heal.jpg"))
+        self.image = load_image("apps/sirtet/images", "heal.jpg")
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
@@ -144,9 +146,10 @@ class GameSkillGreatHeal(GameSkillHeal):
         super(GameSkillGreatHeal, self).__init__(color, heal=50, **kwargs)
         self.name = "great-heal"
         self.threshold = 100
-        self.image = pygame.image.load(
-            os.path.join("apps/sirtet/images", "great_heal.jpg")
-        )
+        # self.image = pygame.image.load(
+        #     os.path.join("apps/sirtet/images", "great_heal.jpg")
+        # )
+        self.image = load_image("apps/sirtet/images", "great_heal.jpg")
 
 
 class GameSkillMegaHeal(GameSkill):
@@ -154,9 +157,10 @@ class GameSkillMegaHeal(GameSkill):
         super(GameSkillMegaHeal, self).__init__(color, heal=500, **kwargs)
         self.name = "mega-heal"
         self.threshold = 250
-        self.image = pygame.image.load(
-            os.path.join("apps/sirtet/images", "mega_heal.jpg")
-        )
+        # self.image = pygame.image.load(
+        #     os.path.join("apps/sirtet/images", "mega_heal.jpg")
+        # )
+        self.image = load_image("apps/sirtet/images", "mega_heal.jpg")
 
 
 class GameSkillDefenseUp(GameSkill):
@@ -165,9 +169,10 @@ class GameSkillDefenseUp(GameSkill):
             "defense-up", color, 50, expire=5, **kwargs
         )
         self.defense_value = kwargs.get("defense", 1)
-        self.image = pygame.image.load(
-            os.path.join("apps/sirtet/images", "defense_up.jpg")
-        )
+        # self.image = pygame.image.load(
+        #     os.path.join("apps/sirtet/images", "defense_up.jpg")
+        # )
+        self.image = load_image("apps/sirtet/images", "defense_up.jpg")
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
@@ -193,9 +198,10 @@ class GameSkillDamageUp(GameSkill):
             "damage-up", color, 100, expire=5, **kwargs
         )
         self.damage_value = kwargs.get("damage", 1)
-        self.image = pygame.image.load(
-            os.path.join("apps/sirtet/images", "damage_up.jpg")
-        )
+        # self.image = pygame.image.load(
+        #     os.path.join("apps/sirtet/images", "damage_up.jpg")
+        # )
+        self.image = load_image("apps/sirtet/images", "damage_up.jpg")
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.
@@ -320,9 +326,10 @@ class GameSkillRawDamage(GameSkill):
         super(GameSkillRawDamage, self).__init__("raw-damage", color, 25, **kwargs)
         self._target = "target"
         self.damage_value = kwargs.get("damage", 10)
-        self.image = pygame.image.load(
-            os.path.join("apps/sirtet/images", "raw_damage.jpg")
-        )
+        # self.image = pygame.image.load(
+        #     os.path.join("apps/sirtet/images", "raw_damage.jpg")
+        # )
+        self.image = load_image("apps/sirtet/images", "raw_damage.jpg")
 
     def action(self, source, target):
         """can_run checks if the skill is available to be executed.

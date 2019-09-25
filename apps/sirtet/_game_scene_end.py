@@ -1,7 +1,8 @@
-import os
+# import os
 import pygame
 from pyplay import Scene, Color
 from pyplay.gobject import GText, GInput
+from _game_loader import load_music
 
 
 class GameSceneEnd(Scene):
@@ -21,9 +22,10 @@ class GameSceneEnd(Scene):
         """open is called when transitioning into the scene.
         """
         pygame.mixer.music.stop()
-        pygame.mixer.music.load(
-            os.path.join("apps/sirtet/music", "bensound-ukulele.mp3")
-        )
+        # pygame.mixer.music.load(
+        #     os.path.join("apps/sirtet/music", "bensound-ukulele.mp3")
+        # )
+        load_music("apps/sirtet/music", "bensound-ukulele.mp3")
         pygame.mixer.music.play(-1)
 
     def handle_keyboard_event(self, event):

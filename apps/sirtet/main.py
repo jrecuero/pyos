@@ -69,6 +69,22 @@ class TheGame:
         self.gh.add_scene(self.scene_end)
         self.gh.hscene.active(self.scene_title)
 
+    def new_match(self):
+        """new_match should create all required resources (actor and targets)
+        for a new match.
+        """
+        pass
+
+    def start_match(self):
+        """start_match starts a new match with all resources already created.
+        """
+        pass
+
+    def stop_match(self):
+        """stop_match stops and end a match.
+        """
+        pass
+
     def play(self):
         """play runs and plays the game.
         """
