@@ -78,7 +78,12 @@ class TheGame:
     def start_match(self):
         """start_match starts a new match with all resources already created.
         """
-        pass
+        self.number_of_targets = 1
+        self.actor = Actor()
+        self.targets = [Target(f"t{i+1}") for i in range(self.number_of_targets)]
+        # TODO: call game handler start new match, which shoudl initializes
+        # the game handler.
+        # TODO: reinitialize scene board at this point.
 
     def stop_match(self):
         """stop_match stops and end a match.
