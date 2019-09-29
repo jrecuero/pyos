@@ -4,38 +4,6 @@ import random
 from pyplay import GHandler, Color, GEvent
 from pyplay.gobject import GText
 from _game_stat import GameStat
-from _game_actor import GameActor
-import _game_skill as gs
-
-
-class Actor(GameActor):
-    def __init__(self, **kwargs):
-        super(Actor, self).__init__("actor")
-        self.max_health = 1000
-        self.max_damage = 1
-        self.max_defense = 1
-        self.max_skill = 1
-        self.set_play_damage(Color.RED)
-        self.set_play_defense(Color.BLUE)
-        self.set_play_mind(Color.GREEN)
-        self.damage_skills.append(gs.GameSkillRawDamage(Color.RED))
-        self.defense_skills.append(gs.GameSkillDamageUp(Color.BLUE))
-        self.mind_skills.append(gs.GameSkillDefenseUp(Color.GREEN))
-        self.mind_skills.append(gs.GameSkillHeal(Color.GREEN))
-        self.mind_skills.append(gs.GameSkillGreatHeal(Color.GREEN))
-
-
-class Target(GameActor):
-    def __init__(self, name, **kwargs):
-        super(Target, self).__init__(name, **kwargs)
-        self.max_health = 50
-        self.max_damage = 2
-        self.set_play_damage(Color.BLACK)
-        self.set_play_defense(Color.BLACK)
-        self.set_play_mind(Color.BLACK)
-        self.damage_skills.append(gs.GameSkillRawDamage(Color.BLACK))
-        self.defense_skills.append(gs.GameSkillDefenseUp(Color.BLACK))
-        self.mind_skills.append(gs.GameSkillHeal(Color.BLACK))
 
 
 class GameHandler(GHandler):
@@ -46,10 +14,7 @@ class GameHandler(GHandler):
         super(GameHandler, self).__init__(name, surface, **kwargs)
         self.gstat = GameStat()
         self.gobj_console = GText("console", 10, 800, f"> {' ' * 50}")
-        # self.actor = Actor()
         self.actor = None
-        # self.targets = [Target("t1"), Target("t2"), Target("t3")]
-        # self.targets = [Target("t1")]
         self.targets = None
         self.skill_actions = {"lines": [], "timer": [], "pieces": []}
 
