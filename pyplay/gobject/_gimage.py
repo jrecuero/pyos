@@ -7,10 +7,11 @@ class GImage(GObject):
     """GRect implements a graphical object that is an image.
     """
 
-    def __init__(self, name, filename, x, y, dx, dy, **kwargs):
+    def __init__(self, name, image, x, y, dx, dy, **kwargs):
         super(GImage, self).__init__(name, x, y, dx, dy, **kwargs)
-        self.filename = filename
-        self.image = pygame.image.load(self.filename)
+        # self.filename = filename
+        # self.image = pygame.image.load(self.filename)
+        self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y

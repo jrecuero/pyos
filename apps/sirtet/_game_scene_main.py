@@ -6,4 +6,5 @@ class GameSceneMain(Scene):
     should be trigger.
     """
 
-    pass
+    def __init__(self, surface, **kwargs):
+        super(GameSceneMain, self).__init__("game main", surface, **kwargs)

@@ -5,8 +5,10 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 
 from pyplay import Color
-from _game_scene_board import GameSceneBoard
 from _game_scene_title import GameSceneTitle
+from _game_scene_main import GameSceneMain
+from _game_scene_board import GameSceneBoard
+from _game_scene_result import GameSceneResult
 from _game_scene_end import GameSceneEnd
 from _game_handler import GameHandler
 from _game_actor import GameActor
@@ -61,11 +63,15 @@ class TheGame:
         actual game implementation.
         """
         self.gh = GameHandler("app", self.surface)
-        self.scene_board = GameSceneBoard(self.surface)
         self.scene_title = GameSceneTitle(self.surface)
+        self.scene_main = GameSceneMain(self.surface)
+        self.scene_board = GameSceneBoard(self.surface)
+        self.scene_result = GameSceneResult(self.surface)
         self.scene_end = GameSceneEnd(self.surface)
         self.gh.add_scene(self.scene_title)
+        # self.gh.add_scene(self.scene_main)
         self.gh.add_scene(self.scene_board)
+        # self.gh.add_scene(self.scene_result)
         self.gh.add_scene(self.scene_end)
         self.gh.hscene.active(self.scene_title)
 
@@ -73,30 +79,30 @@ class TheGame:
         """new_match should create all required resources (actor and targets)
         for a new match.
         """
-        pass
+        self.actor = Actor()
 
     def start_match(self):
         """start_match starts a new match with all resources already created.
         """
         self.number_of_targets = 1
-        self.actor = Actor()
         self.targets = [Target(f"t{i+1}") for i in range(self.number_of_targets)]
         # TODO: call game handler start new match, which shoudl initializes
         # the game handler.
         # TODO: reinitialize scene board at this point.
+        self.gh.start_match(actor=self.actor, targets=self.targets)
 
     def stop_match(self):
         """stop_match stops and end a match.
         """
-        pass
+        self.gh.end_match()
 
     def play(self):
         """play runs and plays the game.
         """
-        # ->
-        # TODO: This should be called when a new match starts.
-        self.gh.start_match()
-        # <-
+        # # ->
+        # # TODO: This should be called when a new match starts.
+        # self.gh.start_match()
+        # # <-
 
         while True:
             self.clock.tick(30)
@@ -127,10 +133,10 @@ class TheGame:
             # <-
             self.gh.end_tick()
 
-        # ->
-        # TODO: This should be called when a match ends.
-        self.gh.end_match()
-        # <-
+        # # ->
+        # # TODO: This should be called when a match ends.
+        # self.gh.end_match()
+        # # <-
 
 
 def main():
@@ -138,7 +144,10 @@ def main():
     """
     game = TheGame()
     game.create()
+    game.new_match()
+    game.start_match()
     game.play()
+    game.end_match()
 
 
 if __name__ == "__main__":

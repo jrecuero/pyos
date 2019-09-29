@@ -46,9 +46,11 @@ class GameHandler(GHandler):
         super(GameHandler, self).__init__(name, surface, **kwargs)
         self.gstat = GameStat()
         self.gobj_console = GText("console", 10, 800, f"> {' ' * 50}")
-        self.actor = Actor()
+        # self.actor = Actor()
+        self.actor = None
         # self.targets = [Target("t1"), Target("t2"), Target("t3")]
-        self.targets = [Target("t1")]
+        # self.targets = [Target("t1")]
+        self.targets = None
         self.skill_actions = {"lines": [], "timer": [], "pieces": []}
 
     @property
@@ -60,15 +62,17 @@ class GameHandler(GHandler):
             return self.targets[0]
         return None
 
-    def start_match(self):
+    def start_match(self, **kwargs):
         """start_match proceeds to start a match and it will call all
         objects involved in the match like skills, ...
         """
+        self.actor = kwargs.get("actor", None)
+        self.targets = kwargs.get("targets", None)
         self.actor.start_match()
         for target in self.targets:
             target.start_match()
 
-    def end_match(self):
+    def end_match(self, **kwargs):
         """end_match proceeds to end a match and it will call all objects
         that were involved in the match like skills.
         """
