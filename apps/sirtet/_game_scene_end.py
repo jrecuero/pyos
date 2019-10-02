@@ -22,9 +22,6 @@ class GameSceneEnd(Scene):
         """open is called when transitioning into the scene.
         """
         pygame.mixer.music.stop()
-        # pygame.mixer.music.load(
-        #     os.path.join("apps/sirtet/music", "bensound-ukulele.mp3")
-        # )
         load_music("apps/sirtet/music", "bensound-ukulele.mp3")
         pygame.mixer.music.play(-1)
 

@@ -4,6 +4,7 @@ from pyplay import Color, GObject, GEvent
 from pyplay.gobject.grid import GravityBoard, TriShape
 from _game_tools import CELL_SIZE
 
+# TODO: These pieces should be feed by the main game/scene to be used.
 pieces = []
 pieces.append({"piece": [[0, 1, 1], [0, 1, 0], [0, 1, 0]], "rotation": True})
 pieces.append({"piece": [[1, 1, 0], [0, 1, 0], [0, 1, 0]], "rotation": True})
