@@ -124,31 +124,48 @@ class GameHandler(GHandler):
         color_dict = GameStat.new_play_colors()
         for cell in [c for _, line in lines for c in line]:
             color_dict[Color.color_to_str(cell.color)] += 1
+        # Update screen with new total of lines and colors.
         self.gstat.add_color_dict(color_dict)
         self.gstat.add_to_lines(len(lines))
         self.actor.add_color_dict(color_dict)
-        actor_damage = self.get_actor_damage(self.actor, color_dict)
-        actor_defense = self.get_actor_defense(self.actor, color_dict)
         self.target.add_color_dict(color_dict)
-        t_damage = self.get_actor_damage(self.target, color_dict)
-        self.target.health = self.target.health - actor_damage
-        target_damage = t_damage - actor_defense
-        target_damage = target_damage if target_damage > 0 else 0
-        self.actor.health = self.actor.health - target_damage
-        self.gobj_console.message = f"> Actor Damage {actor_damage} Defense {actor_defense}. Target Damage {t_damage} {target_damage}"
+
+        # Calculate damage dealt from the actor to the target.
+        actor_damage = self.get_actor_damage(self.actor, color_dict)
+        target_defense = self.get_actor_defense(self.target, color_dict)
+        damage_to_target = actor_damage - target_defense
+        damage_to_target = damage_to_target if damage_to_target > 0 else 0
+        self.target.health = self.target.health - damage_to_target
+
+        # Calculate damage dealt from the target to the actor.
+        actor_defense = self.get_actor_defense(self.actor, color_dict)
+        target_damage = self.get_actor_damage(self.target, color_dict)
+        damage_to_actor = target_damage - actor_defense
+        damage_to_actor = damage_to_actor if damage_to_actor > 0 else 0
+        self.actor.health = self.actor.health - damage_to_actor
+
+        self.gobj_console.message = (
+            f"> Damage To Target {damage_to_target}. Target To Actor {damage_to_actor}"
+        )
+
+        # Check if target is dead and has to be removed.
         if self.target.health <= 0:
             self.targets.remove(self.target)
             if len(self.targets):
                 GEvent.scene_event(GEvent.CREATE, source=self.target.gdisplay())
         if len(self.targets) == 0:
             GEvent.engine_event(GEvent.END, winner="actor")
+
+        # Check any actor skills expiration.
         self.check_skill_actions_for_lines(len(lines), color_dict)
+
+        # Check if target can execute any action.
         self.check_target_skills(len(lines), color_dict)
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
-        # Handle all keyboard inputs that trigger skills.
+        # Handle all keyboard inputs that trigger skills by the user.
         if self.running:
             if event.key == pygame.K_1:
                 if len(self.actor.damage_skills):
