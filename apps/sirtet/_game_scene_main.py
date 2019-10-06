@@ -2,8 +2,9 @@ from pyplay import Scene
 
 
 class GameSceneMain(Scene):
-    """GameSceneMain implements the game main scene, where any other scene
-    should be trigger.
+    """GameSceneMain implements the game main scene. Main scene should display
+    all attributes from the main actor, any skill to be selected or upgraded
+    and the next scene to be played.
     """
 
     def __init__(self, surface, **kwargs):
