@@ -8,8 +8,7 @@ from _game import TheGame
 def main():
     """main implements the full game application.
     """
-    game = TheGame()
-    game.play()
+    TheGame().play()
 
 
 if __name__ == "__main__":
