@@ -1,5 +1,6 @@
 import os
 
+# Avoid default pygame message.
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
 from _game import TheGame
