@@ -136,7 +136,7 @@ class TheGame:
         # # <-
 
     def play(self):
-        """play plays the game.
+        """play implements the game loop.
         """
         self.create()
         self.new_game()
