@@ -18,6 +18,7 @@ class GameActor(Gid):
         self._damage = GameActorAttr("damage", kwargs.get("damage", 0))
         self._defense = GameActorAttr("defense", kwargs.get("defense", 0))
         self._mind = GameActorAttr("mind", kwargs.get("mind", 0))
+        self.image = GameActorAttr("image", kwargs.get("image", None))
         self.stats = GameActorStats()
         self.counter_colors_all = GameStat.new_play_colors()
         self.counter_colors_available = GameStat.new_play_colors()
