@@ -13,23 +13,6 @@ WARNING = 4
 ERROR = 5
 
 
-def _log_runner(self, attr: str):
-    """log_runner adds to the logger attribute and arguments passed in any
-    called method.
-    """
-
-    def _inner_log_runner(*args):
-        if len(args) == 0:
-            self.dicta[attr] = ""
-        elif isinstance(args[0], dict):
-            self.dicta[attr] = args
-        else:
-            self.dicta[attr] = "{}".format(args[0])
-        return self
-
-    return _inner_log_runner
-
-
 class _Formatter(logging.Formatter):
     """_Formatter class implements the functionality to format all logger
     output in JSON format.
@@ -64,11 +47,27 @@ class _Logging(logging.Logger):
         super(_Logging, self).__init__(*args)
         self.dicta = {}
 
+    def _log_runner(self, attr: str):
+        """log_runner adds to the logger attribute and arguments passed in any
+        called method.
+        """
+
+        def _inner_log_runner(*args):
+            if len(args) == 0:
+                self.dicta[attr] = ""
+            elif isinstance(args[0], dict):
+                self.dicta[attr] = args
+            else:
+                self.dicta[attr] = "{}".format(args[0])
+            return self
+
+        return _inner_log_runner
+
     def __getattr__(self, attr):
         try:
             return self.__getattribute__(attr)
         except Exception:
-            return _log_runner(self, attr)
+            return self._log_runner(attr)
 
     def call(self, level=INFO):
         """call should be called when implementing attribute/value pairs using

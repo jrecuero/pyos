@@ -1,4 +1,3 @@
-# import pygame
 from pyplay import Gid
 from _game_stat import GameStat
 from _game_actor_attr import GameActorAttr
