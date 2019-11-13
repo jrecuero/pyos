@@ -126,7 +126,7 @@ class TheGame:
             # -> render objects
             self.surface.fill((255, 255, 255))
             self.gh.render()
-            pygame.display.flip()
+            # pygame.display.flip()
             # <-
             self.gh.end_tick()
 

@@ -1,3 +1,4 @@
+import pygame
 from ._hscene import SceneHandler
 
 
@@ -105,8 +106,15 @@ class GHandler:
 
     def render(self, **kwargs):
         """render calls render method for all scenes and graphical objects.
+
+        Kwargs:
+            flip (bool): call pygame to flip surface.
         """
         # call only the active scene.
         self.hscene.render(**kwargs)
         for gobj in self.gobjects:
             gobj.render(self.surface, **kwargs)
+
+        # By default flip surface calling pygame.
+        if kwargs.get("flip", True):
+            pygame.display.flip()
