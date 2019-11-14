@@ -1,3 +1,4 @@
+import sys
 import pygame
 from ._hscene import SceneHandler
 
@@ -22,22 +23,26 @@ class GHandler:
         """add_gobject adds a graphical object to the game handler.
         """
         self.gobjects.append(gobject)
+        return gobject
 
     def del_gobject(self, gobject):
         """del_gobject deletes a graphical object from the game handler.
         """
         if gobject in self.gobjects:
             self.gobjects.remove(gobject)
+        return gobject
 
     def add_scene(self, scene):
         """add_scene adds an scene to the game handler.
         """
         self.hscene.add(scene)
+        return scene
 
     def del_scene(self, scene):
         """del_scene deletes an scene from the game handler.
         """
         self.hscene.delete(scene)
+        return scene
 
     def start_tick(self):
         """start_tick should set all elements ready for a new tick.
@@ -95,6 +100,28 @@ class GHandler:
         Mouse events are passed to the active scene to be handle.
         """
         self.hscene.handle_mouse_event(event)
+
+    def event_handler(self, events=None, keyboards=None, buttons=None, **kwargs):
+        """event_handler provides a common and basic event handler to be added
+        to the application.
+        """
+        events = events if events else pygame.event.get()
+        keyboards = keyboards if keyboards else [pygame.KEYDOWN, pygame.KEYUP]
+        buttons = (
+            buttons
+            if buttons
+            else [pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]
+        )
+        for event in events:
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
+            elif event.type in keyboards:
+                self.gh.handle_keyboard_event(event)
+            elif event.type in buttons:
+                self.gh.handle_mouse_event(event)
+            elif event.type >= pygame.USEREVENT:
+                self.gh.handle_custom_event(event)
 
     def update(self, **kwargs):
         """update calls update method for all scenes and  graphical objects.

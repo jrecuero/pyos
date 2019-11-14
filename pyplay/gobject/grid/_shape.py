@@ -199,7 +199,6 @@ class Shape(Gid):
     def collide_with(self, other, collision):
         """collide_with processes a collision with other object.
         """
-
         for cell in self.cells:
             cell.back_it()
 

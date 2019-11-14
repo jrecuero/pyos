@@ -87,5 +87,6 @@ class Scene(Gid):
         """render calls render method for all scene graphical objects.
         """
         self.gobjects.draw(self.surface)
+        # call render for thos gobjects that can not be drawn as sprites.
         for gobj in self.gobjects:
             gobj.render(self.surface, **kwargs)

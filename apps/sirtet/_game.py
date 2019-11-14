@@ -1,4 +1,4 @@
-import sys
+# import sys
 import pygame
 
 from _game_scene_title import GameSceneTitle
@@ -104,20 +104,21 @@ class TheGame:
         while self.is_match():
             self.clock.tick(30)
             self.gh.start_tick()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit(0)
-                elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
-                    self.gh.handle_keyboard_event(event)
-                elif event.type in [
-                    pygame.MOUSEMOTION,
-                    pygame.MOUSEBUTTONDOWN,
-                    pygame.MOUSEBUTTONUP,
-                ]:
-                    self.gh.handle_mouse_event(event)
-                elif event.type >= pygame.USEREVENT:
-                    self.gh.handle_custom_event(event)
+            # for event in pygame.event.get():
+            #     if event.type == pygame.QUIT:
+            #         pygame.quit()
+            #         sys.exit(0)
+            #     elif event.type in [pygame.KEYDOWN, pygame.KEYUP]:
+            #         self.gh.handle_keyboard_event(event)
+            #     elif event.type in [
+            #         pygame.MOUSEMOTION,
+            #         pygame.MOUSEBUTTONDOWN,
+            #         pygame.MOUSEBUTTONUP,
+            #     ]:
+            #         self.gh.handle_mouse_event(event)
+            #     elif event.type >= pygame.USEREVENT:
+            #         self.gh.handle_custom_event(event)
+            self.gh.event_handler()
 
             # -> update objects
             self.gh.update()
