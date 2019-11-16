@@ -1,0 +1,115 @@
+config_desc = [
+    {
+        "mo": "Uni",
+        "flags": {
+            "super": None,
+            "config": True,
+            "concrete": True,
+            "access": "all",
+            "owner": "system",
+            "deletable": True,
+            "editable": True,
+            "visible": True,
+            "label": "Base Object",
+        },
+        "properties": [
+            {
+                "name": "dn",
+                "flags": {
+                    "config": True,
+                    "deletable": True,
+                    "editable": True,
+                    "visible": True,
+                    "type": "str:base",
+                    "auto": False,
+                    "default": "uni",
+                    "validate": None,
+                },
+            },
+            {
+                "name": "name",
+                "flags": {
+                    "config": True,
+                    "deletable": True,
+                    "editable": True,
+                    "visible": True,
+                    "type": "str:base",
+                    "auto": False,
+                    "default": "not-valid",
+                    "validate": None,
+                },
+            },
+        ],
+    },
+    {
+        "mo": "Poli",
+        "flags": {
+            "super": "Uni",
+            "config": True,
+            "concrete": True,
+            "access": "all",
+            "owner": "system",
+            "deletable": True,
+            "editable": True,
+            "visible": True,
+            "label": "Base Object",
+        },
+        "properties": [
+            {
+                "name": "tDn",
+                "flags": {
+                    "config": True,
+                    "deletable": True,
+                    "editable": True,
+                    "visible": True,
+                    "type": "str:base",
+                    "auto": False,
+                    "default": "poli",
+                    "validate": None,
+                },
+            },
+            {
+                "name": "desc",
+                "flags": {
+                    "config": True,
+                    "deletable": True,
+                    "editable": True,
+                    "visible": True,
+                    "type": "str:base",
+                    "auto": False,
+                    "default": "empty",
+                    "validate": None,
+                },
+            },
+        ],
+    },
+    {
+        "mo": "Tenant",
+        "flags": {
+            "super": "Poli",
+            "config": True,
+            "concrete": True,
+            "access": "all",
+            "owner": "system",
+            "deletable": True,
+            "editable": True,
+            "visible": True,
+            "label": "Tenant information",
+        },
+        "properties": [
+            {
+                "name": "region",
+                "flags": {
+                    "config": True,
+                    "deletable": True,
+                    "editable": True,
+                    "visible": True,
+                    "type": "str:base",
+                    "auto": False,
+                    "default": "home",
+                    "validate": None,
+                },
+            }
+        ],
+    },
+]

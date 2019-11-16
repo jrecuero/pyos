@@ -6,11 +6,12 @@ import sys
 import inspect
 
 
-NONE = 0
-DEBUG = 1
-INFO = 3
-WARNING = 4
-ERROR = 5
+NONE = "none"
+DEBUG = "debug"
+TRACE = "trace"
+INFO = "info"
+WARNING = "warning"
+ERROR = "error"
 
 
 class _Formatter(logging.Formatter):
@@ -35,6 +36,22 @@ class _Formatter(logging.Formatter):
         if "func-name" not in record.msg:
             record.msg["func-name"] = record.funcName
         return json.dumps(record.msg)
+
+
+def loggable(f):
+    """loggable is a decorator to be used in all internal log methods.
+    """
+
+    def _loggable(self):
+        pframe = inspect.stack()[1]
+        self.dicta["file-name"] = pframe.filename
+        self.dicta["lineno"] = pframe.lineno
+        self.dicta["func-name"] = pframe.function
+        self.dicta["level"] = DEBUG
+        f(self)
+        self.dicta = {}
+
+    return _loggable
 
 
 class _Logging(logging.Logger):
@@ -69,14 +86,49 @@ class _Logging(logging.Logger):
         except Exception:
             return self._log_runner(attr)
 
+    def __update_dict(self):
+        """___update_dict update the dictionary to be log.
+        """
+        pframe = inspect.stack()[2]
+        self.dicta["file-name"] = pframe.filename
+        self.dicta["lineno"] = pframe.lineno
+        self.dicta["func-name"] = pframe.function
+
+    @loggable
+    def debug(self):
+        self.dicta["level"] = DEBUG
+        super(_Logging, self).debug(self.dicta)
+
+    @loggable
+    def trace(self):
+        self.dicta["level"] = TRACE
+        super(_Logging, self).debug(self.dicta)
+
+    @loggable
+    def info(self):
+        self.dicta["level"] = INFO
+        super(_Logging, self).info(self.dicta)
+
+    @loggable
+    def warning(self):
+        self.dicta["level"] = WARNING
+        super(_Logging, self).warning(self.dicta)
+
+    @loggable
+    def error(self):
+        self.dicta["level"] = ERROR
+        super(_Logging, self).error(self.dicta)
+
+    @loggable
     def call(self, level=INFO):
         """call should be called when implementing attribute/value pairs using
         method calls.
         """
-        pframe = inspect.stack()[1]
-        self.dicta["file-name"] = pframe.filename
-        self.dicta["lineno"] = pframe.lineno
-        self.dicta["func-name"] = pframe.function
+        # pframe = inspect.stack()[1]
+        # self.dicta["file-name"] = pframe.filename
+        # self.dicta["lineno"] = pframe.lineno
+        # self.dicta["func-name"] = pframe.function
+        self.dicta["level"] = level
         if level == NONE:
             pass
         elif level == DEBUG:
@@ -89,7 +141,7 @@ class _Logging(logging.Logger):
             self.error(self.dicta)
         else:
             pass
-        self.dicta = {}
+        # self.dicta = {}
 
 
 loggars = {}
