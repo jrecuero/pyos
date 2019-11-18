@@ -42,7 +42,6 @@ class Factory:
         klass_name = desc["mo"]
         klass = self._repo.get(klass_name, None)
         if klass is None:
-            # klass_flags = desc["flags"]
             super_name = desc["flags"].get("super", None)
             super_klass = MO if super_name is None else self.get_klass(super_name)
             if super_klass is None:
@@ -51,21 +50,6 @@ class Factory:
                 ).error()
                 raise Exception(f"Super class {super_name} not found for {klass_name}")
             klass = self.new_derived_klass(super_klass, desc)
-            # klass_props = desc["properties"]
-            # attribute_dict = {p["name"]: p["flags"]["default"] for p in klass_props}
-            # properties_dict = {p["name"]: p["flags"] for p in klass_props}
-            # attribute_dict.update(
-            #     {
-            #         "_flags": klass_flags,
-            #         "_properties": properties_dict,
-            #         "_cls_workflows": {},
-            #         "_mo_status": MoStatus.NONE,
-            #         "_mo_workflows": {},
-            #     }
-            # )
-            # klass = type(klass_name, (MO,), attribute_dict)
-            # self._repo[klass_name] = klass
-            # log.Factory(self.name).Create(klass_name).trace()
         return klass
 
     def new_derived_klass(self, super_klass, desc):
@@ -81,8 +65,9 @@ class Factory:
         properties_dict = {
             p["name"]: self.set_prop_flags(p["flags"]) for p in klass_props
         }
-        # attribute_dict = {p["name"]: p["flags"].get("default", None) for p in klass_props}
         attribute_dict = {k: v["default"] for k, v in properties_dict.items()}
+        if super_klass.__name__ not in ["MO"]:
+            properties_dict.update(super_klass._properties)
         attribute_dict.update(
             {
                 "_flags": klass_flags,

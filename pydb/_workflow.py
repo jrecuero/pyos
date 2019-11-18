@@ -16,19 +16,24 @@ class Workflow:
     def id(self):
         return self._id
 
-    def check_mo_properties(self, mo):
-        """check_mo_properties checks properties for the given mo instance.
+    def cls_check_mo_properties(self, mo):
+        """cls_check_mo_properties checks properties for the given class.
         """
-        log.Trace(f"checking properties for mo {mo}").trace()
+        log.Trace(f"checking properties for cls.mo:{mo}").trace()
+
+    def mo_check_mo_properties(self, mo):
+        """mo_check_mo_properties checks properties for the given mo instance.
+        """
+        log.Trace(f"checking properties for mo:{mo}").trace()
 
     def add_cls(self, cls, props=None):
         """add_cls adds a new class to the workflow.
         """
         self.clss[cls] = props
-        cls.cls_to_workflow(self.id, self.check_mo_properties)
+        cls.cls_to_workflow(self.id, self.cls_check_mo_properties)
 
     def add_mo(self, mo, props=None):
         """add_mo adds a new instance to the workflow.
         """
         self.mos[mo] = props
-        mo.mo_to_workflow(self.id, self.check_mo_properties)
+        mo.mo_to_workflow(self.id, self.mo_check_mo_properties)

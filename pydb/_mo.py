@@ -46,7 +46,6 @@ class MO:
         for k in [k for k in dir(self) if not k.startswith("_")]:
             setattr(self, k, getattr(self, k, None))
         # update values for properties given when instance is created.
-        # for k, v in [(k, v) for k, v in kwargs.items() if hasattr(self, k)]:
         for k, v in kwargs.items():
             setattr(self, k, v)
         self._mo_status = MoStatus.CREATED
@@ -59,18 +58,33 @@ class MO:
         """__process_set_attr process any instance attribute that is going to
         be set/updated.
         """
+        klass_name = self.__class__.__name__
         if not hasattr(self, attr):
-            klass_name = self.__class__.__name__
             log.Class(klass_name).Exception(
                 f"Can not create new property: {attr}"
             ).error()
             raise Exception(f"{klass_name} can not create new property: {attr}")
-        # prop = (
-        #     self._properties.get(attr, None)
-        #     if getattr(self, "_properties", None)
-        #     else None
-        # )
-        # print(f"attribute {attr} set to {value} [{prop}]")
+        attr_prop = self._properties.get(attr, None)
+        # if attr_prop is None:
+        #     log.Class(klass_name).Property(attr).Exception(f"Unknowm property").error()
+        #     raise Exception(f"{klass_name}.{attr} Unknown property")
+        if (
+            attr_prop
+            and not attr_prop.get("editable")
+            and self._mo_status not in [MoStatus.INIT]
+        ):
+            log.Class(klass_name).Propertu(attr).Exception(
+                f"Only read property"
+            ).error()
+            raise Exception(f"{klass_name}.{attr} Only read property")
+        for wf_cb in [
+            _ for workflows in self.__class__._cls_workflows.values() for _ in workflows
+        ]:
+            wf_cb(self)
+        for wf_cb in [
+            _ for workflows in self._mo_workflows.values() for _ in workflows
+        ]:
+            wf_cb(self)
 
     # def __getattr__(self, attr):
     #    try:

@@ -18,7 +18,7 @@ config_desc = [
                 "flags": {
                     "config": True,
                     "deletable": True,
-                    "editable": True,
+                    "editable": False,
                     "visible": True,
                     "type": "str:base",
                     "auto": False,
