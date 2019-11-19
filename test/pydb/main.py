@@ -16,6 +16,9 @@ if __name__ == "__main__":
     # print(json.dumps(factory.dump(), indent=4))
     # print(json.dumps(factory.dump_tree("Tenant"), indent=4))
 
+    wf = Workflow("test")
+    wf.add_cls(factory.get_klass("Tenant"))
+
     # uni = factory.new_mo("Uni", dn="uni/1", name="Root node")
     # poli = factory.new_mo("Poli", tDn="uni/poli/1", desc="Config node")
     # print(poli.__dict__)
@@ -24,8 +27,8 @@ if __name__ == "__main__":
     )
     # print(tenant.__dict__)
 
-    wf = Workflow("test")
-    wf.add_cls(tenant.__class__)
-    wf.add_mo(tenant)
+    # wf.add_cls(factory.get_klass("Tenant"))
+    # wf.add_mo(tenant)
 
     tenant.region = "us-east-1"
+    tenant.deleted()

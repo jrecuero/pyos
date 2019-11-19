@@ -48,11 +48,29 @@ class MO:
         # update values for properties given when instance is created.
         for k, v in kwargs.items():
             setattr(self, k, v)
-        self._mo_status = MoStatus.CREATED
+        self.created()
 
     # def __process_get_attr(self, attr):
     #    print(f"attribute {attr} was read")
     #    return False
+
+    def __call_workflows(self, attr=None, value=None):
+        """__call_workflows calls to all Class and Instance workflows.
+        """
+        for wf_cb, mo_st in [
+            (cb, st)
+            for workflows in self.__class__._cls_workflows.values()
+            for (cb, st) in workflows
+        ]:
+            if not mo_st or (mo_st and attr is None):
+                wf_cb(self, attr, value)
+        for wf_cb, mo_st in [
+            (cb, st)
+            for workflows in self._mo_workflows.values()
+            for (cb, st) in workflows
+        ]:
+            if not mo_st or (mo_st and attr is None):
+                wf_cb(self, attr, value)
 
     def __process_set_attr(self, attr, value):
         """__process_set_attr process any instance attribute that is going to
@@ -77,14 +95,7 @@ class MO:
                 f"Only read property"
             ).error()
             raise Exception(f"{klass_name}.{attr} Only read property")
-        for wf_cb in [
-            _ for workflows in self.__class__._cls_workflows.values() for _ in workflows
-        ]:
-            wf_cb(self)
-        for wf_cb in [
-            _ for workflows in self._mo_workflows.values() for _ in workflows
-        ]:
-            wf_cb(self)
+        self.__call_workflows(attr, value)
 
     # def __getattr__(self, attr):
     #    try:
@@ -102,15 +113,27 @@ class MO:
         return super(MO, self).__setattr__(attr, value)
 
     @classmethod
-    def cls_to_workflow(cls, wf_id, wf_cb):
+    def cls_to_workflow(cls, wf_id, wf_cb, on_status=False):
         """cls_to_workflow appends a worflow callback for the class.
         """
-        cls._cls_workflows.setdefault(wf_id, []).append(wf_cb)
+        cls._cls_workflows.setdefault(wf_id, []).append((wf_cb, on_status))
 
-    def mo_to_workflow(self, wf_id, wf_cb):
+    def mo_to_workflow(self, wf_id, wf_cb, on_status=False):
         """mo_to_workflow appends a workflow callback for the instance.
         """
-        self._mo_workflows.setdefault(wf_id, []).append(wf_cb)
+        self._mo_workflows.setdefault(wf_id, []).append((wf_cb, on_status))
+
+    def created(self):
+        """created sets the mo in CREATED state.
+        """
+        self._mo_status = MoStatus.CREATED
+        self.__call_workflows()
+
+    def deleted(self):
+        """deleted sets the mo in DELETED state.
+        """
+        self._mo_status = MoStatus.DELETED
+        self.__call_workflows()
 
     def __str__(self):
         """___str___ overwrites default method to return a string
