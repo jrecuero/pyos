@@ -21,12 +21,12 @@ class Workflow:
         """
         if prop is None:
             log.Workflow(self.name).Trace(
-                f"CLS:{mo.__class__} Instance update to {mo._mo_status}"
+                f"CLS:{mo.__class__} @ {mo._mo_status}"
             ).trace()
         else:
             old_value = mo.__dict__.get(prop, None)
             log.Workflow(self.name).Trace(
-                f"CLS:{mo.__class__} {prop} : {old_value} -> {value}"
+                f"CLS:{mo.__class__} @ {mo._mo_status} {prop} : {old_value} -> {value}"
             ).trace()
 
     def mo_check_mo_properties(self, mo, prop, value):
@@ -34,12 +34,12 @@ class Workflow:
         """
         if prop is None:
             log.Workflow(self.name).Trace(
-                f"CLS:{mo.__class__} Instance update to {mo._mo_status}"
+                f"CLS:{mo.__class__} @ {mo._mo_status}"
             ).trace()
         else:
             old_value = mo.__dict__.get(prop, None)
             log.Workflow(self.name).Trace(
-                f"MO:{mo.__class__} {prop} : {old_value} -> {value}"
+                f"MO:{mo.__class__} @ {mo._mo_status} {prop} : {old_value} -> {value}"
             ).trace()
 
     def add_cls(self, cls, props=None):

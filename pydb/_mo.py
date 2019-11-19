@@ -16,27 +16,27 @@ class MO:
     Class is created using a configuration data with these options.
 
     Class options:
-        - super : super class.
-        - config: configuration or no class.
-        - concrete: concrete or abstract class.
-        - access: who can access to the class.
-        - owner: class owner.
-        - deletable: instance can be the deleted.
-        - editable: instance can be edited.
-        - visible: instance is visible.
-        - label: user defined class description.
+        - super : super class. default: None
+        - config: configuration or no class. default: True
+        - concrete: concrete or abstract class. default: True
+        - access: who can access to the class. default: all
+        - owner: class owner. default: system
+        - deletable: instance can be the deleted. default: True
+        - editable: instance can be edited. default: True
+        - visible: instance is visible. default: True
+        - label: user defined class description. default: ''
 
     For every class property there are a set of options too.
 
     Property options:
-        - config: configuration or not property.
-        - deletable: property can be deleted.
-        - editable: property can be edited.
-        - visible: property is visible.
-        - type: property type.
-        - auto: auto generated property.
-        - default: property default value.
-        - validate: method that validate property value.
+        - config: configuration or not property. default: True
+        - deletable: property can be deleted. default: True
+        - editable: property can be edited. default: True
+        - visible: property is visible. default: True
+        - type: property type. default: str:base
+        - auto: auto generated property. default: False
+        - default: property default value. default: None
+        - validate: method that validate property value. default: None
     """
 
     def __init__(self, **kwargs):
@@ -57,29 +57,27 @@ class MO:
     def __call_workflows(self, attr=None, value=None):
         """__call_workflows calls to all Class and Instance workflows.
         """
-        for wf_cb, mo_st in [
-            (cb, st)
-            for workflows in self.__class__._cls_workflows.values()
-            for (cb, st) in workflows
-        ]:
-            if not mo_st or (mo_st and attr is None):
-                wf_cb(self, attr, value)
-        for wf_cb, mo_st in [
-            (cb, st)
-            for workflows in self._mo_workflows.values()
-            for (cb, st) in workflows
-        ]:
-            if not mo_st or (mo_st and attr is None):
-                wf_cb(self, attr, value)
+        # Call class workflows callbacks.
+        workflows = self.__class__._cls_workflows.values()
+        for wf_cb, mo_st in [(cb, st) for wf in workflows for (cb, st) in wf]:
+            # if not mo_st or (mo_st and attr is None):
+            wf_cb(self, attr, value)
+        # Call instance workflows callbacks.
+        workflows = self._mo_workflows.values()
+        for wf_cb, mo_st in [(cb, st) for wf in workflows for (cb, st) in wf]:
+            # if not mo_st or (mo_st and attr is None):
+            wf_cb(self, attr, value)
 
     def __process_set_attr(self, attr, value):
         """__process_set_attr process any instance attribute that is going to
         be set/updated.
         """
+        if self._properties.get(attr, None) is None:
+            return
         klass_name = self.__class__.__name__
         if not hasattr(self, attr):
             log.Class(klass_name).Exception(
-                f"Can not create new property: {attr}"
+                f"can not create new property: {attr}"
             ).error()
             raise Exception(f"{klass_name} can not create new property: {attr}")
         attr_prop = self._properties.get(attr, None)
@@ -95,7 +93,7 @@ class MO:
                 f"Only read property"
             ).error()
             raise Exception(f"{klass_name}.{attr} Only read property")
-        self.__call_workflows(attr, value)
+        self.updated(attr, value)
 
     # def __getattr__(self, attr):
     #    try:
@@ -103,7 +101,7 @@ class MO:
     #    except Exception:
     #        return self.__process_get_attr(attr)
 
-    def __setattr__(self, attr, value):
+    def __setattr__(self, attr=None, value=None):
         """__setattr__ overwrites default method in orde to provide special
         processing when any attribute is being set/updated.
         """
@@ -128,6 +126,15 @@ class MO:
         """
         self._mo_status = MoStatus.CREATED
         self.__call_workflows()
+
+    def updated(self, attr, value):
+        """updated sets the mo in UPDATED state.
+        """
+        # Workflows are not called in INIT status in order to avoid flood of
+        # notifications when MOs are being created.
+        if self._mo_status not in [MoStatus.INIT]:
+            self._mo_status = MoStatus.UPDATED
+            self.__call_workflows(attr, value)
 
     def deleted(self):
         """deleted sets the mo in DELETED state.
