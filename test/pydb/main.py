@@ -3,7 +3,7 @@ from conf_data import config_desc
 from pydb import Factory, Workflow
 
 
-if __name__ == "__main__":
+def old_factory():
     factory = Factory()
 
     factory.process_config(config_desc)
@@ -32,3 +32,34 @@ if __name__ == "__main__":
 
     tenant.region = "us-east-1"
     tenant.deleted()
+
+
+def new_factory():
+    factory = Factory()
+    factory.process_config(config_desc)
+
+    wf = Workflow("test")
+    wf.add_cls(factory.get_klass("Tenant"))
+    region = factory.new_mo(
+        "Region", dn="uni/region-[us-west-01]", name="us-west-01", area="us-west"
+    )
+    tenant_coke = factory.new_mo(
+        "Tenant", dn="uni/region-[us-west-01]/coke", name="infra"
+    )
+    tenant_coke.name = "coke"
+    # tenant_coke.region = region
+    # tenant_coke.parenting("region", region, "tenants")
+    tenant_coke.rel_region(region)
+
+    tenant_pepsi = factory.new_mo(
+        "Tenant", dn="uni/region-[us-west-01]/pepsi", name="pepsi"
+    )
+    tenant_pepsi.rel_region(region)
+
+    print(f"{tenant_coke.region}")
+    print(f"{tenant_pepsi.region}")
+    print(f"{region.tenants}")
+
+
+if __name__ == "__main__":
+    new_factory()

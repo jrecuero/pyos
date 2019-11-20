@@ -32,6 +32,7 @@ class Factory:
         flags.setdefault("auto", False)
         flags.setdefault("default", None)
         flags.setdefault("validate", None)
+        flags.setdefault("href", None)
         return flags
 
     def new_klass(self, desc):
@@ -52,6 +53,54 @@ class Factory:
             klass = self.new_derived_klass(super_klass, desc)
         return klass
 
+    def parenting(self, parent_prop, child_prop):
+        """parenting sets the parent MO for a give instance, parent and child
+        property have to be passed too.
+        """
+
+        def _parenting(mo, parent):
+            mo.parenting(parent_prop, parent, child_prop)
+            # if parent and hasattr(mo, parent_prop) and hasattr(parent, child_prop):
+            #     setattr(mo, parent_prop, parent)
+            #     setattr(parent, child_prop, mo)
+
+        return _parenting
+
+    def childrening(self, child_prop, parent_prop):
+        """childrening sets the child MO for a give instance, child and parent
+        property have to be passed too.
+        """
+
+        def _childrening(mo, child):
+            mo.childrening(child_prop, child, parent_prop)
+            # if child and hasattr(mo, child_prop) and hasattr(child, parent_prop):
+            #     setattr(mo, child_prop, child)
+            #     setattr(child, parent_prop, mo)
+
+        return _childrening
+
+    def add_to_list(self, prop):
+        """add_to_list adds a value to a list property.
+        """
+
+        def _add_to_list(mo, value):
+            lista = getattr(mo, prop)
+            print(f"add_to_list {mo} {lista} {value}")
+            lista.append(value)
+            mo.updated(prop, value)
+
+        return _add_to_list
+
+    def del_from_list(self, prop):
+        """del_from_list deletes a value from a list property.
+        """
+
+        def _del_from_list(mo, value):
+            getattr(mo, prop).remove(value)
+            mo.updated(prop, value)
+
+        return _del_from_list
+
     def new_derived_klass(self, super_klass, desc):
         """new_derived_klass creates a class using the given super class using
         the given configuration description.
@@ -68,6 +117,18 @@ class Factory:
         attribute_dict = {k: v["default"] for k, v in properties_dict.items()}
         if super_klass.__name__ not in ["MO"]:
             properties_dict.update(super_klass._properties)
+
+        # Create parent/child relation properties
+        for k, v in properties_dict.items():
+            if v["href"]:
+                href, rel_klass, rel_prop = v["href"].split(":")
+                if href == "parent":
+                    attribute_dict[f"rel_{k}"] = self.parenting(k, rel_prop)
+                elif href == "child":
+                    attribute_dict[f"rel_{k}"] = self.childrening(k, rel_prop)
+                attribute_dict[f"add_{k}"] = self.add_to_list(k)
+                attribute_dict[f"del_{k}"] = self.del_from_list(k)
+
         attribute_dict.update(
             {
                 "_flags": klass_flags,

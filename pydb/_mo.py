@@ -37,6 +37,7 @@ class MO:
         - auto: auto generated property. default: False
         - default: property default value. default: None
         - validate: method that validate property value. default: None
+        - href: property relation with other instance. default: None
     """
 
     def __init__(self, **kwargs):
@@ -44,7 +45,11 @@ class MO:
         self._mo_workflows = {}
         # set default values for all properties provisioned for the given class.
         for k in [k for k in dir(self) if not k.startswith("_")]:
-            setattr(self, k, getattr(self, k, None))
+            prop = self._properties.get(k, None)
+            if prop and prop["href"]:
+                setattr(self, k, list())
+            else:
+                setattr(self, k, getattr(self, k, None))
         # update values for properties given when instance is created.
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -142,8 +147,32 @@ class MO:
         self._mo_status = MoStatus.DELETED
         self.__call_workflows()
 
-    def __str__(self):
-        """___str___ overwrites default method to return a string
-        representation for the instance.
+    def parenting(self, parent_prop, parent, child_prop):
+        """parenting sets the parent MO for a give instance, parent and child
+        property have to be passed too.
         """
-        return f"{self.__dict__}"
+        print(f"parenting {self} {parent_prop} {parent} {child_prop}")
+        if parent and hasattr(self, parent_prop) and hasattr(parent, child_prop):
+            # setattr(self, parent_prop, parent)
+            getattr(self, f"add_{parent_prop}")(parent)
+            # getattr(parent, child_prop).append(self)
+            getattr(parent, f"add_{child_prop}")(self)
+
+    def childrening(self, child_prop, child, parent_prop):
+        """childrening sets the child MO for a give instance, child and parent
+        property have to be passed too.
+        """
+        if child and hasattr(self, child_prop) and hasattr(child, parent_prop):
+            # getattr(self, child_prop).append(child)
+            getattr(self, f"add_{child_prop}")(child)
+            # setattr(child, parent_prop, self)
+            getattr(child, f"add_{parent_prop}")(self)
+
+    # def __str__(self):
+    #     """___str___ overwrites default method to return a string
+    #     representation for the instance.
+    #     """
+    #     props = "\n  ".join(
+    #         [f"{k} : {self.__dict__.get(k)}" for k in self._properties.keys()]
+    #     )
+    #     return f"{self.__class__.__name__}:\n  {props}"
