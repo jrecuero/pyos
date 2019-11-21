@@ -38,6 +38,7 @@ class MO:
         - default: property default value. default: None
         - validate: method that validate property value. default: None
         - href: property relation with other instance. default: None
+        - label: user defined property description. default: ''
     """
 
     def __init__(self, **kwargs):
@@ -151,22 +152,33 @@ class MO:
         """parenting sets the parent MO for a give instance, parent and child
         property have to be passed too.
         """
-        print(f"parenting {self} {parent_prop} {parent} {child_prop}")
         if parent and hasattr(self, parent_prop) and hasattr(parent, child_prop):
-            # setattr(self, parent_prop, parent)
-            getattr(self, f"add_{parent_prop}")(parent)
-            # getattr(parent, child_prop).append(self)
-            getattr(parent, f"add_{child_prop}")(self)
+            parent_prop_flags = self._properties[parent_prop]
+            if parent_prop_flags["type"] in ["list:href"]:
+                getattr(self, f"add_{parent_prop}")(parent)
+            else:
+                setattr(self, parent_prop, parent)
+            child_prop_flags = parent._properties[child_prop]
+            if child_prop_flags["type"] in ["list:href"]:
+                getattr(parent, f"add_{child_prop}")(self)
+            else:
+                getattr(parent, child_prop).append(self)
 
     def childrening(self, child_prop, child, parent_prop):
         """childrening sets the child MO for a give instance, child and parent
         property have to be passed too.
         """
         if child and hasattr(self, child_prop) and hasattr(child, parent_prop):
-            # getattr(self, child_prop).append(child)
-            getattr(self, f"add_{child_prop}")(child)
-            # setattr(child, parent_prop, self)
-            getattr(child, f"add_{parent_prop}")(self)
+            child_prop_flags = self._properties[child_prop]
+            if child_prop_flags["type"] in ["list:href"]:
+                getattr(self, f"add_{child_prop}")(child)
+            else:
+                getattr(self, child_prop).append(child)
+            parent_prop_flags = child._properties[parent_prop]
+            if parent_prop_flags["type"] in ["list:href"]:
+                getattr(child, f"add_{parent_prop}")(self)
+            else:
+                setattr(child, parent_prop, self)
 
     # def __str__(self):
     #     """___str___ overwrites default method to return a string

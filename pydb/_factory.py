@@ -33,6 +33,7 @@ class Factory:
         flags.setdefault("default", None)
         flags.setdefault("validate", None)
         flags.setdefault("href", None)
+        flags.setdefault("label", None)
         return flags
 
     def new_klass(self, desc):
@@ -85,8 +86,9 @@ class Factory:
 
         def _add_to_list(mo, value):
             lista = getattr(mo, prop)
-            print(f"add_to_list {mo} {lista} {value}")
             lista.append(value)
+            klass_name = mo.__class__.__name__
+            log.Class(klass_name).Update(prop).To(value).Status(mo._mo_status).trace()
             mo.updated(prop, value)
 
         return _add_to_list
@@ -97,6 +99,8 @@ class Factory:
 
         def _del_from_list(mo, value):
             getattr(mo, prop).remove(value)
+            klass_name = mo.__class__.__name__
+            log.Class(klass_name).Update(prop).To(value).Status(mo._mo_status).trace()
             mo.updated(prop, value)
 
         return _del_from_list
@@ -126,8 +130,9 @@ class Factory:
                     attribute_dict[f"rel_{k}"] = self.parenting(k, rel_prop)
                 elif href == "child":
                     attribute_dict[f"rel_{k}"] = self.childrening(k, rel_prop)
-                attribute_dict[f"add_{k}"] = self.add_to_list(k)
-                attribute_dict[f"del_{k}"] = self.del_from_list(k)
+                if v["type"] in ["list:href"]:
+                    attribute_dict[f"add_{k}"] = self.add_to_list(k)
+                    attribute_dict[f"del_{k}"] = self.del_from_list(k)
 
         attribute_dict.update(
             {

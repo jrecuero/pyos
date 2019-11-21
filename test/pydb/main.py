@@ -3,7 +3,7 @@ from conf_data import config_desc
 from pydb import Factory, Workflow
 
 
-def old_factory():
+def old_factory_01():
     factory = Factory()
 
     factory.process_config(config_desc)
@@ -34,7 +34,7 @@ def old_factory():
     tenant.deleted()
 
 
-def new_factory():
+def old_factory_02():
     factory = Factory()
     factory.process_config(config_desc)
 
@@ -43,6 +43,7 @@ def new_factory():
     region = factory.new_mo(
         "Region", dn="uni/region-[us-west-01]", name="us-west-01", area="us-west"
     )
+    wf.add_mo(region)
     tenant_coke = factory.new_mo(
         "Tenant", dn="uni/region-[us-west-01]/coke", name="infra"
     )
@@ -58,6 +59,33 @@ def new_factory():
 
     print(f"{tenant_coke.region}")
     print(f"{tenant_pepsi.region}")
+    print(f"{region.tenants}")
+
+
+def new_factory():
+    tenant_config = [
+        {"dn": "uni/region-[us-west-01]/coke", "name": "infra"},
+        {"dn": "uni/region-[us-west-01]/pepsi", "name": "infra"},
+    ]
+
+    factory = Factory("test")
+    factory.process_config(config_desc)
+
+    wf = Workflow("test")
+    wf.add_cls(factory.get_klass("Tenant"))
+    region = factory.new_mo(
+        "Region", dn="uni/region-[us-west-01]", name="us-west-01", area="us-west"
+    )
+    wf.add_mo(region)
+
+    tenants = []
+    for t in tenant_config:
+        tenant = factory.new_mo("Tenant", **t)
+        tenant.rel_region(region)
+        tenants.append(tenant)
+
+    for tenant in tenants:
+        print(f"{tenant.region}")
     print(f"{region.tenants}")
 
 
