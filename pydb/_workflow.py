@@ -1,6 +1,40 @@
 from ._loggar import log
 
 
+class KlassSeedDbase:
+    """KlassSeedDbase class stores information for every class that has an
+    active instance.
+    """
+
+    _repo = None
+
+    def __init__(self):
+        if KlassSeedDbase._repo is None:
+            KlassSeedDbase._repo = {}
+
+    @property
+    def db(self):
+        """db property returns the class _repo attribute that contains all
+        KlassSeed instances.
+        """
+        return KlassSeedDbase._repo
+
+    def add(self, kname=None, kseed=None):
+        """add adds a new KlassSeed instance to the repository.
+        """
+        if kname:
+            kseed = self.db.get(kname, None)
+            if kseed is None:
+                kseed = KlassSeed(kname)
+                self.db[kname] = kseed
+        elif kseed:
+            if self.db.get(kseed.name, None) is None:
+                self.db[kseed.name] = kseed
+        else:
+            return None
+        return kseed
+
+
 class KlassSeed:
     """KlassSeed class stores information for every class registered to a
     workflow. It shows if there is at least one instance for that class
@@ -11,6 +45,11 @@ class KlassSeed:
     def __init__(self, klass_name):
         self.klass_name = klass_name
         self.active = False
+        KlassSeedDbase().add(kseed=self)
+
+    @property
+    def name(self):
+        return self.klass_name
 
 
 class DepSeed:
@@ -60,6 +99,10 @@ class Workflow:
     @property
     def id(self):
         return self._id
+
+    @property
+    def kdbase(self):
+        return KlassSeedDbase()
 
     def start(self):
         """start starts the workflow.

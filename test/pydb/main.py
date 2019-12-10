@@ -87,6 +87,7 @@ def new_factory():
     for tenant in tenants:
         print(f"{tenant.region}")
     print(f"{region.tenants}")
+    print(f"{wf.kdbase.db}")
 
 
 if __name__ == "__main__":
