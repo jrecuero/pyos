@@ -50,12 +50,12 @@ def old_factory_02():
     tenant_coke.name = "coke"
     # tenant_coke.region = region
     # tenant_coke.parenting("region", region, "tenants")
-    tenant_coke.rel_region(region)
+    tenant_coke.href_region(region)
 
     tenant_pepsi = factory.new_mo(
         "Tenant", dn="uni/region-[us-west-01]/pepsi", name="pepsi"
     )
-    tenant_pepsi.rel_region(region)
+    tenant_pepsi.href_region(region)
 
     print(f"{tenant_coke.region}")
     print(f"{tenant_pepsi.region}")
@@ -81,13 +81,14 @@ def new_factory():
     tenants = []
     for t in tenant_config:
         tenant = factory.new_mo("Tenant", **t)
-        tenant.rel_region(region)
+        tenant.href_region(region)
         tenants.append(tenant)
 
     for tenant in tenants:
         print(f"{tenant.region}")
     print(f"{region.tenants}")
     print(f"{wf.kdbase.db}")
+    tenants[0].deleted()
 
 
 if __name__ == "__main__":

@@ -67,6 +67,16 @@ class Factory:
 
         return _parenting
 
+    def unparenting(self, parent_prop, child_prop):
+        """unparenting unsets the parent MO for a given instance, parent and cihld
+        property have to be passed too.
+        """
+
+        def _unparenting(mo, parent):
+            mo.unparenting(parent_prop, parent, child_prop)
+
+        return _unparenting
+
     def childrening(self, child_prop, parent_prop):
         """childrening sets the child MO for a give instance, child and parent
         property have to be passed too.
@@ -79,6 +89,16 @@ class Factory:
             #     setattr(child, parent_prop, mo)
 
         return _childrening
+
+    def unchildrening(self, child_prop, parent_prop):
+        """unchildrening unsets the childMO for a given insntance, child and parent
+        property have to be passed too.
+        """
+
+        def _unchildrening(mo, child):
+            mo.unchildrening(child_prop, child, parent_prop)
+
+        return _unchildrening
 
     def add_to_list(self, prop):
         """add_to_list adds a value to a list property.
@@ -125,11 +145,13 @@ class Factory:
         # Create parent/child relation properties
         for k, v in properties_dict.items():
             if v["href"]:
-                href, rel_klass, rel_prop = v["href"].split(":")
+                href, href_klass, href_prop = v["href"].split(":")
                 if href == "parent":
-                    attribute_dict[f"rel_{k}"] = self.parenting(k, rel_prop)
+                    attribute_dict[f"href_{k}"] = self.parenting(k, href_prop)
+                    attribute_dict[f"unhref_{k}"] = self.unparenting(k, href_prop)
                 elif href == "child":
-                    attribute_dict[f"rel_{k}"] = self.childrening(k, rel_prop)
+                    attribute_dict[f"href_{k}"] = self.childrening(k, href_prop)
+                    attribute_dict[f"unhref_{k}"] = self.unchildrening(k, href_prop)
                 if v["type"] in ["list:href"]:
                     attribute_dict[f"add_{k}"] = self.add_to_list(k)
                     attribute_dict[f"del_{k}"] = self.del_from_list(k)

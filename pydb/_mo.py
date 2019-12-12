@@ -145,6 +145,8 @@ class MO:
     def deleted(self):
         """deleted sets the mo in DELETED state.
         """
+        # TODO: instance has to be deleted from all parents, and in theory it
+        # should proceed to delete all children.
         self._mo_status = MoStatus.DELETED
         self.__call_workflows()
 
@@ -164,6 +166,22 @@ class MO:
             else:
                 getattr(parent, child_prop).append(self)
 
+    def unparenting(self, parent_prop, parent, child_prop):
+        """unparenting unsets the parent MO for a given instance, parent and cihld
+        property have to be passed too.
+        """
+        if parent and hasattr(self, parent_prop) and hasattr(parent, child_prop):
+            parent_prop_flags = self._properties[parent_prop]
+            if parent_prop_flags["type"] in ["list:href"]:
+                getattr(self, f"del_{parent_prop}")(parent)
+            else:
+                setattr(self, parent_prop, None)
+            child_prop_flags = parent._properties[child_prop]
+            if child_prop_flags["type"] in ["list:href"]:
+                getattr(parent, f"del_{child_prop}")(self)
+            else:
+                getattr(parent, child_prop).remove(self)
+
     def childrening(self, child_prop, child, parent_prop):
         """childrening sets the child MO for a give instance, child and parent
         property have to be passed too.
@@ -171,14 +189,19 @@ class MO:
         if child and hasattr(self, child_prop) and hasattr(child, parent_prop):
             child_prop_flags = self._properties[child_prop]
             if child_prop_flags["type"] in ["list:href"]:
-                getattr(self, f"add_{child_prop}")(child)
+                getattr(self, f"del_{child_prop}")(child)
             else:
-                getattr(self, child_prop).append(child)
+                getattr(self, child_prop).remove(child)
             parent_prop_flags = child._properties[parent_prop]
             if parent_prop_flags["type"] in ["list:href"]:
-                getattr(child, f"add_{parent_prop}")(self)
+                getattr(child, f"del_{parent_prop}")(self)
             else:
-                setattr(child, parent_prop, self)
+                setattr(child, parent_prop, None)
+
+    def unchildrening(self, child_prop, child, parent_prop):
+        """unchildrening unsets the childMO for a given insntance, child and parent
+        property have to be passed too.
+        """
 
     # def __str__(self):
     #     """___str___ overwrites default method to return a string
