@@ -72,7 +72,8 @@ class Factory:
         property have to be passed too.
         """
 
-        def _unparenting(mo, parent):
+        def _unparenting(mo, parent=None):
+            parent = parent or getattr(mo, parent_prop)
             mo.unparenting(parent_prop, parent, child_prop)
 
         return _unparenting
@@ -95,7 +96,8 @@ class Factory:
         property have to be passed too.
         """
 
-        def _unchildrening(mo, child):
+        def _unchildrening(mo, child=None):
+            child = child or getattr(mo, child_prop)
             mo.unchildrening(child_prop, child, parent_prop)
 
         return _unchildrening

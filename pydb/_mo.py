@@ -147,6 +147,9 @@ class MO:
         """
         # TODO: instance has to be deleted from all parents, and in theory it
         # should proceed to delete all children.
+        for k in [_ for _ in dir(self) if _.startswith("unhref_")]:
+            log.Class(self.__class__.__name__).Unref(k).trace()
+            getattr(self, k)()
         self._mo_status = MoStatus.DELETED
         self.__call_workflows()
 

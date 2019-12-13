@@ -88,7 +88,11 @@ def new_factory():
         print(f"{tenant.region}")
     print(f"{region.tenants}")
     print(f"{wf.kdbase.db}")
-    tenants[0].deleted()
+
+    tenant = tenants[0]
+    # tenant.unhref_region(tenant.region)
+    # tenant.unhref_region()
+    tenant.deleted()
 
 
 if __name__ == "__main__":
