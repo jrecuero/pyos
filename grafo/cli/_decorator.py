@@ -110,7 +110,7 @@ def loader(path, baseline=None, top=None):
         module = (
             "{}.{}".format(baseline, mod[:-3]) if baseline else "{}".format(mod[:-3])
         )
-        print("importing {}...".format(module))
+        # print("importing {}...".format(module))
         __import__(module, locals(), globals())
     for mod in [m for m in all_mods if not (m.startswith(".") or m.startswith("__"))]:
         module = os.path.join(path, mod)

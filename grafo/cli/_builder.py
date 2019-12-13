@@ -8,6 +8,8 @@ from ._builtins import _exit, _help
 from grafo.cli.parser import Parser, Syntax, Token
 from grafo.cli.parser.lex import CliLexer
 
+END_ID = "END"
+
 
 class Hooker(object):
     __slots__ = ["handler", "hook_next"]
@@ -126,7 +128,7 @@ class Builder(object):
         self.parser.set_line(line)
         result, error = self.parser.parse()
         if error is None:
-            print(result.command, result.arguments, result.tokens)
+            # print(result.command, result.arguments, result.tokens)
             return result
         print(error)
         return None
@@ -179,8 +181,8 @@ class Builder(object):
             hookers[-1].next = active_hooker.terminate()
             active_hooker = hookers.pop()
         end_node = active_hooker.terminate()
-        self.handler.add_node(end_node, Node("END", content=EndContent()), first=True)
-        print(self.handler.grafo.to_mermaid())
+        self.handler.add_node(end_node, Node(END_ID, content=EndContent()), first=True)
+        # print(self.handler.grafo.to_mermaid())
         return command_node, end_node
 
     def create_grafo(self, path):

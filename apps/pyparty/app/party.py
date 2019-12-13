@@ -1,9 +1,3 @@
-from flask import Flask
-
-
-app = Flask(__name__)
-
-
 class Party:
     def __init__(self, members):
         self.members = {m: False for m in members}
@@ -24,19 +18,3 @@ class Party:
 
 
 party = Party(["jose", "marce"])
-
-
-@app.route("/")
-def app_index():
-    return "Hello world"
-
-
-@app.route("/activate/<member>")
-def activate(member):
-    party.activate(member)
-    return str(party.members)
-
-
-@app.route("/play")
-def play():
-    return party.play()
