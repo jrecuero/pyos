@@ -1,0 +1,28 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Sign-up{% endblock %}
+
+
+{% block main %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+        <h1>Sign up</h1>
+        <hr>
+        <form action="/sign-up" method="POST">
+            {% for k, v in members.items() %}
+                {% if v %}
+                    <input type="radio" name="player" value="{{ k }}" disabled>{{ k }}<br>
+                {% else %}
+                    <input type="radio" name="player" value="{{ k }}">{{ k }}<br>
+                {% endif %}
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Sign up</button>
+        </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

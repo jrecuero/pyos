@@ -2,6 +2,7 @@ class Party:
     def __init__(self, members):
         self.members = {m: False for m in members}
         self.playing = False
+        self.name = "Internet Party"
 
     def activate(self, member):
         if member in self.members:
@@ -17,4 +18,4 @@ class Party:
             return f"missing players {[k for (k, v) in self.members.items() if not v]}"
 
 
-party = Party(["jose", "marce"])
+party = Party(["JOSE", "MARCELA"])
