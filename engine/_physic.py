@@ -372,7 +372,7 @@ class Arena(NObject):
         for shape in sorted(moved_shapes, key=lambda x: x.priority):
             for other in [o for o in others if o != shape]:
                 if shape.collision_with(other):
-                    # log.Actor(shape.name).CollisionWith(other.name).call()
+                    # log.Actor(shape.name).CollisionWith(other.name).info()
                     # shape.back()
                     shape.collisioned(other)
                     other.collisioned(shape)

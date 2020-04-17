@@ -16,15 +16,15 @@ def plug_exc(exit: bool = False):
                 return f(self, *args)
             except KeyboardInterrupt:
                 self.restore_screen(self.screen)
-                log.Error("KeyboardInterrupt").call()
+                log.Error("KeyboardInterrupt").error()
             except get_plugin().exception() as ex:
                 self.restore_screen(self.screen)
-                log.Error({"display.plug.exception": "{}".format(ex)}).call()
+                log.Error({"display.plug.exception": "{}".format(ex)}).error()
                 for l in traceback.format_exc().splitlines():
                     print(l)
             except Exception as ex:
                 self.restore_screen(self.screen)
-                log.Error({"Exception": "{}".format(ex)}).call()
+                log.Error({"Exception": "{}".format(ex)}).error()
                 for l in traceback.format_exc().splitlines():
                     print(l)
             finally:

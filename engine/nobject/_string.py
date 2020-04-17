@@ -1,7 +1,7 @@
 from typing import List, Any, Optional
 from .._nobject import draw_box, NObject, pinput, update, render
 from .._event import Event, EventInput, Timer, EVT
-from .._dplug import get_plugin()
+from .._dplug import get_plugin
 from .._loggar import log
 
 
@@ -9,9 +9,7 @@ class TextData(NObject):
     """TextData class identifies all object that have to render some string.
     """
 
-    def __init__(
-        self, y: int, x: int, dy: int, dx: int, text_data: str, fmt=None
-    ):
+    def __init__(self, y: int, x: int, dy: int, dx: int, text_data: str, fmt=None):
         super(TextData, self).__init__(y, x, dy, dx, fmt)
         self.text_data = text_data
 
@@ -236,9 +234,7 @@ class TimerText(String):
 
     __slots__ = ["__timer", "__calleer"]
 
-    def __init__(
-        self, y: int, x: int, msg: str, t: Timer, caller: Any, fmt=None
-    ):
+    def __init__(self, y: int, x: int, msg: str, t: Timer, caller: Any, fmt=None):
         super(TimerText, self).__init__(y, x, msg, fmt)
         self.__timer = t
         self.__caller = caller
@@ -318,7 +314,7 @@ class Input(TextData, Capture):
     def pinput(self, screen, keys) -> List[Event]:
         if self.capture_input and len(keys):
             key = keys.pop()
-            log.Input("Key: {}".format(key)).call()
+            log.Input("Key: {}".format(key)).info()
             if key == 10:  # return carrier
                 self.capture_input = False
                 self.text_output.append(self.input_str)

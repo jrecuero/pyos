@@ -372,9 +372,9 @@ class Menu(NObject, Capture):
     def pinput(self, screen, keys) -> List[Event]:
         if self.capture_input and len(keys):
             key = keys.pop()
-            log.Menu("Key {}".format(key)).call()
+            log.Menu("Key {}".format(key)).info()
             if key == 27:  # escape
-                log.Menu("Key ESCAPE").call()
+                log.Menu("Key ESCAPE").info()
             else:
                 key = chr(key).upper()
             if key in self.shortcuts:
