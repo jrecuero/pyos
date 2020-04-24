@@ -132,13 +132,17 @@ class _Logging(logging.Logger):
         if level == NONE:
             pass
         elif level == DEBUG:
-            self.debug(self.dicta)
+            # self.debug(self.dicta)
+            self.debug()
         elif level == INFO:
-            self.info(self.dicta)
+            # self.info(self.dicta)
+            self.info()
         elif level == WARNING:
-            self.warning(self.dicta)
+            # self.warning(self.dicta)
+            self.warning()
         elif level == ERROR:
-            self.error(self.dicta)
+            # self.error(self.dicta)
+            self.error()
         else:
             pass
         # self.dicta = {}

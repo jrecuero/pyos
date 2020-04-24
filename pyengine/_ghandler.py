@@ -1,6 +1,7 @@
 import sys
 import pygame
 from ._hscene import SceneHandler
+from ._loggar import Log
 
 
 class GHandler:
@@ -12,6 +13,7 @@ class GHandler:
     """
 
     def __init__(self, name, surface, **kwargs):
+        Log.GHandler(f"{name}").Stage("init").call()
         self.name = name
         self.surface = surface
         self.hscene = SceneHandler()

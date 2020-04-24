@@ -1,9 +1,10 @@
 import pygame
 
 # from ._loggar import log
-from .._gid import new_gid
-from .._move import Move
-from .._color import Color
+from ._gid import new_gid
+from ._move import Move
+from ._color import Color
+from ._layer import Layer
 
 
 class GObject(pygame.sprite.Sprite):
@@ -33,7 +34,7 @@ class GObject(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.ctype = kwargs.get("ctype", GObject.NONE)
-        self.z = kwargs.get("z", 0)
+        self.z = kwargs.get("z", Layer.GROUND)
         self.move = kwargs.get("move", Move())
         self.pushed = kwargs.get("pushed", None)
         self.enable = kwargs.get("enable", True)
@@ -84,11 +85,31 @@ class GObject(pygame.sprite.Sprite):
         """
         return self._dx
 
+    @dx.setter
+    def dx(self, val):
+        """dx setter sets the graphical object width or X-axis size.
+        """
+        self._dx = int(val)
+        self.image = pygame.transform.scale(self.image, (self._dx, self._dy))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
     @property
     def dy(self):
         """dy property returns the graphical object height or Y-axis size.
         """
         return self._dy
+
+    @dy.setter
+    def dy(self, val):
+        """dy setter sets the graphical object heigh or Y-axis size.
+        """
+        self._dy = int(val)
+        self.image = pygame.transform.scale(self.image, (self._dx, self._dy))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
 
     def dxdy(self, dx=None, dy=None):
         """dxdy allows to set the graphical object width and height at the
@@ -162,6 +183,12 @@ class GObject(pygame.sprite.Sprite):
         """
         return True
 
+    def handle_mouse_event(self, event):
+        """handle_mouse_event should process the mouse event given.
+        Mouse events are passed to the active scene to be handle.
+        """
+        pass
+
     def out_of_bounds_x_response(self):
         """out_of_bounds_x_response takes action when the graphical object is
         out of bound at the X-axis.
@@ -170,12 +197,6 @@ class GObject(pygame.sprite.Sprite):
         """
         self.bounce_x()
         return False
-
-    def handle_mouse_event(self, event):
-        """handle_mouse_event should process the mouse event given.
-        Mouse events are passed to the active scene to be handle.
-        """
-        pass
 
     def out_of_bounds_y_response(self):
         """out_of_bounds_x_response takes action when the graphical object is
@@ -200,6 +221,7 @@ class GObject(pygame.sprite.Sprite):
         """update updates x and y compoments based on the move attribute
         x and y components.
         """
+        # update object based on the move attribute.
         self.move_inc(self.move.x, self.move.y)
 
     def render(self, surface, **kwargs):

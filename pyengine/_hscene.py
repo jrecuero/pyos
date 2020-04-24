@@ -64,7 +64,7 @@ class SceneHandler:
     def add(self, scene):
         """add adds a new scene.
         """
-        index = len(self.sceneds)
+        index = len(self.scenes)
         self.scenes.append(scene)
         return index
 
