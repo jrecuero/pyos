@@ -12,13 +12,14 @@ class GHandler:
     all those instances (scenes and any other app global instance).
     """
 
-    def __init__(self, name, surface, **kwargs):
+    def __init__(self, name, surface, clock, **kwargs):
         Log.GHandler(f"{name}").Stage("init").call()
         self.name = name
         self.surface = surface
         self.hscene = SceneHandler()
         self.gobjects = []
         self.timers = []
+        self.clock = clock
         self.running = True
 
     def add_gobject(self, gobject):
@@ -119,16 +120,18 @@ class GHandler:
                 pygame.quit()
                 sys.exit(0)
             elif event.type in keyboards:
-                self.gh.handle_keyboard_event(event)
+                self.handle_keyboard_event(event)
             elif event.type in buttons:
-                self.gh.handle_mouse_event(event)
+                self.handle_mouse_event(event)
             elif event.type >= pygame.USEREVENT:
-                self.gh.handle_custom_event(event)
+                self.handle_custom_event(event)
 
     def update(self, **kwargs):
         """update calls update method for all scenes and  graphical objects.
         """
         # call only the active scene.
+
+        # Log.GHandler(f"{self.name}").Update(kwargs).Clock(self.clock).call()
         self.hscene.update(**kwargs)
         for gobj in self.gobjects:
             gobj.update(self.surface, **kwargs)

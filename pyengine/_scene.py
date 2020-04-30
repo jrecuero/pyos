@@ -1,4 +1,5 @@
 import pygame
+# from ._loggar import Log
 from ._gid import Gid
 
 
@@ -60,6 +61,7 @@ class Scene(Gid):
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
+        # Log.Scene(self.name).KeyboardEvent(event.key).call()
         for gobj in self.gobjects:
             gobj.handle_keyboard_event(event)
 
@@ -75,7 +77,7 @@ class Scene(Gid):
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        for gobj in self.objects:
+        for gobj in self.gobjects:
             gobj.handle_custom_event(event)
 
     def update(self, **kwargs):

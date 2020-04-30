@@ -7,6 +7,27 @@ class Cell:
         self.row = row
         self.col = col
         self.gobjects = [gobject, ]
+        self.solid = False
 
     def __str__(self):
         return f"({self.row}, {self.col})"
+
+    def add_gobject(self, gobject):
+        """add_gobject adds a new gobject.
+        """
+        self.gobjects.append(gobject)
+        gobject._cell = self
+        self.solid = self.solid or gobject.solid
+
+    def del_gobject(self, gobject):
+        """del_gobject removes a gobject.
+        """
+        self.gobjects.remove(gobject)
+        gobject._cell = None
+        if gobject.solid:
+            self.solid = False
+
+    def collision(self, gobject):
+        """collision checks if the gobject given has a collision with the cell.
+        """
+        return self.solid and gobject.solid

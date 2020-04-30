@@ -1,6 +1,6 @@
 import pygame
 
-# from ._loggar import log
+# from ._loggar import Log
 from ._gid import new_gid
 from ._move import Move
 from ._color import Color
@@ -44,6 +44,7 @@ class GObject(pygame.sprite.Sprite):
         self.outline = kwargs.get("outline", 0)
         self.catch_keyboard = kwargs.get("keyboard", False)
         self.content = kwargs.get("content", None)
+        self._cell = None
 
     @property
     def gid(self):
@@ -142,11 +143,14 @@ class GObject(pygame.sprite.Sprite):
         """
         return self.move.bounce_y()
 
-    def move_inc(self, inc_x, inc_y):
+    def move_inc(self, inc_x, inc_y, dry=False):
         """move_inc moves the grafical object by the given x and y components.
         """
+        if dry:
+            return (self.x + inc_x, self.y + inc_y)
         self.x += inc_x
         self.y += inc_y
+        return (self.x, self.y)
 
     def move_to(self, x, y):
         """move_to moves the grafical object to the given position.
@@ -171,9 +175,20 @@ class GObject(pygame.sprite.Sprite):
         """
         pass
 
+    def move_it(self, dx, dy, dry=False):
+        """move_it moves a shape the given X and Y offsets. Grid position
+        and graphical position are stored and move delta is stored. It moreover
+        updates gridx and gridy attributes if update flag is True.
+        """
+        return self.move_inc(dx, dy, dry)
+
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
+        # Log.GObject(self.name).KeyboardEvent(event.key).call()
+        # if self.catch_keyboard:
+        #     if pygame.key.get_pressed()[pygame.K_SPACE]:
+        #         Log.GObject(self.name).KeyboardEvent(event.key).Shoot().call()
         return True
 
     def handle_custom_event(self, event):
