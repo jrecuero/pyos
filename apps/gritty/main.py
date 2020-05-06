@@ -3,40 +3,23 @@ import os
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
-from pyengine import Scene, GRect, GHandler, Color, Log, Grid, Layer, GTimed
+# from pyengine import Scene, GRect, GHandler, Color, Log, Grid, Layer, GTimed
 # from pyengine import Move
-
-
-class GameScene(Scene):
-
-    def __init__(self, surface, **kwargs):
-        cs = 32     # cell size
-        super(GameScene, self).__init__("Game Scene", surface, **kwargs)
-        self.target = GRect("target", 0, 0, cs, cs, color=Color.RED)
-        self.deco = GTimed("decoration", 4 * cs, 2 * cs, cs, cs, z=Layer.BACKGROUND, color=Color.BLUE, solid=False, timed_counter=0)
-        self.actor = GRect("actor", cs, cs, cs, cs, keyboard=True)
-        # self.actor.move = Move(1, 1, 5)
-        self.grid = Grid("Grid", 10, 10, 0, 0, cs, cs)
-        self.grid.add_gobject(self.actor)
-        self.grid.add_gobject(self.target)
-        self.grid.add_gobject(self.deco)
-        self.add_gobject(self.grid)
-
-
-class GameHandler(GHandler):
-
-    def __init__(self, surface, clock, **kwargs):
-        super(GameHandler, self).__init__("Gritty", surface, clock, **kwargs)
+from pyengine import Log, Color, GTextBox
+from _game import GameScene, GameHandler
 
 
 def main():
     Log.Main("Gritty App").State("Init").call()
     pygame.init()
     pygame.display.set_caption("GRITTY")
-    screen = pygame.display.set_mode((640, 480))
+    screen = pygame.display.set_mode((800, 600))
     clock = pygame.time.Clock()
     ghandler = GameHandler(screen, clock)
     gscene = GameScene(screen)
+    glog = GTextBox("Log Activity", 32, 320 + 64, 320, 192, logger=True)
+    glog.messages = "Log Activity"
+    gscene.add_gobject(glog)
     ghandler.add_scene(gscene)
     ghandler.hscene.active(gscene)
     while True:

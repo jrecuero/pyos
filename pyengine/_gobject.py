@@ -44,6 +44,7 @@ class GObject(pygame.sprite.Sprite):
         self.outline = kwargs.get("outline", 0)
         self.catch_keyboard = kwargs.get("keyboard", False)
         self.content = kwargs.get("content", None)
+        self.logger = kwargs.get("logger", False)
         self._cell = None
 
     @property

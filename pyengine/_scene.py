@@ -1,6 +1,8 @@
 import pygame
 # from ._loggar import Log
 from ._gid import Gid
+from ._gevent import GEvent
+from ._loggar import Log
 
 
 class Scene(Gid):
@@ -77,7 +79,14 @@ class Scene(Gid):
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
+        logger_event_message = None
+        if GEvent.check_destination(event, GEvent.SCENE) and event.type == GEvent.ENGINE:
+            if event.subtype == GEvent.LOGGER:
+                Log.Grid(self.name).Event(event).call()
+                logger_event_message = event.payload
         for gobj in self.gobjects:
+            if gobj.logger and logger_event_message:
+                gobj.messages = logger_event_message
             gobj.handle_custom_event(event)
 
     def update(self, **kwargs):

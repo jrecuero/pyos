@@ -97,6 +97,8 @@ class Grid(GObject):
         self.gobjects[layer].add(gobject)
         if gobject.catch_keyboard:
             self.catch_keyboard_gobject = gobject
+        gobject.x += self.g_origin.x
+        gobject.y += self.g_origin.y
         self.add_gobject_to_cell(gobject)
 
     def del_gobject(self, gobject):

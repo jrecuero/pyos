@@ -15,11 +15,21 @@ class GEvent:
     ENGINE = pygame.USEREVENT + 1
     TIMER = pygame.USEREVENT + 2
     CALLBACK = pygame.USEREVENT + 3
+    USER_DEFINED = pygame.USEREVENT + 4
 
     # GEvent subtype. Used internaly
     MOVE_TO = 1
     DELETE = 2
     CREATE = 3
+    LOGGER = 4
+    SUBTYPE_USER_DEFINED = 1000
+    _gevent_subtypes = {
+        "MOVE_TO": 1,
+        "DELETE": 2,
+        "CREATE": 3,
+        "LOGGER": 4,
+        "USER_DEFINED": 1000, }
+    _gevent_subtypes_user_defined_last = 1000
 
     # Event Source/Destination
     HANDLER = 1
@@ -27,6 +37,24 @@ class GEvent:
     BOARD = 3
     OBJECT = 4
     OTHER = 5
+    SRC_DST_USER_DEFINED = 1000
+
+    @classmethod
+    def register_subtype_event(cls, name):
+        """register_subtype_event registers a new user defined subtype event.
+        """
+        if name in cls._gevent_subtypes:
+            return None
+        cls._gevent_subtypes_user_defined_last += 1
+        cls._gevent_subtypes[name] = cls._gevent_subtypes_user_defined_last
+        return cls._gevent_subtypes[name]
+
+    @classmethod
+    def get_subtype_event(cls, name):
+        """get_subtype_event returns the subtype for a given user defined
+        subtype event.
+        """
+        return cls._gevent_subtypes.get(name, None)
 
     @staticmethod
     def check_destination(event, dest):
