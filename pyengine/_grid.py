@@ -88,7 +88,7 @@ class Grid(GObject):
             # gobject._cell = None
             Log.Grid(self.name).DelGObjFromCell(gobject.name).Cell(f"{cell.row}, {cell.col}").XY(f"{gobject.x}, {gobject.y}").call()
 
-    def add_gobject(self, gobject):
+    def add_gobject(self, gobject, relative=True):
         """add_gobject adds a graphical object to the grid.
         """
         if gobject.catch_keyboard and self.catch_keyboard_gobject:
@@ -97,8 +97,9 @@ class Grid(GObject):
         self.gobjects[layer].add(gobject)
         if gobject.catch_keyboard:
             self.catch_keyboard_gobject = gobject
-        gobject.x += self.g_origin.x
-        gobject.y += self.g_origin.y
+        if relative:
+            gobject.x += self.g_origin.x
+            gobject.y += self.g_origin.y
         self.add_gobject_to_cell(gobject)
 
     def del_gobject(self, gobject):
@@ -134,25 +135,26 @@ class Grid(GObject):
                 self.del_gobject_from_cell(gobject)
                 gobject.move_it(dx, dy)
                 self.add_gobject_to_cell(gobject)
-                return True
-        return False
+                return True, None
+            return False, self.cell(row, col)
+        return False, None
 
     def handle_keyboard_event(self, event):
         """handle_keyboard_event should process the keyboard event given.
         """
         # Log.Grid(self.name).KeyboardEvent(event.key).call()
         if self.running:
-            if self.catch_keyboard_gobject:
-                key_pressed = pygame.key.get_pressed()
-                Log.Grid(self.name).KeyboardEvent(event).GObject(self.catch_keyboard_gobject.name).call()
-                if key_pressed[pygame.K_LEFT]:
-                    self.move_it_gobject(self.catch_keyboard_gobject, -self.g_cell_size.x, 0)
-                if key_pressed[pygame.K_RIGHT]:
-                    self.move_it_gobject(self.catch_keyboard_gobject, self.g_cell_size.x, 0)
-                if key_pressed[pygame.K_UP]:
-                    self.move_it_gobject(self.catch_keyboard_gobject, 0, -self.g_cell_size.y)
-                if key_pressed[pygame.K_DOWN]:
-                    self.move_it_gobject(self.catch_keyboard_gobject, 0, self.g_cell_size.y)
+            # if self.catch_keyboard_gobject:
+            #     key_pressed = pygame.key.get_pressed()
+            #     Log.Grid(self.name).KeyboardEvent(event).GObject(self.catch_keyboard_gobject.name).call()
+            #     if key_pressed[pygame.K_LEFT]:
+            #         self.move_it_gobject(self.catch_keyboard_gobject, -self.g_cell_size.x, 0)
+            #     if key_pressed[pygame.K_RIGHT]:
+            #         self.move_it_gobject(self.catch_keyboard_gobject, self.g_cell_size.x, 0)
+            #     if key_pressed[pygame.K_UP]:
+            #         self.move_it_gobject(self.catch_keyboard_gobject, 0, -self.g_cell_size.y)
+            #     if key_pressed[pygame.K_DOWN]:
+            #         self.move_it_gobject(self.catch_keyboard_gobject, 0, self.g_cell_size.y)
             for gobj in [o for _, go in self.gobjects.items() for o in go]:
                 gobj.handle_keyboard_event(event)
 
@@ -172,7 +174,8 @@ class Grid(GObject):
             Log.Grid(self.name).Event(event.source).Payload(str(event.payload)).call()
             if event.subtype == GEvent.MOVE_TO:
                 new_pos = pygame.math.Vector2(event.payload["validation"]())
-                if self.move_it_gobject(event.source, new_pos.x, new_pos.y):
+                ok, _ = self.move_it_gobject(event.source, new_pos.x, new_pos.y)
+                if ok:
                     event.payload["callback"]()
             elif event.subtype == GEvent.DELETE:
                 self.del_gobject(event.source)

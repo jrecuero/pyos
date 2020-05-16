@@ -6,7 +6,8 @@ import pygame
 # from pyengine import Scene, GRect, GHandler, Color, Log, Grid, Layer, GTimed
 # from pyengine import Move
 from pyengine import Log, Color, GTextBox
-from _game import GameScene, GameHandler
+from _game_scene import GameScene
+from _game_handler import GameHandler
 
 
 def main():
