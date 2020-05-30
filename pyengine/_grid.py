@@ -139,7 +139,7 @@ class Grid(GObject):
             return False, self.cell(row, col)
         return False, None
 
-    def handle_keyboard_event(self, event):
+    def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
         """
         # Log.Grid(self.name).KeyboardEvent(event.key).call()
@@ -156,16 +156,16 @@ class Grid(GObject):
             #     if key_pressed[pygame.K_DOWN]:
             #         self.move_it_gobject(self.catch_keyboard_gobject, 0, self.g_cell_size.y)
             for gobj in [o for _, go in self.gobjects.items() for o in go]:
-                gobj.handle_keyboard_event(event)
+                gobj.handle_keyboard_event(event, **kwargs)
 
-    def handle_mouse_event(self, event):
+    def handle_mouse_event(self, event, **kwargs):
         """handle_mouse_event should process the mouse event given.
         Mouse events are passed to the active scene to be handle.
         """
         for gobj in [o for _, go in self.gobjects.items() for o in go]:
-            gobj.handle_mouse_event(event)
+            gobj.handle_mouse_event(event, **kwargs)
 
-    def handle_custom_event(self, event):
+    def handle_custom_event(self, event, **kwargs):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
@@ -180,13 +180,13 @@ class Grid(GObject):
             elif event.subtype == GEvent.DELETE:
                 self.del_gobject(event.source)
         for gobj in [o for _, go in self.gobjects.items() for o in go]:
-            gobj.handle_custom_event(event)
+            gobj.handle_custom_event(event, **kwargs)
 
     def update(self, surface, **kwargs):
         """update provides any functionality to be done every tick.
         """
         for gobj in [o for _, go in self.gobjects.items() for o in go]:
-            gobj.update(surface)
+            gobj.update(surface, **kwargs)
 
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.

@@ -183,7 +183,7 @@ class GObject(pygame.sprite.Sprite):
         """
         return self.move_inc(dx, dy, dry)
 
-    def handle_keyboard_event(self, event):
+    def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
         """
         # Log.GObject(self.name).KeyboardEvent(event.key).call()
@@ -192,14 +192,14 @@ class GObject(pygame.sprite.Sprite):
         #         Log.GObject(self.name).KeyboardEvent(event.key).Shoot().call()
         return True
 
-    def handle_custom_event(self, event):
+    def handle_custom_event(self, event, **kwargs):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
         return True
 
-    def handle_mouse_event(self, event):
+    def handle_mouse_event(self, event, **kwargs):
         """handle_mouse_event should process the mouse event given.
         Mouse events are passed to the active scene to be handle.
         """

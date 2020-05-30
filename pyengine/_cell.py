@@ -6,11 +6,18 @@ class Cell:
     def __init__(self, row, col, gobject=None):
         self.row = row
         self.col = col
-        self.gobjects = [gobject, ]
+        self.gobjects = [gobject, ] if gobject else []
         self.solid = False
 
     def __str__(self):
         return f"({self.row}, {self.col})"
+
+    @property
+    def solid_object(self):
+        for gobject in self.gobjects:
+            if gobject.solid:
+                return gobject
+        return None
 
     def add_gobject(self, gobject):
         """add_gobject adds a new gobject.

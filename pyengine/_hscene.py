@@ -136,27 +136,27 @@ class SceneHandler:
         if self.iactive is not None and self.scenes:
             self.scenes[self.iactive].end_tick()
 
-    def handle_keyboard_event(self, event):
+    def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
         Keyboard events are passed to the active scene to be handle.
         """
         if self.iactive is not None and self.scenes:
-            self.scenes[self.iactive].handle_keyboard_event(event)
+            self.scenes[self.iactive].handle_keyboard_event(event, **kwargs)
 
-    def handle_mouse_event(self, event):
+    def handle_mouse_event(self, event, **kwargs):
         """handle_mouse_event should process the mouse event given.
         Mouse events are passed to the active scene to be handle.
         """
         if self.iactive is not None and self.scenes:
-            self.scenes[self.iactive].handle_mouse_event(event)
+            self.scenes[self.iactive].handle_mouse_event(event, **kwargs)
 
-    def handle_custom_event(self, event):
+    def handle_custom_event(self, event, **kwargs):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
         if self.iactive is not None and self.scenes:
-            self.scenes[self.iactive].handle_custom_event(event)
+            self.scenes[self.iactive].handle_custom_event(event, **kwargs)
 
     def update(self, **kwargs):
         """update calls update for the active scene.

@@ -20,6 +20,12 @@ class Scene(Gid):
         self.timers = []
         self.enable = kwargs.get("enable", True)
         self.visible = kwargs.get("visible", True)
+        # These event buckets are being used to received any events from
+        # graphical objects when processing keyboard/mouse events, update
+        # events or rendering events.
+        self.event_input_bucket = []
+        self.event_update_bucket = []
+        self.event_render_bucket = []
 
     def __str__(self):
         return f"[{self.gid}] : {self.__class__.__name__}@{self.name}"
@@ -92,7 +98,9 @@ class Scene(Gid):
     def update(self, **kwargs):
         """update calls update method for all scene graphical objects.
         """
-        self.gobjects.update(self.surface)
+        # self.gobjects.update(self.surface, **kwargs)
+        for gobj in self.gobjects:
+            gobj.update(self.surface, **kwargs)
 
     def render(self, **kwargs):
         """render calls render method for all scene graphical objects.

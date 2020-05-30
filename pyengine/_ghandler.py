@@ -85,24 +85,24 @@ class GHandler:
         """
         pass
 
-    def handle_custom_event(self, event):
+    def handle_custom_event(self, event, **kwargs):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        self.hscene.handle_custom_event(event)
+        self.hscene.handle_custom_event(event, **kwargs)
 
-    def handle_keyboard_event(self, event):
+    def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
         Keyboard events are passed to the active scene to be handle.
         """
-        self.hscene.handle_keyboard_event(event)
+        self.hscene.handle_keyboard_event(event, **kwargs)
 
-    def handle_mouse_event(self, event):
+    def handle_mouse_event(self, event, **kwargs):
         """handle_mouse_event should process the mouse event given.
         Mouse events are passed to the active scene to be handle.
         """
-        self.hscene.handle_mouse_event(event)
+        self.hscene.handle_mouse_event(event, **kwargs)
 
     def event_handler(self, events=None, keyboards=None, buttons=None, **kwargs):
         """event_handler provides a common and basic event handler to be added

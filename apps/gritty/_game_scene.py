@@ -1,8 +1,9 @@
 import sys
 import pygame
-from pyengine import Scene, GRect, Color, Layer, GEvent, GObject
+from pyengine import Scene, Color, GEvent, GObject
 from pyengine import Log
 from _game_board import GameBoard
+from _game_actor import GameActor
 
 
 class GTimed(GObject):
@@ -27,13 +28,13 @@ class GTimed(GObject):
         def _timed_callback():
             # self.move_it(dx, dy)
             if self.timed_tick_counter == 3:
-                GEvent.new_event(
+                GEvent.post_event(
                     GEvent.ENGINE,
                     GEvent.LOGGER,
                     self,
                     GEvent.SCENE,
                     "GObject is being deleted")
-                GEvent.new_event(
+                GEvent.post_event(
                     self.timed_event_type,
                     GEvent.DELETE,
                     self,
@@ -57,7 +58,7 @@ class GTimed(GObject):
             if self.timed_tick % self.timed_threshold == 0:
                 self.timed_tick_counter += 1
                 Log.Update(self.name).Counter(self.timed_tick).call()
-                GEvent.new_event(
+                GEvent.post_event(
                     self.timed_event_type,
                     self.timed_event_subtype,
                     self,
@@ -74,22 +75,16 @@ class GameScene(Scene):
         cs = 32     # cell size
         super(GameScene, self).__init__("Game Scene", surface, **kwargs)
         self.board = GameBoard(10, 10, 32, 32, cs, cs)
-        # row, col = self.board.g_cell(0, 0)
-        # self.target = GRect("target", row, col, cs, cs, color=Color.RED)
-        self.target = GRect("target", *self.board.g_cell(0, 0), cs, cs, color=Color.RED)
-        # row, col = self.board.g_cell(2, 4)
-        # self.deco = GTimed("decoration", row, col, cs, cs, z=Layer.BACKGROUND, color=Color.BLUE, solid=False, timed_counter=0)
-        self.deco = GRect("decoration", *self.board.g_cell(2, 4), cs, cs, z=Layer.BACKGROUND, color=Color.BLUE)
-        # row, col = self.board.g_cell(1, 1)
-        # self.actor = GRect("actor", row, col, cs, cs, keyboard=True)
-        self.actor = GRect("actor", *self.board.g_cell(1, 1), cs, cs, keyboard=True)
-        # self.actor.move = Move(1, 1, 5)
+        self.targets = [GameActor("target1", *self.board.g_cell(0, 0), cs, cs, color=Color.RED),
+                        GameActor("target2", *self.board.g_cell(2, 4), cs, cs, color=Color.BLUE), ]
+        self.actor = GameActor("actor", *self.board.g_cell(1, 1), cs, cs, keyboard=True)
+        for target in self.targets:
+            self.board.add_gobject(target, relative=False)
         self.board.add_gobject(self.actor, relative=False)
-        self.board.add_gobject(self.target, relative=False)
-        self.board.add_gobject(self.deco, relative=False)
         self.add_gobject(self.board)
+        self.event_battle_attack = GEvent.register_subtype_event("BATTLE_ATTACK")
 
-    def handle_keyboard_event(self, event):
+    def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
         """
         ok, collision = False, None
@@ -105,11 +100,41 @@ class GameScene(Scene):
         if key_pressed[pygame.K_DOWN]:
             ok, collision = self.board.move_player_down()
         if not ok and collision:
-            GEvent.new_event(
-                GEvent.ENGINE,
-                GEvent.LOGGER,
-                self,
-                GEvent.SCENE,
-                f"Player collision with {str(collision)}")
+            event = GEvent.new_event(GEvent.APP_DEFINED,
+                                     self.event_battle_attack,
+                                     self,
+                                     GEvent.SCENE,
+                                     {"source": self.actor, "target": collision.solid_object}, )
+            self.event_input_bucket.append(event)
 
-        super(GameScene, self).handle_keyboard_event(event)
+        super(GameScene, self).handle_keyboard_event(event, **kwargs)
+
+    def update(self, **kwargs):
+        """update calls update method for all scene graphical objects.
+        """
+        while len(self.event_input_bucket):
+            event = self.event_input_bucket.pop(0)
+            if event.type == GEvent.APP_DEFINED and event.destination == GEvent.SCENE:
+                if event.subtype == self.event_battle_attack:
+                    source = event.payload["source"]
+                    target = event.payload["target"]
+                    damage = source.attack(target)
+                    GEvent.post_event(
+                        GEvent.ENGINE,
+                        GEvent.LOGGER,
+                        self,
+                        GEvent.SCENE,
+                        f"{source.name} attack {target.name} for {damage} hp: {target.life}.")
+        kwargs["event_bucket"] = self.event_update_bucket
+        super(GameScene, self).update(**kwargs)
+        while len(self.event_update_bucket):
+            event = self.event_update_bucket.pop(0)
+            Log.Scene(self.name).EventUpdateBucket(event).call()
+            if event.type == GEvent.ENGINE and event.subtype == GEvent.DELETE and event.destination == GEvent.SCENE:
+                GEvent.post_event(
+                    GEvent.ENGINE,
+                    GEvent.LOGGER,
+                    self,
+                    GEvent.SCENE,
+                    f"Delete {event.source.name}")
+                pass

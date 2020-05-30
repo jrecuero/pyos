@@ -90,7 +90,7 @@ class GameBoard(Grid):
         #     return ok, collision
         # return True, None
 
-    def handle_keyboard_event(self, event):
+    def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
         """
         # if self.running:
@@ -109,14 +109,14 @@ class GameBoard(Grid):
         #         if key_pressed[pygame.K_DOWN]:
         #             self.move_it_gobject(self.catch_keyboard_gobject, 0, self.g_cell_size.y)
         if self.player_turn:
-            super(GameBoard, self).handle_keyboard_event(event)
+            super(GameBoard, self).handle_keyboard_event(event, **kwargs)
 
-    def handle_custom_event(self, event):
+    def handle_custom_event(self, event, **kwargs):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
         """
-        super(GameBoard, self).handle_custom_event(event)
+        super(GameBoard, self).handle_custom_event(event, **kwargs)
 
     def update(self, surface, **kwargs):
         """update provides any functionality to be done every tick.

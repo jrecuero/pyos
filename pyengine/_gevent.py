@@ -15,7 +15,8 @@ class GEvent:
     ENGINE = pygame.USEREVENT + 1
     TIMER = pygame.USEREVENT + 2
     CALLBACK = pygame.USEREVENT + 3
-    USER_DEFINED = pygame.USEREVENT + 4
+    APP_DEFINED = pygame.USEREVENT + 4
+    USER_DEFINED = pygame.USEREVENT + 5
 
     # GEvent subtype. Used internaly
     MOVE_TO = 1
@@ -67,9 +68,17 @@ class GEvent:
             return dest == event.destination
 
     @staticmethod
+    def post_event(etype, esubtype, source, destination, payload, **kwargs):
+        """post_event creates and post a new event.
+        """
+        the_event = pygame.event.Event(etype, subtype=esubtype, source=source, destination=destination, payload=payload, **kwargs)
+        pygame.event.post(the_event)
+        Log.Post().Event(etype).Subtype(esubtype).Source(source).Destination(destination).Payload(str(payload)).Kwargs(kwargs).call()
+
+    @staticmethod
     def new_event(etype, esubtype, source, destination, payload, **kwargs):
         """new_event creates a new event.
         """
         the_event = pygame.event.Event(etype, subtype=esubtype, source=source, destination=destination, payload=payload, **kwargs)
-        pygame.event.post(the_event)
-        Log.Event(etype).Subtype(esubtype).Source(source).Destination(destination).Payload(str(payload)).Kwargs(kwargs).call()
+        Log.New().Event(etype).Subtype(esubtype).Source(source).Destination(destination).Payload(str(payload)).Kwargs(kwargs).call()
+        return the_event
