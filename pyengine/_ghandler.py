@@ -21,6 +21,7 @@ class GHandler:
         self.timers = []
         self.clock = clock
         self.running = True
+        self.event_bucket = []
 
     def add_gobject(self, gobject):
         """add_gobject adds a graphical object to the game handler.
@@ -115,16 +116,17 @@ class GHandler:
             if buttons
             else [pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]
         )
+        kwargs["event-bucket"] = self.event_bucket
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
             elif event.type in keyboards:
-                self.handle_keyboard_event(event)
+                self.handle_keyboard_event(event, **kwargs)
             elif event.type in buttons:
-                self.handle_mouse_event(event)
+                self.handle_mouse_event(event, **kwargs)
             elif event.type >= pygame.USEREVENT:
-                self.handle_custom_event(event)
+                self.handle_custom_event(event, **kwargs)
 
     def update(self, **kwargs):
         """update calls update method for all scenes and  graphical objects.
@@ -132,6 +134,7 @@ class GHandler:
         # call only the active scene.
 
         # Log.GHandler(f"{self.name}").Update(kwargs).Clock(self.clock).call()
+        kwargs["event-bucket"] = self.event_bucket
         self.hscene.update(**kwargs)
         for gobj in self.gobjects:
             gobj.update(self.surface, **kwargs)
@@ -143,6 +146,7 @@ class GHandler:
             flip (bool): call pygame to flip surface.
         """
         # call only the active scene.
+        kwargs["event-bucket"] = self.event_bucket
         self.hscene.render(**kwargs)
         for gobj in self.gobjects:
             gobj.render(self.surface, **kwargs)

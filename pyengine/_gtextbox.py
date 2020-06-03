@@ -35,9 +35,10 @@ class GTextBox(GObject):
         self.image.fill((255, 255, 255, 0))
         self.image.fill(self.background_color)
         pygame.draw.rect(self.image, self.color, (0, 0, self.dx, self.dy), 1)
-        self._messages.append(val)
+        self._messages.append(f"{val}")
         inc_x, inc_y = self.font_size / 2, self.font_size / 2
-        for msg in self._messages[-16:]:
+        scroll_len = (self.dy // self.font_size) - 1
+        for msg in self._messages[-scroll_len:]:
             gtext = self.font.render(msg, True, self.color)
             rect = gtext.get_rect()
             rect.x, rect.y = self.x + inc_x, self.y + inc_y

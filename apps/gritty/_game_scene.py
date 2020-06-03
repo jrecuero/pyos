@@ -1,6 +1,6 @@
 import sys
 import pygame
-from pyengine import Scene, Color, GEvent, GObject
+from pyengine import Scene, Color, GEvent, GObject, GMenu
 from pyengine import Log
 from _game_board import GameBoard
 from _game_actor import GameActor
@@ -75,13 +75,20 @@ class GameScene(Scene):
         cs = 32     # cell size
         super(GameScene, self).__init__("Game Scene", surface, **kwargs)
         self.board = GameBoard(10, 10, 32, 32, cs, cs)
-        self.targets = [GameActor("target1", *self.board.g_cell(0, 0), cs, cs, color=Color.RED),
-                        GameActor("target2", *self.board.g_cell(2, 4), cs, cs, color=Color.BLUE), ]
+        self.targets = [GameActor("target1", *self.board.g_cell(0, 0), cs, cs, color=Color.RED, life=100),
+                        GameActor("target2", *self.board.g_cell(2, 4), cs, cs, color=Color.BLUE, life=100),
+                        GameActor("target2", *self.board.g_cell(3, 8), cs, cs, color=Color.GREEN, life=100), ]
         self.actor = GameActor("actor", *self.board.g_cell(1, 1), cs, cs, keyboard=True)
         for target in self.targets:
             self.board.add_gobject(target, relative=False)
         self.board.add_gobject(self.actor, relative=False)
         self.add_gobject(self.board)
+        self.menu = GMenu("menu", 450, 32, 100, 20)
+        self.menu.add_menu_item("File")
+        self.menu.add_menu_item("Edit")
+        self.menu.add_menu_item("Window")
+        self.menu.add_menu_item("Help")
+        self.add_gobject(self.menu)
         self.event_battle_attack = GEvent.register_subtype_event("BATTLE_ATTACK")
 
     def handle_keyboard_event(self, event, **kwargs):
@@ -105,15 +112,16 @@ class GameScene(Scene):
                                      self,
                                      GEvent.SCENE,
                                      {"source": self.actor, "target": collision.solid_object}, )
-            self.event_input_bucket.append(event)
+            kwargs["event-bucket"].append(event)
 
         super(GameScene, self).handle_keyboard_event(event, **kwargs)
 
     def update(self, **kwargs):
         """update calls update method for all scene graphical objects.
         """
-        while len(self.event_input_bucket):
-            event = self.event_input_bucket.pop(0)
+        event_bucket = kwargs["event-bucket"]
+        while len(event_bucket):
+            event = event_bucket.pop(0)
             if event.type == GEvent.APP_DEFINED and event.destination == GEvent.SCENE:
                 if event.subtype == self.event_battle_attack:
                     source = event.payload["source"]
@@ -125,11 +133,11 @@ class GameScene(Scene):
                         self,
                         GEvent.SCENE,
                         f"{source.name} attack {target.name} for {damage} hp: {target.life}.")
-        kwargs["event_bucket"] = self.event_update_bucket
         super(GameScene, self).update(**kwargs)
-        while len(self.event_update_bucket):
-            event = self.event_update_bucket.pop(0)
-            Log.Scene(self.name).EventUpdateBucket(event).call()
+        event_bucket = kwargs["event-bucket"]
+        while len(event_bucket):
+            event = event_bucket.pop(0)
+            # Log.Scene(self.name).EventUpdateBucket(event).call()
             if event.type == GEvent.ENGINE and event.subtype == GEvent.DELETE and event.destination == GEvent.SCENE:
                 GEvent.post_event(
                     GEvent.ENGINE,

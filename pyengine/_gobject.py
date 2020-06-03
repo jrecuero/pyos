@@ -38,6 +38,8 @@ class GObject(pygame.sprite.Sprite):
         self.move = kwargs.get("move", Move())
         self.pushed = kwargs.get("pushed", None)
         self.enable = kwargs.get("enable", True)
+        self.grayout = kwargs.get("grayout", False)
+        self.selected = kwargs.get("selected", False)
         self.visible = kwargs.get("visible", True)
         self.solid = kwargs.get("solid", True)
         self.color = kwargs.get("color", Color.BLACK)

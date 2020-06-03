@@ -20,12 +20,6 @@ class Scene(Gid):
         self.timers = []
         self.enable = kwargs.get("enable", True)
         self.visible = kwargs.get("visible", True)
-        # These event buckets are being used to received any events from
-        # graphical objects when processing keyboard/mouse events, update
-        # events or rendering events.
-        self.event_input_bucket = []
-        self.event_update_bucket = []
-        self.event_render_bucket = []
 
     def __str__(self):
         return f"[{self.gid}] : {self.__class__.__name__}@{self.name}"
@@ -66,21 +60,21 @@ class Scene(Gid):
         for gobj in self.gobjects:
             gobj.end_tick()
 
-    def handle_keyboard_event(self, event):
+    def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
         """
         # Log.Scene(self.name).KeyboardEvent(event.key).call()
         for gobj in self.gobjects:
-            gobj.handle_keyboard_event(event)
+            gobj.handle_keyboard_event(event, **kwargs)
 
-    def handle_mouse_event(self, event):
+    def handle_mouse_event(self, event, **kwargs):
         """handle_mouse_event should process the mouse event given.
         Mouse events are passed to the active scene to be handle.
         """
         for gobj in self.gobjects:
-            gobj.handle_mouse_event(event)
+            gobj.handle_mouse_event(event, **kwargs)
 
-    def handle_custom_event(self, event):
+    def handle_custom_event(self, event, **kwargs):
         """handle_custom_event should process pygame custom event given.
         Any object in the game, like, scene, graphic objects, ... can post
         customs events, and those should be handled at this time.
@@ -93,7 +87,7 @@ class Scene(Gid):
         for gobj in self.gobjects:
             if gobj.logger and logger_event_message:
                 gobj.messages = logger_event_message
-            gobj.handle_custom_event(event)
+            gobj.handle_custom_event(event, **kwargs)
 
     def update(self, **kwargs):
         """update calls update method for all scene graphical objects.

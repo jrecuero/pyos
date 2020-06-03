@@ -30,11 +30,11 @@ class GameActor(GRect):
         """update calls update method for game actor.
         """
         if self.life == 0:
-            event_bucket = kwargs.get("event_bucket", None)
+            event_bucket = kwargs.get("event-bucket", None)
             if event_bucket is not None:
                 event = GEvent.new_event(GEvent.ENGINE,
                                          GEvent.DELETE,
                                          self,
-                                         GEvent.SCENE,
+                                         GEvent.BOARD,
                                          {"source": self, }, )
                 event_bucket.append(event)

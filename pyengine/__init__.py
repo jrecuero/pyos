@@ -11,6 +11,8 @@ from ._layer import Layer
 from ._grid import Grid
 from ._gtext import GText
 from ._gtextbox import GTextBox
+from ._gmenu import GMenu
+from ._gmenuitem import GMenuItem
 from ._loggar import Log
 
 __all__ = [
@@ -28,4 +30,6 @@ __all__ = [
     "Layer",
     "GEvent",
     "GText",
-    "GTextBox", ]
+    "GTextBox",
+    "GMenu",
+    "GMenuItem", ]

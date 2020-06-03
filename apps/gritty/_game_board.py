@@ -1,6 +1,6 @@
 # import sys
 # import pygame
-from pyengine import Grid
+from pyengine import Grid, GEvent
 from pyengine import Log
 
 
@@ -123,8 +123,18 @@ class GameBoard(Grid):
         """
         if not self.player_turn:
             self.off_player_counter += 1
-            if self.off_player_counter >= 10:
+            if self.off_player_counter >= 2:
                 self.off_player_counter = 0
                 self.player_turn = True
                 Log.Board(self.name).StartPlayerTurn().call()
         super(GameBoard, self).update(surface, **kwargs)
+        event_bucket = kwargs["event-bucket"]
+        bucket = []
+        while len(event_bucket):
+            event = event_bucket.pop(0)
+            # Log.Scene(self.name).EventUpdateBucket(event).call()
+            if event.type == GEvent.ENGINE and event.subtype == GEvent.DELETE and event.destination == GEvent.BOARD:
+                self.del_gobject(event.source)
+                event.destination = GEvent.SCENE
+                bucket.append(event)
+        event_bucket.extend(bucket)

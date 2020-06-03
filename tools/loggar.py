@@ -89,32 +89,32 @@ class _Logging(logging.Logger):
     def __update_dict(self):
         """___update_dict update the dictionary to be log.
         """
-        pframe = inspect.stack()[2]
+        pframe = inspect.stack()[3]
         self.dicta["file-name"] = pframe.filename
         self.dicta["lineno"] = pframe.lineno
         self.dicta["func-name"] = pframe.function
 
-    @loggable
+    # @loggable
     def debug(self):
         self.dicta["level"] = DEBUG
         super(_Logging, self).debug(self.dicta)
 
-    @loggable
+    # @loggable
     def trace(self):
         self.dicta["level"] = TRACE
         super(_Logging, self).debug(self.dicta)
 
-    @loggable
+    # @loggable
     def info(self):
         self.dicta["level"] = INFO
         super(_Logging, self).info(self.dicta)
 
-    @loggable
+    # @loggable
     def warning(self):
         self.dicta["level"] = WARNING
         super(_Logging, self).warning(self.dicta)
 
-    @loggable
+    # @loggable
     def error(self):
         self.dicta["level"] = ERROR
         super(_Logging, self).error(self.dicta)
