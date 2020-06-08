@@ -83,12 +83,21 @@ class GameScene(Scene):
             self.board.add_gobject(target, relative=False)
         self.board.add_gobject(self.actor, relative=False)
         self.add_gobject(self.board)
-        self.menu = GMenu("menu", 450, 32, 100, 20)
-        self.menu.add_menu_item("File")
+        self.menu = GMenu("menu", None, 450, 32, width=100, height=100, orientation=GMenu.VERTICAL)
+        self.menu_file = self.menu.add_menu_item("File", orientation=GMenu.VERTICAL)
         self.menu.add_menu_item("Edit")
-        self.menu.add_menu_item("Window")
         self.menu.add_menu_item("Help")
+        # self.menu_file.add_menu_item("Open")
+        # self.menu_file.add_menu_item("Close")
+        # self.menu_file_save = self.menu_file.add_menu_item("Save")
+        # self.menu_file_save.add_menu_item("...")
+        # self.menu_file_save.add_menu_item("As ...")
         self.add_gobject(self.menu)
+        self.menu.visible = False
+        # self.menu.selected = True
+        # self.menu_file.highlighted = True
+        # self.menu_file.selected = True
+        # self.menu_file_save.selected = True
         self.event_battle_attack = GEvent.register_subtype_event("BATTLE_ATTACK")
 
     def handle_keyboard_event(self, event, **kwargs):
@@ -106,6 +115,14 @@ class GameScene(Scene):
             ok, collision = self.board.move_player_up()
         if key_pressed[pygame.K_DOWN]:
             ok, collision = self.board.move_player_down()
+        if key_pressed[pygame.K_a]:
+            self.menu.highlight_next()
+        if key_pressed[pygame.K_q]:
+            self.menu.highlight_prev()
+        if key_pressed[pygame.K_m]:
+            self.menu.visible = not self.menu.visible
+        if key_pressed[pygame.K_RETURN]:
+            self.menu.select_highlighted()
         if not ok and collision:
             event = GEvent.new_event(GEvent.APP_DEFINED,
                                      self.event_battle_attack,

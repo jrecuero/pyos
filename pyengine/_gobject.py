@@ -39,6 +39,7 @@ class GObject(pygame.sprite.Sprite):
         self.pushed = kwargs.get("pushed", None)
         self.enable = kwargs.get("enable", True)
         self.grayout = kwargs.get("grayout", False)
+        self._highlighted = kwargs.get("highlighted", False)
         self.selected = kwargs.get("selected", False)
         self.visible = kwargs.get("visible", True)
         self.solid = kwargs.get("solid", True)
@@ -114,6 +115,16 @@ class GObject(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
+
+    @property
+    def highlighted(self):
+        """highlighted property returns the graphical object highlighted attribute.
+        """
+        return self._highlighted
+
+    @highlighted.setter
+    def highlighted(self, val):
+        self._highlighted = val
 
     def dxdy(self, dx=None, dy=None):
         """dxdy allows to set the graphical object width and height at the
