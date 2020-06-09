@@ -84,29 +84,33 @@ class GameScene(Scene):
         self.board.add_gobject(self.actor, relative=False)
         self.add_gobject(self.board)
         self.menu = GMenu("menu", None, 450, 32, width=100, height=100, orientation=GMenu.VERTICAL)
-        self.menu_file = self.menu.add_menu_item("File", orientation=GMenu.VERTICAL)
-        self.menu.add_menu_item("Edit")
-        self.menu.add_menu_item("Help")
-        # self.menu_file.add_menu_item("Open")
-        # self.menu_file.add_menu_item("Close")
-        # self.menu_file_save = self.menu_file.add_menu_item("Save")
-        # self.menu_file_save.add_menu_item("...")
-        # self.menu_file_save.add_menu_item("As ...")
+        self.menu_file = self.menu.add_menu_item("Attack", callback=self.action_attack)
+        self.menu.add_menu_item("Defend", callback=self.action_defend)
+        self.menu.add_menu_item("Pass", callback=self.action_pass)
         self.add_gobject(self.menu)
         self.menu.visible = False
-        # self.menu.selected = True
-        # self.menu_file.highlighted = True
-        # self.menu_file.selected = True
-        # self.menu_file_save.selected = True
         self.event_battle_attack = GEvent.register_subtype_event("BATTLE_ATTACK")
+        self.select_from_menu = False
 
-    def handle_keyboard_event(self, event, **kwargs):
-        """handle_keyboard_event should process the keyboard event given.
-        """
+    def action_attack(self, source=None, target=None):
+        Log.Scene(self.name).Source(source.name).Attack(target.name).call()
+        event = GEvent.new_event(GEvent.APP_DEFINED,
+                                 self.event_battle_attack,
+                                 self,
+                                 GEvent.SCENE,
+                                 {"source": self.battle_source, "target": self.battle_target}, )
+        return event
+
+    def action_defend(self, source=None, target=None):
+        Log.Scene(self.name).Source(source.name).Defend(target.name).call()
+        return None
+
+    def action_pass(self, source=None, target=None):
+        Log.Scene(self.name).Source(source.name).Pass(target.name).call()
+        return None
+
+    def _handle_keyboard_grid_event(self, key_pressed):
         ok, collision = False, None
-        key_pressed = pygame.key.get_pressed()
-        if key_pressed[pygame.K_x]:
-            sys.exit(0)
         if key_pressed[pygame.K_LEFT]:
             ok, collision = self.board.move_player_left()
         if key_pressed[pygame.K_RIGHT]:
@@ -115,21 +119,36 @@ class GameScene(Scene):
             ok, collision = self.board.move_player_up()
         if key_pressed[pygame.K_DOWN]:
             ok, collision = self.board.move_player_down()
-        if key_pressed[pygame.K_a]:
-            self.menu.highlight_next()
-        if key_pressed[pygame.K_q]:
+        return ok, collision
+
+    def _handle_keyboard_menu_event(self, key_pressed):
+        if key_pressed[pygame.K_UP]:
             self.menu.highlight_prev()
-        if key_pressed[pygame.K_m]:
-            self.menu.visible = not self.menu.visible
+        if key_pressed[pygame.K_DOWN]:
+            self.menu.highlight_next()
+
+    def handle_keyboard_event(self, event, **kwargs):
+        """handle_keyboard_event should process the keyboard event given.
+        """
+        ok, collision = False, None
+        key_pressed = pygame.key.get_pressed()
+        if key_pressed[pygame.K_x]:
+            sys.exit(0)
+        if not self.select_from_menu:
+            ok, collision = self._handle_keyboard_grid_event(key_pressed)
+        else:
+            self._handle_keyboard_menu_event(key_pressed)
         if key_pressed[pygame.K_RETURN]:
-            self.menu.select_highlighted()
+            event = self.menu.select_highlighted(source=self.battle_source, target=self.battle_target)
+            self.menu.visible = False
+            self.select_from_menu = False
+            if event:
+                kwargs["event-bucket"].append(event)
         if not ok and collision:
-            event = GEvent.new_event(GEvent.APP_DEFINED,
-                                     self.event_battle_attack,
-                                     self,
-                                     GEvent.SCENE,
-                                     {"source": self.actor, "target": collision.solid_object}, )
-            kwargs["event-bucket"].append(event)
+            self.menu.visible = True
+            self.select_from_menu = True
+            self.battle_source = self.actor
+            self.battle_target = collision.solid_object
 
         super(GameScene, self).handle_keyboard_event(event, **kwargs)
 

@@ -95,12 +95,16 @@ class GMenu(GObject):
             self.menu_items[self.highlighted_index].highlighted = True
 
     def select(self, **kwargs):
-        Log.Menu(self.name).Select(**kwargs).call()
+        Log.Menu(self.name).Select(str(kwargs)).call()
         if self.callback:
-            self.callback(**kwargs)
+            return self.callback(**kwargs)
+        return None
 
     def select_highlighted(self, **kwargs):
-        self.menu_items[self.highlighted_index].select(**kwargs)
+        return self.menu_items[self.highlighted_index].select(**kwargs)
+
+    def get_highlighted(self):
+        return self.menu_items[self.highlighted_index].name
 
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.
