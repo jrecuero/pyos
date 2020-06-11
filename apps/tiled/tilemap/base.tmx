@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.5" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="1">
+<map version="1.2" tiledversion="1.3.5" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="4">
  <tileset firstgid="1" name="[Base]BaseChip_pipo" tilewidth="32" tileheight="32" tilecount="1064" columns="8">
   <image source="[Base]BaseChip_pipo.png" width="256" height="4256"/>
  </tileset>
@@ -51,4 +51,13 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="3" name="objects">
+  <object id="2" name="player_pos" x="256" y="320" width="32" height="32"/>
+  <object id="3" name="treasure" gid="46" x="416" y="320" width="32" height="32">
+   <properties>
+    <property name="end" value="finish line"/>
+    <property name="starting" type="bool" value="true"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>
