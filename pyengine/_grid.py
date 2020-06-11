@@ -14,11 +14,11 @@ class Grid(GObject):
     displayed at fixed positions/
     """
 
-    def __init__(self, name, rows, cols, g_x, g_y, g_dx, g_dy, **kwargs):
+    def __init__(self, name, rows, cols, grid_origin_x, grid_origin_y, cell_width, cell_height, **kwargs):
         self.rows = rows
         self.cols = cols
-        self.g_cell_size = Size(g_dx, g_dy)
-        self.g_origin = Vector2(g_x, g_y)
+        self.g_cell_size = Size(cell_width, cell_height)
+        self.g_origin = Vector2(grid_origin_x, grid_origin_y)
         self.g_size = Size(cols * self.g_cell_size.x, rows * self.g_cell_size.y)
         super(Grid, self).__init__(name, self.g_origin.x, self.g_origin.y, self.g_size.x, self.g_size.y, **kwargs)
         self.db = [[Cell(i, j) for j in range(self.cols)] for i in range(self.rows)]

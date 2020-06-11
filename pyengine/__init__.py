@@ -17,6 +17,7 @@ from ._gimage import GImage
 from ._gfileimage import GFileImage
 from ._gspritesheet import GSpriteSheet
 from ._ganiimage import GAniImage
+from ._gtilemap import TileMap, GTileMap
 from ._loggar import Log
 
 __all__ = [
@@ -40,4 +41,6 @@ __all__ = [
     "GImage",
     "GAniImage",
     "GFileImage",
-    "GSpriteSheet", ]
+    "GSpriteSheet",
+    "TileMap",
+    "GTileMap", ]

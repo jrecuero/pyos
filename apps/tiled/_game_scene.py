@@ -1,36 +1,9 @@
 import sys
 import os
 import pygame
-from pyengine import Scene, GSpriteSheet, GAniImage
-import pytmx
-from pyengine import Log
-
-
-class TileMap:
-
-    def __init__(self, filename):
-        self.tmxdata = pytmx.load_pygame(filename, pixelalpha=True)
-        self.width = self.tmxdata.width * self.tmxdata.tilewidth
-        self.height = self.tmxdata.height * self.tmxdata.tileheight
-
-    def render(self, surface):
-        for layer in self.tmxdata.visible_layers:
-            if isinstance(layer, pytmx.TiledTileLayer):
-                for x, y, gid in layer:
-                    tile = self.tmxdata.get_tile_image_by_gid(gid)
-                    if tile:
-                        surface.blit(tile, (x * self.tmxdata.tilewidth, y * self.tmxdata.tileheight))
-        for to in self.tmxdata.objects:
-            Log.TmxObject(to.name).Position(f"{x}, {y}").Image(to.image).call()
-            for k, v in to.properties.items():
-                Log.TmxObjectx(to.name).Properties(f"{k}: {v}").call()
-            if to.image:
-                surface.blit(to.image, (to.x, to.y))
-
-    def make_map(self):
-        temp_surface = pygame.Surface((self.width, self.height))
-        self.render(temp_surface)
-        return temp_surface
+from pyengine import Scene, GSpriteSheet, GAniImage, TileMap, GTileMap
+# from pyengine import Log
+from _game_board import GameBoard
 
 
 class GameScene(Scene):
@@ -40,14 +13,15 @@ class GameScene(Scene):
         game_folder = os.path.dirname(__file__)
         map_folder = os.path.join(game_folder, "tilemap")
         self.map = TileMap(os.path.join(map_folder, "base.tmx"))
-        self.map_img = self.map.make_map()
-        self.map_img_rect = self.map_img.get_rect()
-        # self.player_image = pygame.image.load(os.path.join(map_folder, "soldier.png"))
+        self.tile_map = GTileMap("world", self.map, 0, 0, 640, 640)
+        # self.add_gobject(self.tile_map)
         self.player_sprite_sheet = GSpriteSheet(os.path.join(map_folder, "full_soldier.png"), 32)
-        # self.player = GImage("player", os.path.join(map_folder, "soldier.png"), 64, 32)
-        # self.player = GImage("player", self.player_sprite_sheet .image_at(pygame.Rect(5 * 32, 0, 32, 32), -1), 32, 32)
         self.player = GAniImage("player", self.player_sprite_sheet, 0, 0, 32, 32, 0, 3)
-        self.add_gobject(self.player)
+        # self.add_gobject(self.player)
+        self.board = GameBoard(32, 32, 0, 0, 32, 32)
+        self.board.add_gobject(self.tile_map)
+        self.board.add_gobject(self.player)
+        self.add_gobject(self.board)
 
     def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
@@ -78,6 +52,4 @@ class GameScene(Scene):
     def render(self, **kwargs):
         """render calls render method for all scene graphical objects.
         """
-        self.surface.blit(self.map_img, (0, 0))
         super(GameScene, self).render(**kwargs)
-        # self.surface.blit(self.player_image, (32, 32))
