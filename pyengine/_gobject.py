@@ -124,6 +124,8 @@ class GObject(pygame.sprite.Sprite):
 
     @highlighted.setter
     def highlighted(self, val):
+        """highlighted setter set the graphical object highlighted attribute.
+        """
         self._highlighted = val
 
     def dxdy(self, dx=None, dy=None):

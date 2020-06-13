@@ -12,6 +12,8 @@ class GHandler:
     all those instances (scenes and any other app global instance).
     """
 
+    EBUCKET = "event-bucket"
+
     def __init__(self, name, surface, clock, **kwargs):
         Log.GHandler(f"{name}").Stage("init").call()
         self.name = name
@@ -111,12 +113,8 @@ class GHandler:
         """
         events = events if events else pygame.event.get()
         keyboards = keyboards if keyboards else [pygame.KEYDOWN, pygame.KEYUP]
-        buttons = (
-            buttons
-            if buttons
-            else [pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]
-        )
-        kwargs["event-bucket"] = self.event_bucket
+        buttons = buttons if buttons else [pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]
+        kwargs[GHandler.EBUCKET] = self.event_bucket
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -132,9 +130,8 @@ class GHandler:
         """update calls update method for all scenes and  graphical objects.
         """
         # call only the active scene.
-
         # Log.GHandler(f"{self.name}").Update(kwargs).Clock(self.clock).call()
-        kwargs["event-bucket"] = self.event_bucket
+        kwargs[GHandler.EBUCKET] = self.event_bucket
         self.hscene.update(**kwargs)
         for gobj in self.gobjects:
             gobj.update(self.surface, **kwargs)
@@ -146,7 +143,7 @@ class GHandler:
             flip (bool): call pygame to flip surface.
         """
         # call only the active scene.
-        kwargs["event-bucket"] = self.event_bucket
+        kwargs[GHandler.EBUCKET] = self.event_bucket
         self.hscene.render(**kwargs)
         for gobj in self.gobjects:
             gobj.render(self.surface, **kwargs)

@@ -1,7 +1,7 @@
 import pygame
 import pytmx
 from ._gobject import GObject
-# from ._loggar import Log
+from ._loggar import Log
 
 
 class TileMap:
@@ -20,11 +20,9 @@ class TileMap:
                     if tile:
                         surface.blit(tile, (x * self.tmxdata.tilewidth, y * self.tmxdata.tileheight))
         for to in self.tmxdata.objects:
-            # Log.TmxObject(to.name).Position(f"{x}, {y}").Image(to.image).call()
-            # for k, v in to.properties.items():
-            #     Log.TmxObjectx(to.name).Properties(f"{k}: {v}").call()
-            import pdb
-            pdb.set_trace()
+            Log.TmxObject(to.name).Position(f"{to.x}, {to.y}").Size(f"{to.width}, {to.height}").Image(to.image).call()
+            for k, v in to.properties.items():
+                Log.TmxObjectx(to.name).Properties(f"{k}: {v}").call()
             self.objects.append(to)
             if to.image:
                 surface.blit(to.image, (to.x, to.y))
@@ -44,3 +42,7 @@ class GTileMap(GObject):
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
+
+    @property
+    def objects(self):
+        return self.tile_map.objects

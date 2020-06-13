@@ -3,6 +3,7 @@ from ._size import Size
 from ._cell import Cell
 from ._layer import Layer
 from ._gobject import GObject
+from ._gobstacle import GObstacle
 from ._color import Color
 from ._gevent import GEvent
 import pygame
@@ -13,6 +14,12 @@ class Grid(GObject):
     """Class Grid identifies a grid containing a group of ordered cells to be
     displayed at fixed positions/
     """
+
+    NONE = 0
+    LEFT = 1
+    RIGHT = 2
+    UP = 3
+    DOWN = 4
 
     def __init__(self, name, rows, cols, grid_origin_x, grid_origin_y, cell_width, cell_height, **kwargs):
         self.rows = rows
@@ -56,6 +63,33 @@ class Grid(GObject):
         origin = self.g_cell(row, col)
         return pygame.Rect(origin.x, origin.y, self.g_cell_size.x, self.g_cell_size.y)
 
+    def _points_in_line(self, start, length, delta):
+        """_points_in_line returns all points contained in a line of lenght,
+        at an start and with an increment of delta.
+        """
+        result = []
+        while start < length:
+            result.append(start)
+            start += delta
+        return result
+
+    def g_cells_in_rect(self, rect):
+        """g_cells_in_rect returns all graphical cell contained in a graphical
+        rectangle.
+        """
+        cells = []
+        xs = self._points_in_line(rect.x, rect.x + rect.width, self.g_cell_size.x)
+        ys = self._points_in_line(rect.y, rect.y + rect.height, self.g_cell_size.y)
+        for yy in ys:
+            for xx in xs:
+                cells.append((yy, xx))
+        return cells
+
+    def cells_in_rect(self, rect):
+        """cells_in_rect returns all cells contained in a graphical rectangle.
+        """
+        return [self.g_to_cell(x, y) for (x, y) in self.g_cells_in_rect(rect)]
+
     def grid_rect(self):
         """grid_rect returns a rectangle for the while grid.
         """
@@ -74,8 +108,6 @@ class Grid(GObject):
         Log.Grid(self.name).AddGObjToCell(gobject.name).Cell(f"{row}, {col}").XY(f"{gobject.x}, {gobject.y}").call()
         cell = self.cell(row, col)
         cell.add_gobject(gobject)
-        # gobject._cell = cell
-        # cell.gobjects.append(gobject)
 
     def del_gobject_from_cell(self, gobject):
         """del_gobject_from_cell removes the graphical object from the cell related
@@ -84,8 +116,6 @@ class Grid(GObject):
         cell = gobject._cell
         if cell:
             cell.del_gobject(gobject)
-            # cell.gobjects.remove(gobject)
-            # gobject._cell = None
             Log.Grid(self.name).DelGObjFromCell(gobject.name).Cell(f"{cell.row}, {cell.col}").XY(f"{gobject.x}, {gobject.y}").call()
 
     def add_gobject(self, gobject, relative=True):
@@ -101,6 +131,19 @@ class Grid(GObject):
             gobject.x += self.g_origin.x
             gobject.y += self.g_origin.y
         self.add_gobject_to_cell(gobject)
+
+    def add_tilemap(self, tilemap, relative=True):
+        """add_tilemap adds a TileMap object to the grid.
+        """
+        self.add_gobject(tilemap, relative)
+        for tobj in tilemap.objects:
+            # if tobj.type == "obstacle":
+            if True:
+                Log.Grid(self.name).Obstacle(tobj.name).At(f"{tobj.x}, {tobj.y}").Size(f"{tobj.width}. {tobj.height}").call()
+                g_cells = self.g_cells_in_rect(tobj)
+                Log.Grid(self.name).Cells(g_cells).call()
+                for y, x in g_cells:
+                    self.add_gobject(GObstacle(tobj.name, x, y, self.g_cell_size.x, self.g_cell_size.y, z=Layer.TOP))
 
     def del_gobject(self, gobject):
         """del_gobject deletes a graphical object from the grid.
@@ -124,37 +167,85 @@ class Grid(GObject):
         for gobj in [o for _, go in self.gobjects.items() for o in go]:
             gobj.end_tick()
 
-    def move_it_gobject(self, gobject, dx, dy):
-        """move_it_gobject moves the given object the given x-y delta.
+    def can_move_to(self, gobject, move_shift_x, move_shift_y):
+        """can_move_to checks if the given object can move the given x-y delta.
+        It returns a boolean with the movement result (True move allowed,
+        False, not) and a cell instance if there is a collision.
+        - Movement allowed: True, None
+        - Movement not allowed (out of bounds): False, None
+        - Movement not allowed (collision): False, collision-cell
         """
-        dx, dy = int(dx), int(dy)
-        new_x, new_y = gobject.move_it(dx, dy, dry=True)
+        move_shift_x, move_shift_y = int(move_shift_x), int(move_shift_y)
+        new_x, new_y = gobject.move_it(move_shift_x, move_shift_y, dry=True)
+        row, col = self.g_to_cell(new_x, new_y)
+        if (0 <= row < self.rows) and (0 <= col < self.cols):
+            if not self.cell(row, col).collision(gobject):
+                return True, None
+            return False, self.cell(row, col)
+        return False, None
+
+    def move_it_gobject(self, gobject, move_shift_x, move_shift_y):
+        """move_it_gobject moves the given object the given x-y delta.
+        It returns a boolean with the movement result (True move allowed,
+        False, not) and a cell instance if there is a collision.
+        - Movement allowed: True, None
+        - Movement not allowed (out of bounds): False, None
+        - Movement not allowed (collision): False, collision-cell
+        """
+        move_shift_x, move_shift_y = int(move_shift_x), int(move_shift_y)
+        new_x, new_y = gobject.move_it(move_shift_x, move_shift_y, dry=True)
         row, col = self.g_to_cell(new_x, new_y)
         if (0 <= row < self.rows) and (0 <= col < self.cols):
             if not self.cell(row, col).collision(gobject):
                 self.del_gobject_from_cell(gobject)
-                gobject.move_it(dx, dy)
+                gobject.move_it(move_shift_x, move_shift_y)
                 self.add_gobject_to_cell(gobject)
                 return True, None
             return False, self.cell(row, col)
         return False, None
+
+    def move_gobject_to(self, direction):
+        """move_gobject_to moves the gobject to the given direction.
+        """
+        if self.catch_keyboard_gobject:
+            if direction == Grid.LEFT:
+                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, -self.g_cell_size.x, 0)
+            elif direction == Grid.RIGHT:
+                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, self.g_cell_size.x, 0)
+            elif direction == Grid.UP:
+                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, 0, -self.g_cell_size.y)
+            elif direction == Grid.DOWN:
+                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, 0, self.g_cell_size.y)
+            else:
+                return False, None
+            return ok, collision
+        return True, None
+
+    def move_gobject_left(self):
+        """move_gobject_left moves the gobject to the left.
+        """
+        return self.move_gobject_to(Grid.LEFT)
+
+    def move_gobject_right(self):
+        """move_gobject_right moves the gobject to the right.
+        """
+        return self.move_gobject_to(Grid.RIGHT)
+
+    def move_gobject_up(self):
+        """move_gobject_up moves the gobject to the up.
+        """
+        return self.move_gobject_to(Grid.UP)
+
+    def move_gobject_down(self):
+        """move_gobject_down moves the gobject to the down.
+        """
+        return self.move_gobject_to(Grid.DOWN)
 
     def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
         """
         # Log.Grid(self.name).KeyboardEvent(event.key).call()
         if self.running:
-            # if self.catch_keyboard_gobject:
-            #     key_pressed = pygame.key.get_pressed()
-            #     Log.Grid(self.name).KeyboardEvent(event).GObject(self.catch_keyboard_gobject.name).call()
-            #     if key_pressed[pygame.K_LEFT]:
-            #         self.move_it_gobject(self.catch_keyboard_gobject, -self.g_cell_size.x, 0)
-            #     if key_pressed[pygame.K_RIGHT]:
-            #         self.move_it_gobject(self.catch_keyboard_gobject, self.g_cell_size.x, 0)
-            #     if key_pressed[pygame.K_UP]:
-            #         self.move_it_gobject(self.catch_keyboard_gobject, 0, -self.g_cell_size.y)
-            #     if key_pressed[pygame.K_DOWN]:
-            #         self.move_it_gobject(self.catch_keyboard_gobject, 0, self.g_cell_size.y)
             for gobj in [o for _, go in self.gobjects.items() for o in go]:
                 gobj.handle_keyboard_event(event, **kwargs)
 
@@ -199,5 +290,7 @@ class Grid(GObject):
                 c = self.g_origin.x + (col * self.g_cell_size.x)
                 pygame.draw.line(surface, Color.BLACK, (c, self.g_origin.y), (c, self.g_origin.y + self.g_size.y))
 
-        for _, gobjects in self.gobjects.items():
-            gobjects.draw(surface)
+        # for _, gobjects in self.gobjects.items():
+        #     gobjects.draw(surface)
+        for layer in Layer.layers():
+            self.gobjects[layer].draw(surface)

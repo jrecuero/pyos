@@ -1,6 +1,6 @@
 import sys
 import pygame
-from pyengine import Scene, Color, GEvent, GObject, GMenu
+from pyengine import Scene, Color, GEvent, GObject, GMenu, GHandler
 from pyengine import Log
 from _game_board import GameBoard
 from _game_actor import GameActor
@@ -143,7 +143,7 @@ class GameScene(Scene):
             self.menu.visible = False
             self.select_from_menu = False
             if event:
-                kwargs["event-bucket"].append(event)
+                kwargs[GHandler.EBUCKET].append(event)
         if not ok and collision:
             self.menu.visible = True
             self.select_from_menu = True
@@ -155,7 +155,7 @@ class GameScene(Scene):
     def update(self, **kwargs):
         """update calls update method for all scene graphical objects.
         """
-        event_bucket = kwargs["event-bucket"]
+        event_bucket = kwargs[GHandler.EBUCKET]
         while len(event_bucket):
             event = event_bucket.pop(0)
             if event.type == GEvent.APP_DEFINED and event.destination == GEvent.SCENE:
@@ -170,7 +170,7 @@ class GameScene(Scene):
                         GEvent.SCENE,
                         f"{source.name} attack {target.name} for {damage} hp: {target.life}.")
         super(GameScene, self).update(**kwargs)
-        event_bucket = kwargs["event-bucket"]
+        event_bucket = kwargs[GHandler.EBUCKET]
         while len(event_bucket):
             event = event_bucket.pop(0)
             # Log.Scene(self.name).EventUpdateBucket(event).call()

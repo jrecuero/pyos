@@ -14,3 +14,7 @@ class Layer:
             return "top"
         else:
             raise Exception(f"Unknown layer: {layer}")
+
+    @classmethod
+    def layers(cls):
+        return [cls.BACKGROUND, cls.GROUND, cls.TOP]

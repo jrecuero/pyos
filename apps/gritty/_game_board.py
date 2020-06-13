@@ -17,11 +17,6 @@ class GameBoard(Grid):
         self.player_turn = True
         self.off_player_counter = 0
 
-    def move_it_gobject(self, gobject, dx, dy):
-        """move_it_gobject moves the given object the given x-y delta.
-        """
-        return super(GameBoard, self).move_it_gobject(gobject, dx, dy)
-
     def move_player_to(self, direction):
         """move_player_to moves the player to the given direction.
         """
