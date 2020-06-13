@@ -1,5 +1,6 @@
 import pygame
 from ._gobject import GObject
+from ._loggar import Log
 
 
 class GAniImage(GObject):
@@ -33,6 +34,7 @@ class GAniImage(GObject):
     def update(self, surface, **kwargs):
         """update updates animated image.
         """
+        Log.GAniImage(self.name).Update(f"{surface}").call()
         if self.repeated_frames == self.repeat_frames:
             self.repeated_frames = 0
             self.index = self.start_at if self.index == self.end_at else self.index + 1

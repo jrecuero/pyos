@@ -12,7 +12,6 @@ from ._grid import Grid
 from ._gtext import GText
 from ._gtextbox import GTextBox
 from ._gmenu import GMenu
-from ._gmenuitem import GMenuItem
 from ._gimage import GImage
 from ._gfileimage import GFileImage
 from ._gspritesheet import GSpriteSheet
@@ -38,7 +37,6 @@ __all__ = [
     "GText",
     "GTextBox",
     "GMenu",
-    "GMenuItem",
     "GImage",
     "GAniImage",
     "GFileImage",

@@ -34,14 +34,14 @@ class GObject(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.ctype = kwargs.get("ctype", GObject.NONE)
-        self.z = kwargs.get("z", Layer.GROUND)
+        self._layer = kwargs.get("layer", Layer.GROUND)
         self.move = kwargs.get("move", Move())
         self.pushed = kwargs.get("pushed", None)
         self.enable = kwargs.get("enable", True)
         self.grayout = kwargs.get("grayout", False)
         self._highlighted = kwargs.get("highlighted", False)
         self.selected = kwargs.get("selected", False)
-        self.visible = kwargs.get("visible", True)
+        self.visible = kwargs.get("visible", 1)
         self.solid = kwargs.get("solid", True)
         self.color = kwargs.get("color", Color.BLACK)
         self.outline = kwargs.get("outline", 0)
@@ -118,15 +118,27 @@ class GObject(pygame.sprite.Sprite):
 
     @property
     def highlighted(self):
-        """highlighted property returns the graphical object highlighted attribute.
+        """highlighted property returns the graphical object _highlighted attribute.
         """
         return self._highlighted
 
     @highlighted.setter
     def highlighted(self, val):
-        """highlighted setter set the graphical object highlighted attribute.
+        """highlighted setter set the graphical object _highlighted attribute.
         """
         self._highlighted = val
+
+    # @property
+    # def layer(self):
+    #     """layer property returns the graphical object _layer attribute.
+    #     """
+    #     return self._layer
+
+    # @layer.setter
+    # def layer(self, val):
+    #     """layer setter set the graphical object _layer attribute.
+    #     """
+    #     self._layer = val
 
     def dxdy(self, dx=None, dy=None):
         """dxdy allows to set the graphical object width and height at the

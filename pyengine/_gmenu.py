@@ -1,7 +1,6 @@
 import pygame
 from ._gobject import GObject, Color
 from ._loggar import Log
-# from ._gmenuitem import GMenuItem
 
 
 class GMenu(GObject):
@@ -13,7 +12,7 @@ class GMenu(GObject):
 
     def __init__(self, name, text, x, y, **kwargs):
         self.text = text
-        self.sprite_group = pygame.sprite.Group()
+        self.sprite_group = pygame.sprite.LayeredUpdates()
         self.menu_items = []
         self.width = kwargs.get("width", None)
         self.height = kwargs.get("height", None)

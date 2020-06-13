@@ -16,7 +16,7 @@ class Scene(Gid):
         super(Scene, self).__init__()
         self.name = name
         self.surface = surface
-        self.gobjects = pygame.sprite.Group()
+        self.gobjects = pygame.sprite.LayeredUpdates()
         self.timers = []
         self.enable = kwargs.get("enable", True)
         self.visible = kwargs.get("visible", True)

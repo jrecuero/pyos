@@ -30,9 +30,7 @@ class Grid(GObject):
         super(Grid, self).__init__(name, self.g_origin.x, self.g_origin.y, self.g_size.x, self.g_size.y, **kwargs)
         self.db = [[Cell(i, j) for j in range(self.cols)] for i in range(self.rows)]
         self.catch_keyboard_gobject = None
-        self.gobjects = {Layer.BACKGROUND: pygame.sprite.Group(),
-                         Layer.GROUND: pygame.sprite.Group(),
-                         Layer.TOP: pygame.sprite.Group(), }
+        self.gobjects = pygame.sprite.LayeredUpdates()
         self.running = True
         self.render_grid = kwargs.get("render_grid", True)
 
@@ -123,8 +121,8 @@ class Grid(GObject):
         """
         if gobject.catch_keyboard and self.catch_keyboard_gobject:
             raise Exception(f"Already configured catch keyboard gobject: {self.catch_keyboard_gobject}")
-        layer = gobject.z
-        self.gobjects[layer].add(gobject)
+        # self.gobjects.add(gobject, layer=gobject.layer)
+        self.gobjects.add(gobject)
         if gobject.catch_keyboard:
             self.catch_keyboard_gobject = gobject
         if relative:
@@ -143,16 +141,14 @@ class Grid(GObject):
                 g_cells = self.g_cells_in_rect(tobj)
                 Log.Grid(self.name).Cells(g_cells).call()
                 for y, x in g_cells:
-                    self.add_gobject(GObstacle(tobj.name, x, y, self.g_cell_size.x, self.g_cell_size.y, z=Layer.TOP))
+                    self.add_gobject(GObstacle(tobj.name, x, y, self.g_cell_size.x, self.g_cell_size.y, layer=Layer.TOP))
 
     def del_gobject(self, gobject):
         """del_gobject deletes a graphical object from the grid.
         """
-        layer = gobject.z
-        if gobject in self.gobjects[layer]:
-            self.gobjects[layer].remove(gobject)
-            if gobject._cell:
-                self.del_gobject_from_cell(gobject)
+        self.gobjects.remove(gobject)
+        if gobject._cell:
+            self.del_gobject_from_cell(gobject)
 
     def start_tick(self):
         """start_tick should set all elements ready for a new tick.
@@ -246,14 +242,14 @@ class Grid(GObject):
         """
         # Log.Grid(self.name).KeyboardEvent(event.key).call()
         if self.running:
-            for gobj in [o for _, go in self.gobjects.items() for o in go]:
+            for gobj in self.gobjects:
                 gobj.handle_keyboard_event(event, **kwargs)
 
     def handle_mouse_event(self, event, **kwargs):
         """handle_mouse_event should process the mouse event given.
         Mouse events are passed to the active scene to be handle.
         """
-        for gobj in [o for _, go in self.gobjects.items() for o in go]:
+        for gobj in self.gobjects:
             gobj.handle_mouse_event(event, **kwargs)
 
     def handle_custom_event(self, event, **kwargs):
@@ -270,13 +266,13 @@ class Grid(GObject):
                     event.payload["callback"]()
             elif event.subtype == GEvent.DELETE:
                 self.del_gobject(event.source)
-        for gobj in [o for _, go in self.gobjects.items() for o in go]:
+        for gobj in self.gobjects:
             gobj.handle_custom_event(event, **kwargs)
 
     def update(self, surface, **kwargs):
         """update provides any functionality to be done every tick.
         """
-        for gobj in [o for _, go in self.gobjects.items() for o in go]:
+        for gobj in self.gobjects:
             gobj.update(surface, **kwargs)
 
     def render(self, surface, **kwargs):
@@ -290,7 +286,4 @@ class Grid(GObject):
                 c = self.g_origin.x + (col * self.g_cell_size.x)
                 pygame.draw.line(surface, Color.BLACK, (c, self.g_origin.y), (c, self.g_origin.y + self.g_size.y))
 
-        # for _, gobjects in self.gobjects.items():
-        #     gobjects.draw(surface)
-        for layer in Layer.layers():
-            self.gobjects[layer].draw(surface)
+        self.gobjects.draw(surface)
