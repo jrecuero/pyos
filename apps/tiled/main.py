@@ -8,25 +8,21 @@ import pygame
 from pyengine import Log, Color
 from _game_scene import GameScene
 from _game_handler import GameHandler
-
-
-CLOCK_SPEED = 60
-DISPLAY_WIDTH = 640
-DISPLAY_HEIGHT = 640
+from _settings import FPS, WIDTH, HEIGHT
 
 
 def main():
     Log.Main("Tiled App").State("Init").call()
     pygame.init()
     pygame.display.set_caption("Tiled App")
-    screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     ghandler = GameHandler(screen, clock)
     gscene = GameScene(screen)
     ghandler.add_scene(gscene)
     ghandler.hscene.active(gscene)
     while True:
-        clock.tick(CLOCK_SPEED)
+        clock.tick(FPS)
         ghandler.event_handler()
 
         # -> update objects

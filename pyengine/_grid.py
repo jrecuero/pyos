@@ -140,7 +140,7 @@ class Grid(GObject):
                 Log.Grid(self.name).Obstacle(tobj.name).At(f"{tobj.x}, {tobj.y}").Size(f"{tobj.width}. {tobj.height}").call()
                 g_cells = self.g_cells_in_rect(tobj)
                 Log.Grid(self.name).Cells(g_cells).call()
-                for y, x in g_cells:
+                for y, x in [(x1, y1) for (x1, y1) in g_cells if x1 < self.g_size.x and y1 < self.g_size.y]:
                     self.add_gobject(GObstacle(tobj.name, x, y, self.g_cell_size.x, self.g_cell_size.y, layer=Layer.TOP))
 
     def del_gobject(self, gobject):
