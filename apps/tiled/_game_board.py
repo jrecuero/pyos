@@ -6,8 +6,8 @@ from pyengine import Grid
 
 class GameBoard(Grid):
 
-    def __init__(self, rows, cols, grid_origin_x, grid_origin_y, cell_width, cell_height, **kwargs):
-        super(GameBoard, self).__init__("Game Board", rows, cols, grid_origin_x, grid_origin_y, cell_width, cell_height, **kwargs)
+    def __init__(self, rows, cols, grid_origin_x, grid_origin_y, cell_width, cell_height, camera_width, camera_height, **kwargs):
+        super(GameBoard, self).__init__("Game Board", rows, cols, grid_origin_x, grid_origin_y, cell_width, cell_height, camera_width, camera_height, **kwargs)
         self.player_turn = True
         self.off_player_counter = 0
 

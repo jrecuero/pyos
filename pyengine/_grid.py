@@ -1,5 +1,4 @@
 from ._loggar import Log
-from ._size import Size
 from ._cell import Cell
 from ._layer import Layer
 from ._gobject import GObject
@@ -21,16 +20,19 @@ class Grid(GObject):
     UP = 3
     DOWN = 4
 
-    def __init__(self, name, rows, cols, grid_origin_x, grid_origin_y, cell_width, cell_height, **kwargs):
+    def __init__(self, name, rows, cols, grid_origin_x, grid_origin_y, cell_width, cell_height, camera_height, camera_width, **kwargs):
         self.rows = rows
         self.cols = cols
-        self.g_cell_size = Size(cell_width, cell_height)
+        self.g_cell_size = pygame.Rect(0, 0, cell_width, cell_height)
         self.g_origin = Vector2(grid_origin_x, grid_origin_y)
-        self.g_size = Size(cols * self.g_cell_size.x, rows * self.g_cell_size.y)
-        super(Grid, self).__init__(name, self.g_origin.x, self.g_origin.y, self.g_size.x, self.g_size.y, **kwargs)
+        self.g_size = pygame.Rect(0, 0, cols * self.g_cell_size.width, rows * self.g_cell_size.height)
+        self.camera = pygame.Rect(0, 0, camera_width, camera_height)
+        super(Grid, self).__init__(name, self.g_origin.x, self.g_origin.y, self.g_size.width, self.g_size.height, **kwargs)
+        # super(Grid, self).__init__(name, 0, 0, self.g_size.width, self.g_size.height, **kwargs)
         self.db = [[Cell(i, j) for j in range(self.cols)] for i in range(self.rows)]
         self.catch_keyboard_gobject = None
         self.gobjects = pygame.sprite.LayeredUpdates()
+        self.tile_map = None
         self.running = True
         self.render_grid = kwargs.get("render_grid", True)
 
@@ -46,20 +48,20 @@ class Grid(GObject):
         """g_cell returns the pixel location for the cell at the given
         coordinates.
         """
-        return Vector2(self.g_origin.x + col * self.g_cell_size.x, self.g_origin.y + row * self.g_cell_size.y)
+        return Vector2(self.g_origin.x + col * self.g_cell_size.width, self.g_origin.y + row * self.g_cell_size.height)
 
     def g_to_cell(self, x, y):
         """g_to_cell translates graphical x-y coordinates to grid row/col values.
         """
-        col = (x - self.g_origin.x) / self.g_cell_size.x
-        row = (y - self.g_origin.y) / self.g_cell_size.y
+        col = (x - self.g_origin.x) / self.g_cell_size.width
+        row = (y - self.g_origin.y) / self.g_cell_size.height
         return int(row), int(col)
 
     def g_cell_rect(self, row, col):
         """g_cell_rect returns a rectangle with for the given cell.
         """
         origin = self.g_cell(row, col)
-        return pygame.Rect(origin.x, origin.y, self.g_cell_size.x, self.g_cell_size.y)
+        return pygame.Rect(origin.x, origin.y, self.g_cell_size.width, self.g_cell_size.height)
 
     def _points_in_line(self, start, length, delta):
         """_points_in_line returns all points contained in a line of lenght,
@@ -76,8 +78,8 @@ class Grid(GObject):
         rectangle.
         """
         cells = []
-        xs = self._points_in_line(rect.x, rect.x + rect.width, self.g_cell_size.x)
-        ys = self._points_in_line(rect.y, rect.y + rect.height, self.g_cell_size.y)
+        xs = self._points_in_line(rect.x, rect.x + rect.width, self.g_cell_size.width)
+        ys = self._points_in_line(rect.y, rect.y + rect.height, self.g_cell_size.height)
         for yy in ys:
             for xx in xs:
                 cells.append((yy, xx))
@@ -91,7 +93,7 @@ class Grid(GObject):
     def grid_rect(self):
         """grid_rect returns a rectangle for the while grid.
         """
-        return pygame.Rect(self.g_origin.x, self.g_origin.y, self.g_size.x, self.g_size.y)
+        return pygame.Rect(self.g_origin.x, self.g_origin.y, self.g_size.width, self.g_size.height)
 
     def in_bounds(self, row, col):
         """in_bounds returns in the given location is inside the grid or not.
@@ -130,18 +132,18 @@ class Grid(GObject):
             gobject.y += self.g_origin.y
         self.add_gobject_to_cell(gobject)
 
-    def add_tilemap(self, tilemap, relative=True):
+    def add_tilemap(self, tile_map, relative=True):
         """add_tilemap adds a TileMap object to the grid.
         """
-        self.add_gobject(tilemap, relative)
-        for tobj in tilemap.objects:
+        self.tile_map = tile_map
+        for tobj in tile_map.objects:
             # if tobj.type == "obstacle":
             if True:
                 Log.Grid(self.name).Obstacle(tobj.name).At(f"{tobj.x}, {tobj.y}").Size(f"{tobj.width}. {tobj.height}").call()
                 g_cells = self.g_cells_in_rect(tobj)
                 Log.Grid(self.name).Cells(g_cells).call()
-                for y, x in [(x1, y1) for (x1, y1) in g_cells if x1 < self.g_size.x and y1 < self.g_size.y]:
-                    self.add_gobject(GObstacle(tobj.name, x, y, self.g_cell_size.x, self.g_cell_size.y, layer=Layer.TOP))
+                for y, x in [(x1, y1) for (x1, y1) in g_cells if x1 < self.g_size.width and y1 < self.g_size.height]:
+                    self.add_gobject(GObstacle(tobj.name, x, y, self.g_cell_size.width, self.g_cell_size.height, layer=Layer.TOP))
 
     def del_gobject(self, gobject):
         """del_gobject deletes a graphical object from the grid.
@@ -205,13 +207,13 @@ class Grid(GObject):
         """
         if self.catch_keyboard_gobject:
             if direction == Grid.LEFT:
-                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, -self.g_cell_size.x, 0)
+                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, -self.g_cell_size.width, 0)
             elif direction == Grid.RIGHT:
-                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, self.g_cell_size.x, 0)
+                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, self.g_cell_size.width, 0)
             elif direction == Grid.UP:
-                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, 0, -self.g_cell_size.y)
+                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, 0, -self.g_cell_size.height)
             elif direction == Grid.DOWN:
-                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, 0, self.g_cell_size.y)
+                ok, collision = self.move_it_gobject(self.catch_keyboard_gobject, 0, self.g_cell_size.height)
             else:
                 return False, None
             return ok, collision
@@ -278,12 +280,16 @@ class Grid(GObject):
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.
         """
+        board_surface = pygame.Surface((self.g_size.width, self.g_size.height), pygame.SRCALPHA)
         if self.render_grid:
             for row in range(self.rows + 1):
-                r = self.g_origin.y + (row * self.g_cell_size.y)
-                pygame.draw.line(surface, Color.BLACK, (self.g_origin.x, r), (self.g_origin.x + self.g_size.x, r))
+                r = self.g_origin.y + (row * self.g_cell_size.height)
+                pygame.draw.line(board_surface, Color.BLACK, (self.g_origin.x, r), (self.g_origin.x + self.g_size.width, r))
             for col in range(self.cols + 1):
-                c = self.g_origin.x + (col * self.g_cell_size.x)
-                pygame.draw.line(surface, Color.BLACK, (c, self.g_origin.y), (c, self.g_origin.y + self.g_size.y))
+                c = self.g_origin.x + (col * self.g_cell_size.width)
+                pygame.draw.line(board_surface, Color.BLACK, (c, self.g_origin.y), (c, self.g_origin.y + self.g_size.height))
 
-        self.gobjects.draw(surface)
+        self.tile_map.render(board_surface, origin=pygame.Vector2(self.g_origin.x, self.g_origin.y), area=(0, 0, self.g_size.width, self.g_size.height), **kwargs)
+        self.gobjects.draw(board_surface)
+        # surface.blit(board_surface, (self.g_origin.x, self.g_origin.y), area=self.camera)
+        surface.blit(board_surface, (0, 0), area=self.camera)

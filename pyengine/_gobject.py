@@ -1,10 +1,99 @@
 import pygame
 
 # from ._loggar import Log
-from ._gid import new_gid
+from ._gid import Gid, new_gid
 from ._move import Move
 from ._color import Color
 from ._layer import Layer
+
+
+class GDummy(Gid):
+
+    def __init__(self, name, x, y, dx, dy, **kwargs):
+        super(GDummy, self).__init__()
+        self.name = name
+        self._x = x
+        self._y = y
+        self._dx = dx
+        self._dy = dy
+        self.ctype = kwargs.get("ctype", GObject.NONE)
+        self._layer = kwargs.get("layer", Layer.GROUND)
+        self.move = kwargs.get("move", Move())
+        self.pushed = kwargs.get("pushed", None)
+        self.enable = kwargs.get("enable", True)
+        self.grayout = kwargs.get("grayout", False)
+        self._highlighted = kwargs.get("highlighted", False)
+        self.selected = kwargs.get("selected", False)
+        self.visible = kwargs.get("visible", 1)
+        self.solid = kwargs.get("solid", True)
+        self.color = kwargs.get("color", Color.BLACK)
+        self.outline = kwargs.get("outline", 0)
+        self.catch_keyboard = kwargs.get("keyboard", False)
+        self.content = kwargs.get("content", None)
+        self.logger = kwargs.get("logger", False)
+        self._cell = None
+
+    @property
+    def x(self):
+        """x property returns the graphical object position in the X-axis.
+        """
+        return self._x
+
+    @x.setter
+    def x(self, val):
+        """x setter sets the graphical object position in the X-axis and sync
+        that with the rectangle that contains the object.
+        """
+        self._x = int(val)
+
+    @property
+    def y(self):
+        """y property returns the graphical object position in the y-axis.
+        """
+        return self._y
+
+    @y.setter
+    def y(self, val):
+        """y setter sets the graphical object position in the Y-axis and sync
+        that with the rectangle that contains the object.
+        """
+        self._y = int(val)
+
+    @property
+    def dx(self):
+        """dx property returns the graphical object width or X-axis size.
+        """
+        return self._dx
+
+    @dx.setter
+    def dx(self, val):
+        """dx setter sets the graphical object width or X-axis size.
+        """
+        self._dx = int(val)
+
+    @property
+    def dy(self):
+        """dy property returns the graphical object height or Y-axis size.
+        """
+        return self._dy
+
+    @dy.setter
+    def dy(self, val):
+        """dy setter sets the graphical object heigh or Y-axis size.
+        """
+        self._dy = int(val)
+
+    @property
+    def highlighted(self):
+        """highlighted property returns the graphical object _highlighted attribute.
+        """
+        return self._highlighted
+
+    @highlighted.setter
+    def highlighted(self, val):
+        """highlighted setter set the graphical object _highlighted attribute.
+        """
+        self._highlighted = val
 
 
 class GObject(pygame.sprite.Sprite):

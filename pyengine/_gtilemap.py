@@ -1,6 +1,6 @@
 import pygame
 import pytmx
-from ._gobject import GObject
+# from ._gobject import GObject
 from ._loggar import Log
 
 
@@ -27,16 +27,20 @@ class TileMap:
             if to.image:
                 surface.blit(to.image, (to.x, to.y))
 
-    def make_map(self):
-        temp_surface = pygame.Surface((self.width, self.height))
+    def make_map(self, **kwargs):
+        width = kwargs.get("width", self.width)
+        height = kwargs.get("height", self.height)
+        temp_surface = pygame.Surface((width, height))
         self.render(temp_surface)
         return temp_surface
 
 
-class GTileMap(GObject):
+class GTileMap():
 
-    def __init__(self, name, tile_map, x, y, dx, dy, **kwargs):
-        super(GTileMap, self).__init__(name, x, y, dx, dy, **kwargs)
+    def __init__(self, name, tile_map, x, y, **kwargs):
+        self.name = name
+        self.x = x
+        self.y = y
         self.tile_map = tile_map
         self.image = self.tile_map.make_map()
         self.rect = self.image.get_rect()
@@ -46,3 +50,8 @@ class GTileMap(GObject):
     @property
     def objects(self):
         return self.tile_map.objects
+
+    def render(self, surface, **kwargs):
+        origin = kwargs.get("origin", pygame.Vector2(self.x, self.y))
+        area = kwargs.get("area", None)
+        surface.blit(self.image, (origin.x, origin.y), area=area)

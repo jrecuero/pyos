@@ -4,7 +4,7 @@ import pygame
 from pyengine import Scene, GSpriteSheet, GAniImage, TileMap, GTileMap
 # from pyengine import Log
 from _game_board import GameBoard
-from _settings import ROWS, COLS, TILESIZE, BOARD_ORIGIN_X, BOARD_ORIGIN_Y
+from _settings import ROWS, COLS, TILESIZE, BOARD_ORIGIN_X, BOARD_ORIGIN_Y, BOARD_WIDTH, BOARD_HEIGHT
 
 
 class GameScene(Scene):
@@ -14,12 +14,12 @@ class GameScene(Scene):
         game_folder = os.path.dirname(__file__)
         map_folder = os.path.join(game_folder, "tilemap")
         self.map = TileMap(os.path.join(map_folder, "base.tmx"))
-        self.tile_map = GTileMap("world", self.map, 0, 0, 640, 640)
+        self.tile_map = GTileMap("world", self.map, 0, 0)
+        self.board = GameBoard(ROWS, COLS, BOARD_ORIGIN_X, BOARD_ORIGIN_Y, TILESIZE, TILESIZE, BOARD_WIDTH, BOARD_HEIGHT)
         self.player_sprite_sheet = GSpriteSheet(os.path.join(map_folder, "full_soldier.png"), TILESIZE)
-        self.player = GAniImage("player", self.player_sprite_sheet, 0, 0, TILESIZE, TILESIZE, 0, 3, keyboard=True)
-        self.board = GameBoard(ROWS, COLS, BOARD_ORIGIN_X, BOARD_ORIGIN_Y, TILESIZE, TILESIZE)
+        self.player = GAniImage("player", self.player_sprite_sheet, *self.board.g_cell(0, 0), TILESIZE, TILESIZE, 0, 3, keyboard=True)
         self.board.add_tilemap(self.tile_map)
-        self.board.add_gobject(self.player)
+        self.board.add_gobject(self.player, relative=False)
         self.add_gobject(self.board)
 
     def handle_keyboard_event(self, event, **kwargs):
