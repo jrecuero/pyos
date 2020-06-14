@@ -1,7 +1,7 @@
 from ._loggar import Log
 from ._cell import Cell
 from ._layer import Layer
-from ._gobject import GObject
+from ._gobject import GDummy
 from ._gobstacle import GObstacle
 from ._color import Color
 from ._gevent import GEvent
@@ -9,7 +9,7 @@ import pygame
 from pygame.math import Vector2
 
 
-class Grid(GObject):
+class Grid(GDummy):
     """Class Grid identifies a grid containing a group of ordered cells to be
     displayed at fixed positions/
     """
@@ -26,15 +26,16 @@ class Grid(GObject):
         self.g_cell_size = pygame.Rect(0, 0, cell_width, cell_height)
         self.g_origin = Vector2(grid_origin_x, grid_origin_y)
         self.g_size = pygame.Rect(0, 0, cols * self.g_cell_size.width, rows * self.g_cell_size.height)
-        self.camera = pygame.Rect(0, 0, camera_width, camera_height)
         super(Grid, self).__init__(name, self.g_origin.x, self.g_origin.y, self.g_size.width, self.g_size.height, **kwargs)
-        # super(Grid, self).__init__(name, 0, 0, self.g_size.width, self.g_size.height, **kwargs)
         self.db = [[Cell(i, j) for j in range(self.cols)] for i in range(self.rows)]
         self.catch_keyboard_gobject = None
+        self.camera = pygame.Rect(0, 0, camera_width, camera_height)
+        self.camera_follow = None
         self.gobjects = pygame.sprite.LayeredUpdates()
         self.tile_map = None
         self.running = True
         self.render_grid = kwargs.get("render_grid", True)
+        self.image = pygame.Surface((self.g_size.width, self.g_size.height), pygame.SRCALPHA)
 
     def __str__(self):
         return f"[{self.gid}] : {self.__class__.__name__} ({self.x}, {self.y}) ({self.dx}, {self.dy})"
@@ -151,6 +152,11 @@ class Grid(GObject):
         self.gobjects.remove(gobject)
         if gobject._cell:
             self.del_gobject_from_cell(gobject)
+
+    def camera_follow_gobject(self, gobject):
+        """camera_follow_gobject sets the attribute camera_follow with the given object.
+        """
+        self.camera_follow = gobject
 
     def start_tick(self):
         """start_tick should set all elements ready for a new tick.
@@ -276,20 +282,31 @@ class Grid(GObject):
         """
         for gobj in self.gobjects:
             gobj.update(surface, **kwargs)
+        if self.camera.width < self.g_size.width or self.camera.height < self.g_size.height:
+            camera_x = self.camera_follow.x - self.g_origin.x
+            camera_y = self.camera_follow.y - self.g_origin.y
+            Log.Grid(self.name).Cell(f"{self.g_to_cell(self.camera_follow.x, self.camera_follow.y)}").Follow(f"{self.camera_follow.x}, {self.camera_follow.y}").Position(f"{camera_x}, {camera_y}").Camera(self.camera).Size(self.g_size).call()
+            if (camera_x >= self.camera.width / 2) and (self.g_size.width - camera_x >= self.camera.width / 2):
+                Log.Grid(self.name).NewCamera(self.camera).call()
+                self.camera.x = (self.camera_follow.x - self.camera.width / 2)
+            if (camera_y >= self.camera.height / 2) and (self.g_size.height - camera_y >= self.camera.height / 2):
+                self.camera.y = (self.camera_follow.y - self.camera.height / 2)
 
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.
         """
-        board_surface = pygame.Surface((self.g_size.width, self.g_size.height), pygame.SRCALPHA)
+        # rect = self.image.get_rect()
+        # rect.x = self.g_origin.x
+        # rect.y = self.g_origin.y
         if self.render_grid:
             for row in range(self.rows + 1):
                 r = self.g_origin.y + (row * self.g_cell_size.height)
-                pygame.draw.line(board_surface, Color.BLACK, (self.g_origin.x, r), (self.g_origin.x + self.g_size.width, r))
+                pygame.draw.line(self.image, Color.BLACK, (self.g_origin.x, r), (self.g_origin.x + self.g_size.width, r))
             for col in range(self.cols + 1):
                 c = self.g_origin.x + (col * self.g_cell_size.width)
-                pygame.draw.line(board_surface, Color.BLACK, (c, self.g_origin.y), (c, self.g_origin.y + self.g_size.height))
+                pygame.draw.line(self.image, Color.BLACK, (c, self.g_origin.y), (c, self.g_origin.y + self.g_size.height))
 
-        self.tile_map.render(board_surface, origin=pygame.Vector2(self.g_origin.x, self.g_origin.y), area=(0, 0, self.g_size.width, self.g_size.height), **kwargs)
-        self.gobjects.draw(board_surface)
-        # surface.blit(board_surface, (self.g_origin.x, self.g_origin.y), area=self.camera)
-        surface.blit(board_surface, (0, 0), area=self.camera)
+        self.tile_map.render(self.image, origin=pygame.Vector2(self.g_origin.x, self.g_origin.y), area=(0, 0, self.g_size.width, self.g_size.height), **kwargs)
+        self.gobjects.draw(self.image)
+        # surface.blit(self.image, (self.g_origin.x, self.g_origin.y), area=self.camera)
+        surface.blit(self.image, (0, 0), area=self.camera)

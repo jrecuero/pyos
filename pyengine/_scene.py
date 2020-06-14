@@ -16,7 +16,8 @@ class Scene(Gid):
         super(Scene, self).__init__()
         self.name = name
         self.surface = surface
-        self.gobjects = pygame.sprite.LayeredUpdates()
+        self.sprites = pygame.sprite.LayeredUpdates()
+        self.gobjects = []
         self.timers = []
         self.enable = kwargs.get("enable", True)
         self.visible = kwargs.get("visible", True)
@@ -27,14 +28,21 @@ class Scene(Gid):
     def add_gobject(self, gobject):
         """add_gobject adds a graphical object to the scene.
         """
-        if gobject in self.gobjects:
-            raise Exception(f"object {object} already present in list")
-        self.gobjects.add(gobject)
+        if isinstance(gobject, pygame.sprite.Sprite):
+            if gobject in self.sprites:
+                raise Exception(f"object {object} already present in sprite list")
+            self.sprites.add(gobject)
+        else:
+            if gobject in self.gobjects:
+                raise Exception(f"object {object} already present in gobject list")
+            self.gobjects.append(gobject)
 
     def del_gobject(self, gobject):
         """del_object deletes a graphical object from the scene.
         """
-        if object in self.gobjects:
+        if gobject in self.sprites:
+            self.sprites.remove(gobject)
+        if gobject in self.gobjects:
             self.gobjects.remove(gobject)
 
     def open(self, **kwargs):
@@ -50,6 +58,8 @@ class Scene(Gid):
     def start_tick(self):
         """start_tick should set all elements ready for a new tick.
         """
+        for gobj in self.sprites:
+            gobj.start_tick()
         for gobj in self.gobjects:
             gobj.start_tick()
 
@@ -57,6 +67,8 @@ class Scene(Gid):
         """end_tick shoudl set all elements ready for the end of a tick. Any
         structure to be clean up can be done at this point.
         """
+        for gobj in self.sprites:
+            gobj.end_tick()
         for gobj in self.gobjects:
             gobj.end_tick()
 
@@ -64,6 +76,8 @@ class Scene(Gid):
         """handle_keyboard_event should process the keyboard event given.
         """
         # Log.Scene(self.name).KeyboardEvent(event.key).call()
+        for gobj in self.sprites:
+            gobj.handle_keyboard_event(event, **kwargs)
         for gobj in self.gobjects:
             gobj.handle_keyboard_event(event, **kwargs)
 
@@ -71,6 +85,8 @@ class Scene(Gid):
         """handle_mouse_event should process the mouse event given.
         Mouse events are passed to the active scene to be handle.
         """
+        for gobj in self.sprites:
+            gobj.handle_mouse_event(event, **kwargs)
         for gobj in self.gobjects:
             gobj.handle_mouse_event(event, **kwargs)
 
@@ -88,18 +104,23 @@ class Scene(Gid):
             if gobj.logger and logger_event_message:
                 gobj.messages = logger_event_message
             gobj.handle_custom_event(event, **kwargs)
+        for gobj in self.sprites:
+            if gobj.logger and logger_event_message:
+                gobj.messages = logger_event_message
+            gobj.handle_custom_event(event, **kwargs)
 
     def update(self, **kwargs):
         """update calls update method for all scene graphical objects.
         """
-        # self.gobjects.update(self.surface, **kwargs)
+        for gobj in self.sprites:
+            gobj.update(self.surface, **kwargs)
         for gobj in self.gobjects:
             gobj.update(self.surface, **kwargs)
 
     def render(self, **kwargs):
         """render calls render method for all scene graphical objects.
         """
-        self.gobjects.draw(self.surface)
+        self.sprites.draw(self.surface)
 
         for gobj in self.gobjects:
             gobj.render(self.surface, **kwargs)

@@ -2,7 +2,7 @@ from ._gid import Gid
 from ._color import Color
 from ._gevent import GEvent
 from ._move import Move
-from ._gobject import GObject
+from ._gobject import GDummy, GObject
 from ._grect import GRect
 from ._gtimed import GTimed
 from ._scene import Scene
@@ -25,6 +25,7 @@ __all__ = [
     "Color",
     "Point",
     "Move",
+    "GDummy",
     "GObject",
     "GRect",
     "GTimed",

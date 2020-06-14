@@ -7,31 +7,53 @@ from ._color import Color
 from ._layer import Layer
 
 
+def update_attributes(instance, name, x, y, dx, dy, **kwargs):
+    instance.name = name
+    instance._x = x
+    instance._y = y
+    instance._dx = dx
+    instance._dy = dy
+    instance._layer = kwargs.get("layer", Layer.GROUND)
+    instance.pushed = kwargs.get("pushed", None)
+    instance.enable = kwargs.get("enable", True)
+    instance.grayout = kwargs.get("grayout", False)
+    instance._highlighted = kwargs.get("highlighted", False)
+    instance.selected = kwargs.get("selected", False)
+    instance.visible = kwargs.get("visible", 1)
+    instance.solid = kwargs.get("solid", True)
+    instance.color = kwargs.get("color", Color.BLACK)
+    instance.outline = kwargs.get("outline", 0)
+    instance.catch_keyboard = kwargs.get("keyboard", False)
+    instance.content = kwargs.get("content", None)
+    instance.logger = kwargs.get("logger", False)
+    instance._cell = None
+    return instance
+
+
 class GDummy(Gid):
 
     def __init__(self, name, x, y, dx, dy, **kwargs):
         super(GDummy, self).__init__()
-        self.name = name
-        self._x = x
-        self._y = y
-        self._dx = dx
-        self._dy = dy
-        self.ctype = kwargs.get("ctype", GObject.NONE)
-        self._layer = kwargs.get("layer", Layer.GROUND)
-        self.move = kwargs.get("move", Move())
-        self.pushed = kwargs.get("pushed", None)
-        self.enable = kwargs.get("enable", True)
-        self.grayout = kwargs.get("grayout", False)
-        self._highlighted = kwargs.get("highlighted", False)
-        self.selected = kwargs.get("selected", False)
-        self.visible = kwargs.get("visible", 1)
-        self.solid = kwargs.get("solid", True)
-        self.color = kwargs.get("color", Color.BLACK)
-        self.outline = kwargs.get("outline", 0)
-        self.catch_keyboard = kwargs.get("keyboard", False)
-        self.content = kwargs.get("content", None)
-        self.logger = kwargs.get("logger", False)
-        self._cell = None
+        # self.name = name
+        # self._x = x
+        # self._y = y
+        # self._dx = dx
+        # self._dy = dy
+        # self._layer = kwargs.get("layer", Layer.GROUND)
+        # self.pushed = kwargs.get("pushed", None)
+        # self.enable = kwargs.get("enable", True)
+        # self.grayout = kwargs.get("grayout", False)
+        # self._highlighted = kwargs.get("highlighted", False)
+        # self.selected = kwargs.get("selected", False)
+        # self.visible = kwargs.get("visible", 1)
+        # self.solid = kwargs.get("solid", True)
+        # self.color = kwargs.get("color", Color.BLACK)
+        # self.outline = kwargs.get("outline", 0)
+        # self.catch_keyboard = kwargs.get("keyboard", False)
+        # self.content = kwargs.get("content", None)
+        # self.logger = kwargs.get("logger", False)
+        # self._cell = None
+        update_attributes(self, name, x, y, dx, dy, **kwargs)
 
     @property
     def x(self):
@@ -101,43 +123,34 @@ class GObject(pygame.sprite.Sprite):
     placed or used by the GHandler.
     """
 
-    NONE = 0
-    RECT = 1
-    CIRCLE = 2
-    SHAPE = 3
-    BOARD = 4
-    POLYGON = 5
-    IMAGE = 10
-    TEXT = 20
-
     def __init__(self, name, x, y, dx, dy, **kwargs):
         super(GObject, self).__init__()
         self.__gid = new_gid()
-        self.name = name
-        self._x = x
-        self._y = y
-        self._dx = dx
-        self._dy = dy
+        # self.name = name
+        # self._x = x
+        # self._y = y
+        # self._dx = dx
+        # self._dy = dy
         self.image = pygame.Surface((dx, dy), pygame.SRCALPHA)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.ctype = kwargs.get("ctype", GObject.NONE)
-        self._layer = kwargs.get("layer", Layer.GROUND)
         self.move = kwargs.get("move", Move())
-        self.pushed = kwargs.get("pushed", None)
-        self.enable = kwargs.get("enable", True)
-        self.grayout = kwargs.get("grayout", False)
-        self._highlighted = kwargs.get("highlighted", False)
-        self.selected = kwargs.get("selected", False)
-        self.visible = kwargs.get("visible", 1)
-        self.solid = kwargs.get("solid", True)
-        self.color = kwargs.get("color", Color.BLACK)
-        self.outline = kwargs.get("outline", 0)
-        self.catch_keyboard = kwargs.get("keyboard", False)
-        self.content = kwargs.get("content", None)
-        self.logger = kwargs.get("logger", False)
-        self._cell = None
+        # self._layer = kwargs.get("layer", Layer.GROUND)
+        # self.pushed = kwargs.get("pushed", None)
+        # self.enable = kwargs.get("enable", True)
+        # self.grayout = kwargs.get("grayout", False)
+        # self._highlighted = kwargs.get("highlighted", False)
+        # self.selected = kwargs.get("selected", False)
+        # self.visible = kwargs.get("visible", 1)
+        # self.solid = kwargs.get("solid", True)
+        # self.color = kwargs.get("color", Color.BLACK)
+        # self.outline = kwargs.get("outline", 0)
+        # self.catch_keyboard = kwargs.get("keyboard", False)
+        # self.content = kwargs.get("content", None)
+        # self.logger = kwargs.get("logger", False)
+        # self._cell = None
+        update_attributes(self, name, x, y, dx, dy, **kwargs)
 
     @property
     def gid(self):
@@ -241,7 +254,7 @@ class GObject(pygame.sprite.Sprite):
         self.rect.y = self.y
 
     def __str__(self):
-        return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.x} {self.y} {self.dx} {self.dy} {self.ctype}"
+        return f"[{self.gid}] : {self.__class__.__name__}@{self.name} | {self.x} {self.y} {self.dx} {self.dy}"
 
     def reverse(self):
         """reverse inverts movement with the same speed value.

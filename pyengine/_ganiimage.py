@@ -17,6 +17,8 @@ class GAniImage(GObject):
         self.colorkey = kwargs.get("colorkey", -1)
         self.image = self.sprite_sheet.image_at(pygame.Rect(self.index * dx, 0, dx, dy), colorkey=self.colorkey)
         self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.repeated_frames = 0
         self.repeat_frames = kwargs.get("repeat_frames", 5)
         if end >= self.sprite_sheet.frames:
