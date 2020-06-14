@@ -49,13 +49,13 @@ class Grid(GDummy):
         """g_cell returns the pixel location for the cell at the given
         coordinates.
         """
-        return Vector2(self.g_origin.x + col * self.g_cell_size.width, self.g_origin.y + row * self.g_cell_size.height)
+        return Vector2(col * self.g_cell_size.width, row * self.g_cell_size.height)
 
     def g_to_cell(self, x, y):
         """g_to_cell translates graphical x-y coordinates to grid row/col values.
         """
-        col = (x - self.g_origin.x) / self.g_cell_size.width
-        row = (y - self.g_origin.y) / self.g_cell_size.height
+        col = x / self.g_cell_size.width
+        row = y / self.g_cell_size.height
         return int(row), int(col)
 
     def g_cell_rect(self, row, col):
@@ -119,7 +119,7 @@ class Grid(GDummy):
             cell.del_gobject(gobject)
             Log.Grid(self.name).DelGObjFromCell(gobject.name).Cell(f"{cell.row}, {cell.col}").XY(f"{gobject.x}, {gobject.y}").call()
 
-    def add_gobject(self, gobject, relative=True):
+    def add_gobject(self, gobject, relative=False):
         """add_gobject adds a graphical object to the grid.
         """
         if gobject.catch_keyboard and self.catch_keyboard_gobject:
@@ -128,9 +128,9 @@ class Grid(GDummy):
         self.gobjects.add(gobject)
         if gobject.catch_keyboard:
             self.catch_keyboard_gobject = gobject
-        if relative:
-            gobject.x += self.g_origin.x
-            gobject.y += self.g_origin.y
+        # if relative:
+        #     gobject.x += self.g_origin.x
+        #     gobject.y += self.g_origin.y
         self.add_gobject_to_cell(gobject)
 
     def add_tilemap(self, tile_map, relative=True):
@@ -282,31 +282,31 @@ class Grid(GDummy):
         """
         for gobj in self.gobjects:
             gobj.update(surface, **kwargs)
-        if self.camera.width < self.g_size.width or self.camera.height < self.g_size.height:
-            camera_x = self.camera_follow.x - self.g_origin.x
-            camera_y = self.camera_follow.y - self.g_origin.y
-            Log.Grid(self.name).Cell(f"{self.g_to_cell(self.camera_follow.x, self.camera_follow.y)}").Follow(f"{self.camera_follow.x}, {self.camera_follow.y}").Position(f"{camera_x}, {camera_y}").Camera(self.camera).Size(self.g_size).call()
-            if (camera_x >= self.camera.width / 2) and (self.g_size.width - camera_x >= self.camera.width / 2):
-                Log.Grid(self.name).NewCamera(self.camera).call()
-                self.camera.x = (self.camera_follow.x - self.camera.width / 2)
-            if (camera_y >= self.camera.height / 2) and (self.g_size.height - camera_y >= self.camera.height / 2):
-                self.camera.y = (self.camera_follow.y - self.camera.height / 2)
+        if self.camera_follow:
+            if self.camera.width < self.g_size.width or self.camera.height < self.g_size.height:
+                camera_x = self.camera_follow.x
+                camera_y = self.camera_follow.y
+                Log.Grid(self.name).Cell(f"{self.g_to_cell(self.camera_follow.x, self.camera_follow.y)}").Follow(f"{self.camera_follow.x}, {self.camera_follow.y}").Position(f"{camera_x}, {camera_y}").Camera(self.camera).Size(self.g_size).call()
+                if (camera_x >= self.camera.width / 2) and (self.g_size.width - camera_x >= self.camera.width / 2):
+                    Log.Grid(self.name).NewCamera(self.camera).call()
+                    self.camera.x = (self.camera_follow.x - self.camera.width / 2)
+                if (camera_y >= self.camera.height / 2) and (self.g_size.height - camera_y >= self.camera.height / 2):
+                    self.camera.y = (self.camera_follow.y - self.camera.height / 2)
 
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.
         """
-        # rect = self.image.get_rect()
-        # rect.x = self.g_origin.x
-        # rect.y = self.g_origin.y
         if self.render_grid:
             for row in range(self.rows + 1):
-                r = self.g_origin.y + (row * self.g_cell_size.height)
-                pygame.draw.line(self.image, Color.BLACK, (self.g_origin.x, r), (self.g_origin.x + self.g_size.width, r))
+                r = row * self.g_cell_size.height
+                pygame.draw.line(self.image, Color.BLACK, (0, r), (self.g_size.width, r))
             for col in range(self.cols + 1):
-                c = self.g_origin.x + (col * self.g_cell_size.width)
-                pygame.draw.line(self.image, Color.BLACK, (c, self.g_origin.y), (c, self.g_origin.y + self.g_size.height))
+                c = col * self.g_cell_size.width
+                pygame.draw.line(self.image, Color.BLACK, (c, 0), (c, self.g_size.height))
 
-        self.tile_map.render(self.image, origin=pygame.Vector2(self.g_origin.x, self.g_origin.y), area=(0, 0, self.g_size.width, self.g_size.height), **kwargs)
+        if self.tile_map:
+            # self.tile_map.render(self.image, origin=pygame.Vector2(self.g_origin.x, self.g_origin.y), area=(0, 0, self.g_size.width, self.g_size.height), **kwargs)
+            self.tile_map.render(self.image, origin=pygame.Vector2(0, 0), area=(0, 0, self.g_size.width, self.g_size.height), **kwargs)
         self.gobjects.draw(self.image)
-        # surface.blit(self.image, (self.g_origin.x, self.g_origin.y), area=self.camera)
-        surface.blit(self.image, (0, 0), area=self.camera)
+        surface.blit(self.image, (self.g_origin.x, self.g_origin.y), area=self.camera)
+        # surface.blit(self.image, (0, 0), area=self.camera)

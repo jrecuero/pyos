@@ -14,7 +14,7 @@ def main():
     Log.Main("Workspace App").State("Init").call()
     pygame.init()
     pygame.display.set_caption("Workspace App")
-    screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((900, 900))
     clock = pygame.time.Clock()
     ghandler = GameHandler(screen, clock)
     gscene = GameScene(screen)

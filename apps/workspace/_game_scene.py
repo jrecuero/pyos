@@ -2,12 +2,15 @@ import sys
 import pygame
 from pyengine import Scene
 # from pyengine import Log
+from _game_board import GameBoard
 
 
 class GameScene(Scene):
 
     def __init__(self, surface, **kwargs):
         super(GameScene, self).__init__("Game Workspace Scene", surface, **kwargs)
+        self.board = GameBoard(20, 20, 0, 0, 32, 32, 640, 640)
+        self.add_gobject(self.board)
 
     def handle_keyboard_event(self, event, **kwargs):
         """handle_keyboard_event should process the keyboard event given.
