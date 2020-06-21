@@ -20,7 +20,7 @@ class GameScene(Scene):
         self.player = GAniImage("player", self.player_sprite_sheet, *self.board.g_cell(0, 0), TILESIZE, TILESIZE, 0, 3, keyboard=True)
         # self.player = GRect("player", *self.board.g_cell(0, 0), TILESIZE, TILESIZE, , keyboard=True)
         self.board.add_tilemap(self.tile_map)
-        self.board.add_gobject(self.player, relative=False)
+        self.board.add_gobject(self.player, relative=False, player=True)
         self.board.camera_follow_gobject(self.player)
         self.add_gobject(self.board)
 

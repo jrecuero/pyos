@@ -2,6 +2,7 @@ from ._loggar import Log
 from ._cell import Cell
 from ._layer import Layer
 from ._gobject import GDummy
+from ._grect import GRect
 from ._gobstacle import GObstacle
 from ._color import Color
 from ._gevent import GEvent
@@ -30,6 +31,8 @@ class Grid(GDummy):
         self.db = [[Cell(i, j) for j in range(self.cols)] for i in range(self.rows)]
         self.catch_keyboard_gobject = None
         self.camera = pygame.Rect(0, 0, camera_width, camera_height)
+        self.player = None
+        self.player_position = None
         self.camera_follow = None
         self.gobjects = pygame.sprite.LayeredUpdates()
         self.tile_map = None
@@ -119,15 +122,21 @@ class Grid(GDummy):
             cell.del_gobject(gobject)
             Log.Grid(self.name).DelGObjFromCell(gobject.name).Cell(f"{cell.row}, {cell.col}").XY(f"{gobject.x}, {gobject.y}").call()
 
-    def add_gobject(self, gobject, relative=False):
+    def add_gobject(self, gobject, relative=False, player=False):
         """add_gobject adds a graphical object to the grid.
         """
         if gobject.catch_keyboard and self.catch_keyboard_gobject:
             raise Exception(f"Already configured catch keyboard gobject: {self.catch_keyboard_gobject}")
         # self.gobjects.add(gobject, layer=gobject.layer)
         self.gobjects.add(gobject)
+        if player:
+            self.player = gobject
+            if self.player_position:
+                gobject.x = self.player_position.x
+                gobject.y = self.player_position.y
         if gobject.catch_keyboard:
             self.catch_keyboard_gobject = gobject
+
         # if relative:
         #     gobject.x += self.g_origin.x
         #     gobject.y += self.g_origin.y
@@ -138,13 +147,20 @@ class Grid(GDummy):
         """
         self.tile_map = tile_map
         for tobj in tile_map.objects:
-            # if tobj.type == "obstacle":
-            if True:
-                Log.Grid(self.name).Obstacle(tobj.name).At(f"{tobj.x}, {tobj.y}").Size(f"{tobj.width}. {tobj.height}").call()
+            Log.Grid(self.name).Obstacle(tobj.name).At(f"{tobj.x}, {tobj.y}").Size(f"{tobj.width}. {tobj.height}").call()
+            if tobj.type == "obstacle":
                 g_cells = self.g_cells_in_rect(tobj)
-                Log.Grid(self.name).Cells(g_cells).call()
+                # Log.Grid(self.name).Cells(g_cells).call()
                 for y, x in [(x1, y1) for (x1, y1) in g_cells if x1 < self.g_size.width and y1 < self.g_size.height]:
                     self.add_gobject(GObstacle(tobj.name, x, y, self.g_cell_size.width, self.g_cell_size.height, layer=Layer.TOP))
+            elif tobj.type == "treasure":
+                self.add_gobject(GRect(tobj.name, tobj.x, tobj.y, self.g_cell_size.width, self.g_cell_size.height, layer=Layer.TOP, color=Color.RED))
+            elif tobj.type == "player" and tobj.name == "start-position":
+                # self.add_gobject(GRect(tobj.name, tobj.x, tobj.y, self.g_cell_size.width, self.g_cell_size.height, layer=Layer.TOP, color=Color.BLUE))
+                self.player_position = pygame.math.Vector2(tobj.x, tobj.y)
+                if self.player:
+                    self.player.x = tobj.x
+                    self.player.y = tobj.y
 
     def del_gobject(self, gobject):
         """del_gobject deletes a graphical object from the grid.
