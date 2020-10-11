@@ -187,7 +187,7 @@ class Grid(GDummy):
         for gobj in [o for _, go in self.gobjects.items() for o in go]:
             gobj.end_tick()
 
-    def can_move_to(self, gobject, move_shift_x, move_shift_y):
+    def can_move_to(self, gobject, move_shift_x=None, move_shift_y=None):
         """can_move_to checks if the given object can move the given x-y delta.
         It returns a boolean with the movement result (True move allowed,
         False, not) and a cell instance if there is a collision.

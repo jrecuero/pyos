@@ -1,3 +1,9 @@
 FPS = 60
 WIDTH = 640
 HEIGHT = 480
+IMAGES_PATH = "apps/canvas/images"
+BACKGROUND_LAYER = 0
+BULLET_LAYER = 1
+ENEMY_LAYER = 2
+PLAYER_LAYER = 3
+LAYERS = ["background", "bullet", "enemy", "player"]

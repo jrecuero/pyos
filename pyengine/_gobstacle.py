@@ -12,4 +12,3 @@ class GObstacle(GObject):
     def __init__(self, name, x, y, dx, dy, **kwargs):
         super(GObstacle, self).__init__(name, x, y, dx, dy, **kwargs)
         pygame.draw.rect(self.image, self.color, (0, 0, self.dx, self.dy), self.outline)
-        Log.GObstacle(f"{self}")

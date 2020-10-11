@@ -27,6 +27,8 @@ def update_attributes(instance, name, x, y, dx, dy, **kwargs):
     instance.content = kwargs.get("content", None)
     instance.logger = kwargs.get("logger", False)
     instance._cell = None
+    instance._parent = None
+    instance._owners = set()
     return instance
 
 
@@ -97,6 +99,42 @@ class GDummy(Gid):
         """highlighted setter set the graphical object _highlighted attribute.
         """
         self._highlighted = val
+
+    @property
+    def parent(self):
+        """parent property returns _parent attribute.
+
+        Returns:
+            Object: parent instance.
+        """
+        return self._parent
+
+    @parent.setter
+    def parent(self, val):
+        """parent property setter sets _parent attribute with the given value.
+
+        Args:
+            val (Object): instance to set as parent.
+        """
+        self._parent = val
+
+    @property
+    def owner(self):
+        """owner property returns all owners
+
+        Returns:
+            Set: set structure with all owners.
+        """
+        return self._owners
+
+    @owner.setter
+    def owner(self, val):
+        """owner property setter sets a new owner.
+
+        Args:
+            val (Object): new owner instance.
+        """
+        self._owners.add(val)
 
 
 class GObject(pygame.sprite.Sprite):
@@ -191,6 +229,42 @@ class GObject(pygame.sprite.Sprite):
         """highlighted setter set the graphical object _highlighted attribute.
         """
         self._highlighted = val
+
+    @property
+    def parent(self):
+        """parent property returns _parent attribute.
+
+        Returns:
+            Object: parent instance.
+        """
+        return self._parent
+
+    @parent.setter
+    def parent(self, val):
+        """parent property setter sets _parent attribute with the given value.
+
+        Args:
+            val (Object): instance to set as parent.
+        """
+        self._parent = val
+
+    @property
+    def owner(self):
+        """owner property returns all owners
+
+        Returns:
+            Set: set structure with all owners.
+        """
+        return self._owners
+
+    @owner.setter
+    def owner(self, val):
+        """owner property setter sets a new owner.
+
+        Args:
+            val (Object): new owner instance.
+        """
+        self._owners.add(val)
 
     # @property
     # def layer(self):
