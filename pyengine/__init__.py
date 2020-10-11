@@ -18,12 +18,13 @@ from ._gspritesheet import GSpriteSheet
 from ._ganiimage import GAniImage
 from ._gtilemap import TileMap, GTileMap
 from ._gobstacle import GObstacle
+from ._gcanvas import GCanvas
+from ._gloader import GLoader
 from ._loggar import Log
 
 __all__ = [
     "Gid",
     "Color",
-    "Point",
     "Move",
     "GDummy",
     "GObject",
@@ -44,4 +45,6 @@ __all__ = [
     "GSpriteSheet",
     "TileMap",
     "GTileMap",
-    "GObstacle", ]
+    "GObstacle",
+    "GCanvas",
+    "GLoader", ]

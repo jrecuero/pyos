@@ -34,25 +34,6 @@ class GDummy(Gid):
 
     def __init__(self, name, x, y, dx, dy, **kwargs):
         super(GDummy, self).__init__()
-        # self.name = name
-        # self._x = x
-        # self._y = y
-        # self._dx = dx
-        # self._dy = dy
-        # self._layer = kwargs.get("layer", Layer.GROUND)
-        # self.pushed = kwargs.get("pushed", None)
-        # self.enable = kwargs.get("enable", True)
-        # self.grayout = kwargs.get("grayout", False)
-        # self._highlighted = kwargs.get("highlighted", False)
-        # self.selected = kwargs.get("selected", False)
-        # self.visible = kwargs.get("visible", 1)
-        # self.solid = kwargs.get("solid", True)
-        # self.color = kwargs.get("color", Color.BLACK)
-        # self.outline = kwargs.get("outline", 0)
-        # self.catch_keyboard = kwargs.get("keyboard", False)
-        # self.content = kwargs.get("content", None)
-        # self.logger = kwargs.get("logger", False)
-        # self._cell = None
         update_attributes(self, name, x, y, dx, dy, **kwargs)
 
     @property
@@ -126,30 +107,11 @@ class GObject(pygame.sprite.Sprite):
     def __init__(self, name, x, y, dx, dy, **kwargs):
         super(GObject, self).__init__()
         self.__gid = new_gid()
-        # self.name = name
-        # self._x = x
-        # self._y = y
-        # self._dx = dx
-        # self._dy = dy
         self.image = pygame.Surface((dx, dy), pygame.SRCALPHA)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.move = kwargs.get("move", Move())
-        # self._layer = kwargs.get("layer", Layer.GROUND)
-        # self.pushed = kwargs.get("pushed", None)
-        # self.enable = kwargs.get("enable", True)
-        # self.grayout = kwargs.get("grayout", False)
-        # self._highlighted = kwargs.get("highlighted", False)
-        # self.selected = kwargs.get("selected", False)
-        # self.visible = kwargs.get("visible", 1)
-        # self.solid = kwargs.get("solid", True)
-        # self.color = kwargs.get("color", Color.BLACK)
-        # self.outline = kwargs.get("outline", 0)
-        # self.catch_keyboard = kwargs.get("keyboard", False)
-        # self.content = kwargs.get("content", None)
-        # self.logger = kwargs.get("logger", False)
-        # self._cell = None
         update_attributes(self, name, x, y, dx, dy, **kwargs)
 
     @property
