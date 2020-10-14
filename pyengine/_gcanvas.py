@@ -1,6 +1,7 @@
 import pygame
 from ._color import Color
 from ._gobject import GDummy
+from ._notify import Notify
 
 
 class GCanvas(GDummy):
@@ -46,7 +47,7 @@ class GCanvas(GDummy):
         """
         if 0 <= layer < self.number_layers:
             self.glayers[layer].add(gobject)
-            gobject.parent = self
+            gobject.gparent = self
             return True
         return False
 
@@ -62,6 +63,7 @@ class GCanvas(GDummy):
         for layer in self.glayers:
             if gobject in layer:
                 layer.remove(gobject)
+                Notify.notify(gobject, "DELETED")
                 return True
         return False
 

@@ -35,7 +35,7 @@ class GamePlayer(GImage):
         """
         self.x += self.vx
         self.y += self.vy
-        result, _ = self.parent.can_move_to(self)
+        result, _ = self.gparent.can_move_to(self)
         if not result:
             self.x -= self.vx
             self.y -= self.vy
@@ -68,4 +68,4 @@ class GamePlayer(GImage):
         if key_pressed[pygame.K_SPACE]:
             bullet = GameBullet(self.x + self.dx / 2, self.y + self.dy / 10, 2)
             bullet.owner = self
-            self.parent.add_gobject(bullet, BULLET_LAYER)
+            self.gparent.add_gobject(bullet, BULLET_LAYER)

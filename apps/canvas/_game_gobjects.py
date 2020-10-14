@@ -1,5 +1,6 @@
 import pygame
-from pyengine import GObject, GImage
+from pyengine import GObject, GImage, Notify
+from _settings import BULLET_LAYER
 
 
 class GameBullet(GObject):
@@ -20,9 +21,9 @@ class GameBullet(GObject):
         self.radius = radius
         # pygame.draw.rect(self.image, Color.RED, self.image.get_rect(), self.outline)
         pygame.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius)
-        self.speed = 10
+        self.speed = 10 * kwargs.get("speed", -1)
         self.vx = 0
-        self.vy = -self.speed
+        self.vy = self.speed
 
     def update(self, surface, **kwargs):
         """update method update the GameBullet instance.
@@ -36,11 +37,12 @@ class GameBullet(GObject):
         """
         self.x += self.vx
         self.y += self.vy
-        result, collision = self.parent.can_move_to(self)
+        result, collision = self.gparent.can_move_to(self)
         if collision:
-            self.parent.del_gobject(collision)
+            self.gparent.del_gobject(collision)
+            Notify.notify(collision, "DELETED")
         if not result:
-            self.parent.del_gobject(self)
+            self.gparent.del_gobject(self)
 
 
 class GameEnemy(GImage):
@@ -60,6 +62,8 @@ class GameEnemy(GImage):
         self.speed = 2
         self.vx = self.speed
         self.vy = 0
+        self.timer = 0
+        self.timer_bullet = 50
 
     def update(self, surface, **kwargs):
         """update method update the GameEnemy instance.
@@ -73,11 +77,18 @@ class GameEnemy(GImage):
         """
         self.x += self.vx
         self.y += self.vy
-        result, collision = self.parent.can_move_to(self)
+        result, collision = self.gparent.can_move_to(self)
         if collision:
-            self.parent.del_gobject(collision)
+            self.gparent.del_gobject(collision)
+
         if not result:
             self.x -= self.vx
             self.y -= self.vy
             self.vx = -self.vx
             self.vy = -self.vy
+        self.timer += 1
+        if self.timer == self.timer_bullet:
+            self.timer = 0
+            bullet = GameBullet(self.x + self.dx / 2, self.y + self.dy, 2, speed=1)
+            bullet.owner = self
+            self.gparent.add_gobject(bullet, BULLET_LAYER)

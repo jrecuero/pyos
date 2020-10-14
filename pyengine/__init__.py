@@ -20,6 +20,7 @@ from ._gtilemap import TileMap, GTileMap
 from ._gobstacle import GObstacle
 from ._gcanvas import GCanvas
 from ._gloader import GLoader
+from ._notify import Notify
 from ._loggar import Log
 
 __all__ = [
@@ -47,4 +48,5 @@ __all__ = [
     "GTileMap",
     "GObstacle",
     "GCanvas",
-    "GLoader", ]
+    "GLoader",
+    "Notify", ]

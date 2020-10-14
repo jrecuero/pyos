@@ -27,8 +27,10 @@ def update_attributes(instance, name, x, y, dx, dy, **kwargs):
     instance.content = kwargs.get("content", None)
     instance.logger = kwargs.get("logger", False)
     instance._cell = None
-    instance._parent = None
+    instance._gparent = None
     instance._owners = set()
+    if kwargs.get("owner", None):
+        instance.owner = kwargs.get("owner")
     return instance
 
 
@@ -102,21 +104,23 @@ class GDummy(Gid):
 
     @property
     def parent(self):
-        """parent property returns _parent attribute.
+        """parent property returns _gparent which represents the graphica parent
+        instance.
 
         Returns:
             Object: parent instance.
         """
-        return self._parent
+        return self._gparent
 
     @parent.setter
     def parent(self, val):
-        """parent property setter sets _parent attribute with the given value.
+        """parent property setter sets _gparent attribute with the given value,
+        which represents the graphical parent instance.
 
         Args:
             val (Object): instance to set as parent.
         """
-        self._parent = val
+        self._gparent = val
 
     @property
     def owner(self):
@@ -232,21 +236,23 @@ class GObject(pygame.sprite.Sprite):
 
     @property
     def parent(self):
-        """parent property returns _parent attribute.
+        """parent property returns _gparent attribute, which represents there
+        graphical parent instance.
 
         Returns:
             Object: parent instance.
         """
-        return self._parent
+        return self._gparent
 
     @parent.setter
     def parent(self, val):
-        """parent property setter sets _parent attribute with the given value.
+        """parent property setter sets _gparent attribute with the given value,
+        which represnts the graphical parent instance.
 
         Args:
             val (Object): instance to set as parent.
         """
-        self._parent = val
+        self._gparent = val
 
     @property
     def owner(self):
