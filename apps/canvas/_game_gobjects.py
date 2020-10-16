@@ -59,11 +59,11 @@ class GameEnemy(GImage):
             **kwargs (dict): GameEnemy dictionary with custom arguments.
         """
         super(GameEnemy, self).__init__("Canvas enemy", image, x, y, **kwargs)
-        self.speed = 2
+        self.speed = 1
         self.vx = self.speed
         self.vy = 0
         self.timer = 0
-        self.timer_bullet = 50
+        self.timer_bullet = 100
 
     def update(self, surface, **kwargs):
         """update method update the GameEnemy instance.

@@ -10,4 +10,4 @@ class GImage(GObject):
         rect = image.get_rect()
         super(GImage, self).__init__(name, x, y, rect.width, rect.height, **kwargs)
         self.image = image
-        self.rect = rect
+        # self.rect = rect

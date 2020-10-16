@@ -223,19 +223,19 @@ class GameHandler(GHandler):
                 self.handle_completed_lines(event.source)
             elif event.subtype == GEvent.END:
                 if event.winner == "actor":
-                    self.gobj_console.message = f"> GAME OVER. You WON!!!"
+                    self.gobj_console.message = "> GAME OVER. You WON!!!"
                 else:
-                    self.gobj_console.message = f"> GAME OVER. You LOST!!!"
+                    self.gobj_console.message = "> GAME OVER. You LOST!!!"
                 self.running = False
                 self.hscene.next()
                 print("This is the end")
 
             elif event.subtype == GEvent.PAUSE:
                 if event.source:
-                    self.gobj_console.message = f"> PAUSED"
+                    self.gobj_console.message = "> PAUSED"
                     self.running = False
                 else:
-                    self.gobj_console.message = f">"
+                    self.gobj_console.message = ">"
                     self.running = True
             elif event.subtype == GEvent.SKILL and GEvent.check_destination(
                 event, GEvent.HANDLER

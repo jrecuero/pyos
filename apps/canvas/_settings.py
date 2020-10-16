@@ -6,4 +6,6 @@ BACKGROUND_LAYER = 0
 BULLET_LAYER = 1
 ENEMY_LAYER = 2
 PLAYER_LAYER = 3
-LAYERS = ["background", "bullet", "enemy", "player"]
+DASHBOARD_LAYER = 4
+LAYERS = ["background", "bullet", "enemy", "player", "dashboard"]
+COLLISION_LAYERS = [False, True, True, True, False]

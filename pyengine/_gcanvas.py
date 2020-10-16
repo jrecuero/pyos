@@ -24,6 +24,7 @@ class GCanvas(GDummy):
         super(GCanvas, self).__init__(name, x, y, dx, dy, **kwargs)
         self.number_layers = nlayers
         self.glayers = [pygame.sprite.LayeredUpdates() for _ in range(nlayers)]
+        self.collision_glayers = [True for _ in range(nlayers)]
         self.image = pygame.Surface((self.dx, self.dy), pygame.SRCALPHA)
         self.running = True
 
@@ -88,8 +89,10 @@ class GCanvas(GDummy):
         xplus = x + gobject.dx
         yplus = y + gobject.dy
         if 0 <= x and xplus < self.dx and 0 <= y and yplus < self.dy:
-            for layer in self.glayers:
-                for instance in layer.sprites():
+            for layer, check_collision in enumerate(self.collision_glayers):
+                if not check_collision:
+                    continue
+                for instance in self.glayers[layer].sprites():
                     if instance == gobject or instance in gobject.owner:
                         continue
                     if instance.rect.colliderect(gobject.rect):
@@ -108,7 +111,7 @@ class GCanvas(GDummy):
             None: no value.
         """
         if self.running:
-            for layer in self.glayers[::-1]:
+            for layer in self.glayers:
                 for sprite in layer.sprites():
                     sprite.handle_keyboard_event(event, **kwargs)
 
@@ -124,7 +127,7 @@ class GCanvas(GDummy):
             None: no value.
         """
         if self.running:
-            for layer in self.glayers[::-1]:
+            for layer in self.glayers:
                 for sprite in layer.sprites():
                     sprite.handle_mouse_event(event, **kwargs)
 
@@ -141,13 +144,13 @@ class GCanvas(GDummy):
             None: no value.
         """
         if self.running:
-            for layer in self.glayers[::-1]:
+            for layer in self.glayers:
                 for sprite in layer.sprites():
                     sprite.handle_custom_event(event, **kwargs)
 
     def update(self, surface, **kwargs):
         if self.running:
-            for layer in self.glayers[::-1]:
+            for layer in self.glayers:
                 for sprite in layer.sprites():
                     sprite.update(surface, **kwargs)
 
@@ -163,6 +166,6 @@ class GCanvas(GDummy):
 
         """
         self.image.fill(Color.WHITE)
-        for layer in self.glayers[::-1]:
+        for layer in self.glayers:
             layer.draw(self.image)
-            surface.blit(self.image, (self.x, self.y))
+        surface.blit(self.image, (self.x, self.y))

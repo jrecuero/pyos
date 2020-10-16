@@ -409,7 +409,11 @@ class GObject(pygame.sprite.Sprite):
         x and y components.
         """
         # update object based on the move attribute.
-        self.move_inc(self.move.x, self.move.y)
+        if self.move:
+            self.move_inc(self.move.x, self.move.y)
+        if kwargs.get("dirty"):
+            for owner in self.owner:
+                owner.notify(self, "UPDATED")
 
     def render(self, surface, **kwargs):
         """render should draws the instance on the given surface.
